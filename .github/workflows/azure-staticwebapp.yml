@@ -38,6 +38,8 @@ jobs:
           submodules: true
       - name: Install dependencies
         run: npm ci
+      - name: Build
+        run: npm run build
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -48,3 +50,4 @@ jobs:
           app_location: ${{ env.APP_LOCATION }}
           api_location: ${{ env.API_LOCATION }}
           app_artifact_location: ${{ env.APP_ARTIFACT_LOCATION }}
+          skip_app_build: true
