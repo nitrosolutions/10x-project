@@ -2,6 +2,10 @@
 
 A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
 
+## Status
+
+[![Deploy web app to Azure Static Web Apps](https://github.com/nitrosolutions/10x-project/actions/workflows/azure-staticwebapp.yml/badge.svg)](https://github.com/nitrosolutions/10x-project/actions/workflows/azure-staticwebapp.yml)
+
 ## Tech Stack
 
 - [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
