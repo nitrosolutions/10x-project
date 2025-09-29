@@ -19,8 +19,8 @@ A modern, opinionated starter template for building fast, accessible, and AI-fri
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
+git clone git@github.com:nitrosolutions/10x-project.git
+cd 10x-project
 ```
 
 2. Install dependencies:
