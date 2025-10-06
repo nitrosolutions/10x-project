@@ -25,3 +25,4 @@ pnpm-debug.log*
 
 # local config files
 *.local.*
+.ai/prompt-library/
