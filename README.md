@@ -6,6 +6,8 @@ A modern, opinionated starter template for building fast, accessible, and AI-fri
 
 [![Deploy web app to Azure Static Web Apps](https://github.com/nitrosolutions/10x-project/actions/workflows/azure-staticwebapp.yml/badge.svg)](https://github.com/nitrosolutions/10x-project/actions/workflows/azure-staticwebapp.yml)
 
+[LINK](https://orange-grass-0c6f00e03.1.azurestaticapps.net)
+
 ## Tech Stack
 
 - [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
@@ -58,12 +60,12 @@ npm run build
 ```md
 .
 ├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── components/ # UI components (Astro & React)
-│   └── assets/     # Static assets
-├── public/         # Public assets
+│ ├── layouts/ # Astro layouts
+│ ├── pages/ # Astro pages
+│ │ └── api/ # API endpoints
+│ ├── components/ # UI components (Astro & React)
+│ └── assets/ # Static assets
+├── public/ # Public assets
 ```
 
 ## AI Development Support
