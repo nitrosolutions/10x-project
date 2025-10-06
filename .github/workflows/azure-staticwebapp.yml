@@ -35,7 +35,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: true      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 22.20.0
+          cache: "npm"
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
