@@ -1,100 +1,212 @@
-# 10x Astro Starter
+# PortfelIO
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+> AI-powered household expense tracking through automatic receipt scanning
 
-## Status
+PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by automatically analyzing Polish fiscal receipts using AI. Simply scan a receipt with your phone's camera, and let GPT-4 Vision extract and categorize all items instantly—eliminating the tedious manual data entry.
 
-[![Deploy web app to Azure Static Web Apps](https://github.com/nitrosolutions/10x-project/actions/workflows/azure-staticwebapp.yml/badge.svg)](https://github.com/nitrosolutions/10x-project/actions/workflows/azure-staticwebapp.yml)
+## 📋 Table of Contents
 
-[LINK](https://orange-grass-0c6f00e03.1.azurestaticapps.net)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [Available Scripts](#-available-scripts)
+- [Project Scope](#-project-scope)
+- [Project Status](#-project-status)
+- [License](#-license)
 
-## Tech Stack
+## ✨ Features
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+### Core Functionality
+- **🤖 AI-Powered Receipt Analysis**: Automatic extraction of items, prices, dates, and store names from Polish fiscal receipts using OpenAI GPT-4 Vision/GPT-4o
+- **📸 Multiple Input Methods**:
+  - Scan receipts with camera
+  - Upload from gallery
+  - Manual entry
+- **📊 Visual Analytics**: Monthly expense breakdown with interactive donut charts by category
+- **✏️ Full Edit Capabilities**: Modify all recognized data (dates, store names, items, categories, prices)
+- **📱 Progressive Web App**: Install on mobile/desktop for app-like experience
+- **🔐 Secure Authentication**: Email/password authentication via Supabase Auth
 
-## Prerequisites
+### Expense Categories
+9 predefined categories with emoji icons:
+- 🛒 Food & Beverages
+- 🚗 Transport
+- 💊 Health & Beauty
+- 🏠 Home & Garden
+- 👕 Clothing & Footwear
+- 🎬 Entertainment & Culture
+- 📱 Electronics & Appliances
+- 💼 Services & Fees
+- ❓ Other
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
+## 🛠 Tech Stack
 
-## Getting Started
+### Frontend
+- **[Astro 5](https://astro.build/)** (v5.14.1) - Modern web framework with static site generation
+- **[React 19](https://react.dev/)** (v19.1.1) - UI library for interactive components
+- **[TypeScript 5](https://www.typescriptlang.org/)** - Type-safe JavaScript
+- **[Tailwind CSS 4](https://tailwindcss.com/)** (v4.1.13) - Utility-first CSS framework
+- **[Shadcn/ui](https://ui.shadcn.com/)** - Accessible component library built on Radix UI
 
-1. Clone the repository:
+### Backend & Services
+- **[Supabase](https://supabase.com/)** - PostgreSQL database + Authentication
+- **[OpenAI API](https://openai.com/)** - GPT-4 Vision/GPT-4o for receipt analysis (recommended: Azure OpenAI for GDPR compliance)
 
-```bash
-git clone git@github.com:nitrosolutions/10x-project.git
-cd 10x-project
-```
+### DevOps & Hosting
+- **[Azure Static Web Apps](https://azure.microsoft.com/en-us/products/app-service/static)** - Hosting platform
+- **[GitHub Actions](https://github.com/features/actions)** - CI/CD pipelines
 
-2. Install dependencies:
+## 🚀 Getting Started
 
-```bash
-npm install
-```
+### Prerequisites
 
-3. Run the development server:
+- **Node.js**: v22.20.0 (use [nvm](https://github.com/nvm-sh/nvm) to manage versions)
+- **npm**: v10+ (comes with Node.js)
+- **Supabase Account**: [Sign up here](https://supabase.com/)
+- **OpenAI API Key**: [Get your API key](https://platform.openai.com/api-keys)
 
-```bash
-npm run dev
-```
+### Installation
 
-4. Build for production:
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd 10x-project
+   ```
 
-```bash
-npm run build
-```
+2. **Use the correct Node version**
+   ```bash
+   nvm use
+   # or manually: nvm install 22.20.0 && nvm use 22.20.0
+   ```
 
-## Available Scripts
+3. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
+4. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
 
-## Project Structure
+   Configure the following variables in `.env`:
+   - `SUPABASE_URL` - Your Supabase project URL
+   - `SUPABASE_ANON_KEY` - Your Supabase anonymous key
+   - `OPENAI_API_KEY` - Your OpenAI API key
+   - Additional configuration as needed
 
-```md
-.
-├── src/
-│ ├── layouts/ # Astro layouts
-│ ├── pages/ # Astro pages
-│ │ └── api/ # API endpoints
-│ ├── components/ # UI components (Astro & React)
-│ └── assets/ # Static assets
-├── public/ # Public assets
-```
+5. **Run database migrations**
+   ```bash
+   # Using Supabase CLI
+   npx supabase db push
+   ```
 
-## AI Development Support
+6. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-This project is configured with AI development tools to enhance the development experience, providing guidelines for:
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- Project structure
-- Coding practices
-- Frontend development
-- Styling with Tailwind
-- Accessibility best practices
-- Astro and React guidelines
+## 📜 Available Scripts
 
-### Cursor IDE
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server (port 3000) |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build locally |
+| `npm run lint` | Run ESLint for code quality checks |
+| `npm run lint:fix` | Automatically fix ESLint issues |
+| `npm run format` | Format code with Prettier |
 
-The project includes AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions.
+### Pre-commit Hooks
 
-### GitHub Copilot
+This project uses **Husky** and **lint-staged** to automatically lint and format code before commits.
 
-AI instructions for GitHub Copilot are available in `.github/copilot-instructions.md`
+## 🎯 Project Scope
 
-### Windsurf
+### ✅ Included in MVP
 
-The `.windsurfrules` file contains AI configuration for Windsurf.
+**User Authentication**
+- Email/password registration and login
+- Password validation (min 8 chars, uppercase, lowercase, digit, special char)
+- Session management via Astro.cookies
+- Account deletion
 
-## Contributing
+**Receipt Management**
+- AI-powered receipt scanning (Polish fiscal receipts only)
+- Three input methods: camera, gallery upload, manual entry
+- Support for JPEG/PNG images (max 10MB)
+- Full CRUD operations on receipts and items
+- Automatic category assignment by AI
+- Manual category override
 
-Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
+**Data Visualization**
+- Monthly expense view with donut chart
+- Breakdown by 9 predefined categories
+- Receipt list sorted by date (newest first)
+- Month-to-month navigation
 
-## License
+**Progressive Web App**
+- Install on iOS/Android/Desktop
+- Standalone app experience
+- Responsive design (mobile-first)
+- App icons and splash screen
 
-MIT
+### ❌ Not Included in MVP
+
+**Budget Features**
+- Spending limits per category
+- Budget alerts and notifications
+- Savings goals
+- Month-to-month comparisons
+- Expense forecasting
+
+**Advanced Categories**
+- Custom user-defined categories
+- Category editing/deletion
+- Subcategories
+
+**Social & Sharing**
+- Multi-user accounts (family mode)
+- Expense report sharing
+- Receipt comments/notes
+
+**Advanced Analytics**
+- Trend charts (line, bar)
+- Period comparisons
+- CSV/PDF export
+- Detailed reports and insights
+
+**Advanced Features**
+- Receipt image storage after analysis
+- Warranty tracking
+- Offline mode with sync
+- Push notifications
+- Multi-language support (Polish only in MVP)
+- Multi-currency support (PLN only in MVP)
+- Bank account integration
+
+For a complete list of future enhancements, see the [PRD](.ai/prd.md#4-granice-produktu).
+
+## 📊 Project Status
+
+**Current Phase**: MVP Development 🚧
+
+### Success Metrics (KPIs)
+- **Scan Adoption Rate**: Target 80% of receipts added via scanning (vs. manual entry)
+- **User Engagement**: Target 60% of users adding ≥4 receipts per month
+
+### Supported Platforms
+- ✅ Polish fiscal receipts only
+- ✅ JPEG/PNG images (max 10MB)
+- ✅ Modern browsers with ES6+ support
+- ✅ Requires internet connection (no offline mode in MVP)
+
+## 📄 License
+
+This project license is to be determined. See [LICENSE](./LICENSE) for more information (if available).
+
+---
+
+**Built with ❤️ using Astro, React, and AI**
