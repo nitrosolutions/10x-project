@@ -3,7 +3,6 @@ Jesteś doświadczonym menedżerem produktu, którego zadaniem jest pomoc w stwo
 Prosimy o uważne zapoznanie się z poniższymi informacjami:
 
 <project_description>
-
 # Aplikacja - PortfelIO (MVP)
 
 ## Główny problem
@@ -31,10 +30,10 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 
 ## Kryteria sukcesu
 
-- Mniej niż 15% pozycji na zeskanowanych paragonach wymaga manualnej korekty kategorii lub ceny/nazwy produktu po automatycznej analizie AI.
 - 80% nowo dodanych paragonów jest dodawanych za pomocą funkcji skanowania.
-- 60% aktywnych użytkowników dodaje co najmniej 4 paragony w miesiącu.
-  </project_description>
+- 60% użytkowników dodaje co najmniej 4 paragony w miesiącu.
+
+</project_description>
 
 Przeanalizuj dostarczone informacje, koncentrując się na aspektach istotnych dla tworzenia PRD. Rozważ następujące kwestie:
 <prd_analysis>

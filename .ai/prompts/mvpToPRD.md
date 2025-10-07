@@ -1,7 +1,6 @@
 Jesteś doświadczonym menedżerem produktu, którego zadaniem jest stworzenie kompleksowego dokumentu wymagań produktu (PRD) w oparciu o poniższe opisy:
 
 <project_description>
-
 # Aplikacja - PortfelIO (MVP)
 
 ## Główny problem
@@ -29,78 +28,338 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 
 ## Kryteria sukcesu
 
-- Mniej niż 15% pozycji na zeskanowanych paragonach wymaga manualnej korekty kategorii lub ceny/nazwy produktu po automatycznej analizie AI.
 - 80% nowo dodanych paragonów jest dodawanych za pomocą funkcji skanowania.
-- 60% aktywnych użytkowników dodaje co najmniej 4 paragony w miesiącu.
+- 60% użytkowników dodaje co najmniej 4 paragony w miesiącu.
 
 </project_description>
 
 <project_details>
-<conversation_summary>
-<decisions>
+# Podsumowanie rozmowy - PortfelIO MVP PRD
 
-1.  **Uwierzytelnianie**: System będzie oparty wyłącznie na logowaniu przez e-mail i hasło, bez integracji z kontami społecznościowymi (np. Google).
-2.  **Kategorie wydatków**: Zostanie wdrożona predefiniowana, stała lista kategorii (Żywność, Mieszkanie, Transport, itp.).
-3.  **Analiza AI**: Funkcja skanowania paragonów będzie realizowana poprzez integrację z zewnętrznym modelem AI przez API.
-4.  **Zarządzanie paragonem**: Wszystkie operacje na pozycjach paragonu (dodawanie, edycja, usuwanie) będą odbywać się na jednym, dedykowanym widoku.
-5.  **Zapis danych**: Nagłówek paragonu (data, opis) jest tworzony jako pierwszy. Następnie każda operacja na pojedynczej pozycji (dodanie, edycja, usunięcie) będzie osobnym, niezależnym wywołaniem API. Użytkownik akceptuje ryzyko częściowego zapisu danych.
-6.  **Tryb offline**: Aplikacja nie będzie wspierać trybu offline w ramach MVP.
-7.  **Kryterium sukcesu AI**: Błąd modelu AI jest liczony tylko wtedy, gdy użytkownik musi manualnie poprawić _cenę_ odczytanej pozycji.
-8.  **Nawigacja**: Przełączanie między miesiącami będzie realizowane za pomocą strzałek obok nazwy miesiąca i roku. Nawigacja między widokiem podsumowania a listą wydatków będzie odbywać się za pomocą dedykowanych linków.
-9.  **Zarządzanie kontem**: Użytkownik będzie miał możliwość zmiany hasła oraz trwałego usunięcia konta, co będzie wymagało potwierdzenia hasłem.
-10. **PWA**: Monit o dodanie aplikacji do ekranu głównego będzie nieinwazyjny i będzie pokazywany za każdym razem podczas analizy paragonu przez AI, aż do momentu instalacji.
-11. **Waluta**: Aplikacja będzie obsługiwać wyłącznie walutę PLN.
-12. **Ładowanie danych**: Lista paragonów dla danego miesiąca będzie ładowana w całości, bez implementacji paginacji lub "nieskończonego przewijania".
-13. **Polityka haseł**: Wymagane hasło o długości min. 8 znaków, zawierające co najmniej jedną dużą i małą literę, jedną cyfrę i jeden znak specjalny. Walidacja odbędzie się po stronie serwera.
-14. **Obsługa dat**: Daty będą przechowywane w bazie danych w formacie UTC, a za poprawne wyświetlanie w strefie czasowej użytkownika będzie odpowiadać biblioteka po stronie frontendu.
-15. **Polityka Prywatności**: Projekt MVP nie będzie zawierał Polityki Prywatności.
-    </decisions>
+## Decyzje podjęte przez użytkownika
 
-<matched_recommendations>
+1. **Typ paragonów**: Standardowe paragony fiskalne (polskie)
+2. **Architektura kont**: Jeden portfel na użytkownika
+3. **Kategorie wydatków**:
+   - Żywność i napoje
+   - Transport (paliwo, bilety, parking)
+   - Zdrowie i uroda (apteka, kosmetyki)
+   - Dom i ogród (wyposażenie, narzędzia)
+   - Odzież i obuwie
+   - Rozrywka i kultura
+   - Elektronika i AGD
+   - Usługi i opłaty
+   - Inne
+   - Przechowywane w dedykowanej tabeli w bazie danych dla łatwej rozszerzalności
+4. **Czas przetwarzania AI**: Maksymalnie 1 minuta, z zachętą do instalacji PWA podczas oczekiwania (non-blocking UI)
+5. **Kategoryzacja**: Kategoria przypisana do każdej pozycji paragonu osobno
+6. **Wizualizacja miesięczna**: Diagram donut z kwotami zsumowanymi dla każdej kategorii, na środku kwota po podświetleniu kategorii (domyślnie suma wszystkich wydatków)
+7. **Obsługa błędów OCR**: Użytkownik samodzielnie ocenia i edytuje wyniki AI (dodawanie/edycja/usuwanie pozycji)
+8. **Przechowywanie zdjęć**: Brak - zdjęcia używane jednorazowo podczas analizy, przetwarzane "w locie"
+9. **Zarządzanie paragonami**: Możliwość dodawania i usuwania całych paragonów oraz pojedynczych pozycji
+10. **Duplikaty paragonów**: Brak walidacji, dowolna liczba paragonów; blokada dodawania dat w przyszłości
+11. **Model biznesowy**: Aplikacja całkowicie darmowa
+12. **Provider AI**: Integracja z OpenAI (GPT-4 Vision/GPT-4o)
+13. **Nawigacja między miesiącami**: Strzałki "poprzedni/następny miesiąc"
+14. **Lista paragonów**: Domyślnie posortowana po dacie zakupu malejąco, załadowana w całości
+15. **Flow dodawania**: Floating Action Button (FAB) z bottom sheet (mobile) / modal (desktop)
+16. **Edycja paragonu**: Tylko aktualny stan z bazy danych, bez historii zmian
+17. **Nazwa sklepu**: AI wykrywa/sugeruje nazwę lub opis, pole edytowalne i opcjonalne
+18. **Tryb offline**: Brak wsparcia w MVP, wymagane połączenie internetowe
+19. **Onboarding**: Brak, domyślny widok to aktualny miesiąc
+20. **Struktura widoku miesiąca**: Dwa segmenty - wykres na górze, lista paragonów poniżej
+21. **Uwierzytelnienie**: Tylko email i hasło (min. 8 znaków, 1 mała litera, 1 duża litera, 1 liczba, 1 znak specjalny)
 
-1.  Stworzenie dedykowanego endpointu API (`/api/summary`) do zwracania zagregowanych sum wydatków dla każdej kategorii w celu generowania wykresu.
-2.  Zaimplementowanie wykresu typu "donut", który w centralnym punkcie domyślnie wyświetla sumę wszystkich wydatków, a po najechaniu na segment pokazuje sumę dla wybranej kategorii.
-3.  Wprowadzenie mechanizmu analitycznego do precyzyjnego śledzenia zdarzeń, takich jak `item_added`, `item_edited`, `item_deleted`, w celu dokładnego mierzenia kryteriów sukcesu.
-4.  Zastosowanie RESTful API do operacji na pozycjach paragonu (np. `POST /api/receipts/{id}/items`, `PUT /api/items/{id}`).
-5.  Zabezpieczenie procesu usuwania konta poprzez wymóg ponownego wprowadzenia hasła przez użytkownika.
-6.  Wprowadzenie walidacji danych wejściowych zarówno po stronie klienta (dla lepszego UX), jak i po stronie serwera (dla bezpieczeństwa i integralności danych).
-7.  Zastosowanie długotrwałych sesji użytkownika opartych na tokenach, aby użytkownik pozostawał zalogowany po zamknięciu przeglądarki.
-8.  Przechowywanie predefiniowanej listy kategorii w osobnej tabeli w bazie danych w celu ułatwienia przyszłych modyfikacji.
-9.  Wyświetlanie na bieżąco aktualizowanej sumy całkowitej w widoku edycji paragonu, aby zapewnić użytkownikowi natychmiastową informację zwrotną.
-10. W przypadku niezapisanych zmian, wyświetlanie okna dialogowego z ostrzeżeniem przy próbie opuszczenia widoku edycji.
-    </matched_recommendations>
+## Dopasowane rekomendacje
 
-<prd_planning_summary>
+1. **Provider AI**: Azure OpenAI dla zgodności z RODO i hostingu w EU (koszt ~$0.01-0.03 za paragon)
+2. **Ikony kategorii**: Dodanie emoji do kategorii dla lepszej czytelności wizualnej (🛒 🚗 💊 🏠 👕 🎬 📱 💼 ❓)
+3. **Nawigacja miesięczna**: Header pokazujący nazwę miesiąca z wyraźnymi strzałkami < >
+4. **Grupowanie paragonów**: Lista z subtotalami dla lepszej czytelności
+5. **FAB umiejscowienie**: Prawy dolny róg z ikoną "+" lub aparatu jako primary action
+6. **Edycja pozycji**: Każda pozycja w formie edytowalnego pola z dropdown dla kategorii
+7. **Nazwa sklepu**: Automatyczne wypełnianie przez AI na podstawie NIP lub nazwy z paragonu
+8. **PWA**: Funkcja "dodaj do ekranu głównego" dla app-like experience bez offline mode
+9. **Empty state**: Animowana grafika z przyciskiem "Dodaj pierwszy paragon" dla nowych użytkowników
+10. **Supabase Auth**: Wykorzystanie wbudowanych funkcji Supabase dla email/hasło
 
-### Główne wymagania funkcjonalne produktu
+## Szczegółowe podsumowanie planowania PRD
 
-1.  **System Kont Użytkowników**: Rejestracja i logowanie za pomocą adresu e-mail i hasła. Ustawienia konta umożliwiające zmianę hasła i jego trwałe usunięcie.
-2.  **Dodawanie Wydatków**: Możliwość dodawania paragonów poprzez skan (aparat/plik) lub ręczne wprowadzanie danych. Zewnętrzne API analizuje obraz, próbując odczytać datę, nazwę sklepu oraz listę pozycji (nazwa, cena).
-3.  **Edycja Paragonu**: Dedykowany widok pozwalający na pełną edycję paragonu: zmiana daty, opisu (nazwa sklepu) oraz dodawanie, edycja i usuwanie poszczególnych pozycji (nazwa, cena, kategoria). Każda operacja na pozycji jest osobnym zapisem do bazy danych.
-4.  **Podsumowanie Wydatków**: Główny widok aplikacji to podsumowanie dla wybranego miesiąca, prezentowane w formie interaktywnego wykresu kołowego ("donut") pokazującego podział wydatków na kategorie.
-5.  **Lista Paragonów**: Osobny widok z listą wszystkich paragonów z wybranego miesiąca, posortowaną malejąco po dacie. Każdy element listy zawiera datę, sumę całkowitą i nazwę sklepu.
-6.  **Aplikacja PWA**: Aplikacja webowa z pełnym wsparciem RWD, z możliwością dodania do ekranu głównego urządzenia.
+### 1. Główne wymagania funkcjonalne
 
-### Kluczowe historie użytkownika i ścieżki korzystania
+#### Autentykacja i bezpieczeństwo
+- System logowania email/hasło z walidacją:
+  - Minimum 8 znaków
+  - Co najmniej 1 mała litera
+  - Co najmniej 1 duża litera
+  - Co najmniej 1 cyfra
+  - Co najmniej 1 znak specjalny
+- Wykorzystanie Supabase Auth
+- Jeden portfel wydatków na użytkownika
 
-- **Rejestracja i pierwsze logowanie**: Użytkownik tworzy konto, loguje się i widzi pusty panel główny z zachętą do dodania pierwszego paragonu.
-- **Dodawanie paragonu przez skan**: Użytkownik klika "Dodaj wydatek", wybiera opcję skanowania, robi zdjęcie paragonu. Po analizie AI zostaje przeniesiony do widoku edycji z automatycznie uzupełnionymi danymi, gdzie może je zweryfikować, poprawić i zapisać.
-- **Przeglądanie wydatków**: Użytkownik wchodzi do aplikacji, widzi podsumowanie wydatków z bieżącego miesiąca na wykresie. Może przełączać się między miesiącami lub przejść do szczegółowej listy paragonów, aby odnaleźć konkretny wydatek.
+#### Zarządzanie kategoriami
+- 9 predefiniowanych kategorii przechowywanych w dedykowanej tabeli DB:
+  - Żywność i napoje 🛒
+  - Transport 🚗
+  - Zdrowie i uroda 💊
+  - Dom i ogród 🏠
+  - Odzież i obuwie 👕
+  - Rozrywka i kultura 🎬
+  - Elektronika i AGD 📱
+  - Usługi i opłaty 💼
+  - Inne ❓
+- Kategorie przypisywane na poziomie pojedynczych pozycji paragonu
+- Brak możliwości tworzenia własnych kategorii w MVP
 
-### Ważne kryteria sukcesu i sposoby ich mierzenia
+#### Dodawanie paragonów
+- Trzy metody dodawania:
+  1. Zdjęcie aparatem (mobile)
+  2. Upload z galerii/pliku
+  3. Ręczne wprowadzenie danych
+- Floating Action Button (FAB) w prawym dolnym rogu
+- Bottom sheet na mobile, modal na desktop
+- Obsługa wyłącznie polskich paragonów fiskalnych
 
-1.  **Skuteczność AI**: Mniej niż 15% pozycji na zeskanowanych paragonach wymaga manualnej korekty _ceny_. Mierzone przez śledzenie zdarzenia `receipt_price_edited`.
-2.  **Adopcja funkcji skanowania**: 80% nowo dodanych paragonów jest dodawanych za pomocą funkcji skanowania. Mierzone przez porównanie liczby zdarzeń `receipt_scan_success` do `receipt_manual_add`.
-3.  **Zaangażowanie użytkowników**: 60% aktywnych użytkowników (zalogowani z akcją w ciągu 30 dni) dodaje co najmniej 4 paragony w miesiącu. Mierzone za pomocą analizy kohortowej aktywności użytkowników.
+#### Analiza AI (OpenAI GPT-4 Vision/GPT-4o)
+- Automatyczne rozpoznawanie:
+  - Data zakupu
+  - Nazwa sklepu (opcjonalnie, na podstawie NIP/nazwy)
+  - Pozycje: nazwa produktu, cena
+  - Automatyczna kategoryzacja każdej pozycji
+- Maksymalny czas przetwarzania: 1 minuta
+- Non-blocking UI z zachętą do instalacji PWA podczas oczekiwania
+- Zdjęcia przetwarzane "w locie", bez zapisu w bazie
+- Koszt szacunkowy: $0.01-0.03 za paragon
 
-</prd_planning_summary>
+#### Edycja paragonów
+- Pełna edycja po analizie AI:
+  - Zmiana daty zakupu (z blokadą dat przyszłych)
+  - Edycja nazwy sklepu
+  - Dodawanie nowych pozycji
+  - Edycja istniejących pozycji (nazwa, cena, kategoria)
+  - Usuwanie pojedynczych pozycji
+  - Usuwanie całego paragonu
+- Wyświetlanie tylko aktualnego stanu z bazy (bez historii zmian)
+- Dropdown do wyboru kategorii dla każdej pozycji
 
-<unresolved_issues>
+#### Widok miesięczny (główny ekran)
+- Struktura dwusegmentowa:
+  1. **Górny segment - Wykres donut**:
+     - Wizualizacja wydatków podzielona na kategorie
+     - Na środku: suma wszystkich wydatków (domyślnie)
+     - Po podświetleniu kategorii: kwota dla tej kategorii
+  2. **Dolny segment - Lista paragonów**:
+     - Sortowanie: data zakupu malejąco (najnowsze na górze)
+     - Wszystkie paragony załadowane jednorazowo
+     - Każdy paragon z nazwą sklepu, datą i sumą
+- Nawigacja: strzałki < > do przełączania między miesiącami
+- Header z nazwą aktualnego miesiąca
+- Domyślnie: bieżący miesiąc
 
-- **Ryzyko niespójności danych**: Przyjęty model zapisu, w którym każda modyfikacja pozycji paragonu jest osobną transakcją, stwarza ryzyko powstania niekompletnych lub częściowo zapisanych paragonów w przypadku błędów sieci lub opuszczenia strony przez użytkownika w trakcie operacji. Mimo akceptacji tego ryzyka, jest to kluczowy obszar techniczny, który może negatywnie wpłynąć na doświadczenie użytkownika i integralność danych.
-  </unresolved_issues>
-  </conversation_summary>
-  </project_details>
+#### PWA (Progressive Web App)
+- Możliwość dodania do ekranu głównego (iOS/Android)
+- Brak wsparcia offline w MVP
+- Wymagane stałe połączenie internetowe
+- App-like experience na urządzeniach mobilnych
+
+#### Onboarding
+- Brak dedykowanego onboardingu
+- Nowi użytkownicy widzą od razu widok aktualnego miesiąca
+- Empty state z grafiką i przyciskiem "Dodaj pierwszy paragon"
+
+### 2. Kluczowe historie użytkownika i ścieżki
+
+#### Historia 1: Dodanie paragonu przez skanowanie (Primary Flow)
+```
+JAKO użytkownik
+CHCĘ zrobić zdjęcie paragonu
+ABY automatycznie dodać wydatki bez ręcznego wpisywania
+
+Kroki:
+1. Użytkownik klika FAB (ikona + lub aparat)
+2. Otwiera się bottom sheet/modal z opcjami
+3. Użytkownik wybiera "Zrób zdjęcie" lub "Wybierz z galerii"
+4. Robi zdjęcie/wybiera plik
+5. Wyświetla się loader z informacją o analizie + zachęta do PWA
+6. Po max 1 min wyświetla się ekran edycji z rozpoznanymi danymi:
+   - Data zakupu
+   - Nazwa sklepu (jeśli wykryta)
+   - Lista pozycji (nazwa, cena, kategoria)
+7. Użytkownik weryfikuje/edytuje dane
+8. Klika "Zapisz"
+9. Wraca do widoku miesięcznego z zaktualizowanymi danymi
+```
+
+#### Historia 2: Ręczne dodanie paragonu
+```
+JAKO użytkownik
+CHCĘ ręcznie dodać paragon
+ABY zarejestrować wydatek bez robienia zdjęcia
+
+Kroki:
+1. Użytkownik klika FAB
+2. Wybiera "Dodaj ręcznie"
+3. Wypełnia formularz:
+   - Data zakupu (domyślnie: dzisiaj)
+   - Nazwa sklepu (opcjonalne)
+   - Dodaje pozycje (przycisk "Dodaj pozycję"):
+     - Nazwa produktu
+     - Cena
+     - Kategoria (dropdown)
+4. Klika "Zapisz"
+5. Wraca do widoku miesięcznego
+```
+
+#### Historia 3: Przeglądanie wydatków z miesiąca
+```
+JAKO użytkownik
+CHCĘ zobaczyć podsumowanie moich wydatków
+ABY wiedzieć, na co wydaję najwięcej pieniędzy
+
+Kroki:
+1. Użytkownik otwiera aplikację
+2. Widzi wykres donut z podziałem na kategorie
+3. Na środku wykresu: suma wszystkich wydatków
+4. Klika/hover na segment kategorii
+5. Na środku wykresu zmienia się kwota na wydatki z tej kategorii
+6. Przewija w dół i widzi listę wszystkich paragonów (data malejąco)
+7. Może kliknąć paragon, aby zobaczyć szczegóły
+```
+
+#### Historia 4: Edycja istniejącego paragonu
+```
+JAKO użytkownik
+CHCĘ poprawić błędnie rozpoznane pozycje
+ABY mieć dokładne dane o wydatkach
+
+Kroki:
+1. Z listy paragonów użytkownik klika paragon do edycji
+2. Widzi szczegóły paragonu w trybie edycji
+3. Może:
+   - Zmienić datę zakupu
+   - Zmienić nazwę sklepu
+   - Edytować pozycję (nazwa/cena/kategoria)
+   - Usunąć pozycję (X przy pozycji)
+   - Dodać nową pozycję (+ Dodaj pozycję)
+4. Klika "Zapisz zmiany"
+5. Wraca do widoku miesięcznego
+```
+
+#### Historia 5: Usunięcie paragonu
+```
+JAKO użytkownik
+CHCĘ usunąć błędnie dodany paragon
+ABY mieć czystą listę wydatków
+
+Kroki:
+1. Z listy paragonów użytkownik klika/swipe na paragon
+2. Wybiera opcję "Usuń" (ikona kosza)
+3. Pojawia się potwierdzenie: "Czy na pewno chcesz usunąć?"
+4. Klika "Usuń"
+5. Paragon znika z listy
+6. Wykres donut aktualizuje się automatycznie
+```
+
+#### Historia 6: Nawigacja między miesiącami
+```
+JAKO użytkownik
+CHCĘ zobaczyć wydatki z poprzednich miesięcy
+ABY porównać swoje nawyki zakupowe
+
+Kroki:
+1. W widoku miesięcznym użytkownik klika strzałkę < (poprzedni)
+2. Widok zmienia się na poprzedni miesiąc
+3. Wykres i lista aktualizują się
+4. Header pokazuje nazwę miesiąca (np. "Grudzień 2024")
+5. Może dalej nawigować < > między miesiącami
+```
+
+### 3. Kryteria sukcesu i metryki
+
+#### Metryki produktowe (z oryginalnego dokumentu)
+- **80% adoption skanowania**: 80% nowo dodanych paragonów jest dodawanych za pomocą funkcji skanowania (nie ręcznie)
+  - Mierzenie: `(liczba paragonów ze skanowania / całkowita liczba paragonów) * 100`
+
+- **60% aktywnych użytkowników**: 60% użytkowników dodaje co najmniej 4 paragony w miesiącu
+  - Mierzenie: `(użytkownicy z ≥4 paragonami w miesiącu / wszyscy użytkownicy) * 100`
+
+#### Dodatkowe metryki techniczne
+- **Czas przetwarzania AI**: ≤60 sekund dla 95% paragonów
+- **Dokładność rozpoznawania**: ≥85% pozycji rozpoznanych poprawnie (nazwa + cena)
+- **Dokładność kategoryzacji**: ≥75% pozycji w poprawnej kategorii
+- **Retention rate**: ≥40% użytkowników wraca po 30 dniach
+- **PWA install rate**: ≥15% użytkowników instaluje PWA po 3+ dodanych paragonach
+
+#### Metryki UX
+- **Time to first receipt**: <2 minuty od rejestracji do dodania pierwszego paragonu
+- **Edit rate**: <30% paragonów wymaga edycji po analizie AI
+- **Error rate**: <5% niepowodzeń analizy AI wymagających ponownego zdjęcia
+
+### 4. Architektura techniczna
+
+#### Stack technologiczny (z CLAUDE.md)
+- **Frontend**: Astro 5 + React 19 + TypeScript 5
+- **Styling**: Tailwind CSS 4 + Shadcn/ui
+- **Backend**: Supabase (DB + Auth)
+- **AI**: OpenAI GPT-4 Vision/GPT-4o (zalecany: Azure OpenAI dla RODO)
+- **Hosting**: Azure Static Web Apps
+- **PWA**: Service Worker + Manifest
+
+#### Struktura bazy danych (propozycja)
+```
+users (Supabase Auth)
+├── id (uuid)
+├── email
+└── created_at
+
+categories
+├── id (uuid)
+├── name (text) - np. "Żywność i napoje"
+├── icon (text) - np. "🛒"
+├── order (int) - kolejność wyświetlania
+└── created_at
+
+receipts
+├── id (uuid)
+├── user_id (uuid) FK -> users.id
+├── purchase_date (date) - data zakupu
+├── store_name (text, nullable) - nazwa sklepu
+├── total_amount (decimal) - suma paragonu
+├── created_at (timestamp)
+└── updated_at (timestamp)
+
+receipt_items
+├── id (uuid)
+├── receipt_id (uuid) FK -> receipts.id
+├── category_id (uuid) FK -> categories.id
+├── item_name (text) - nazwa produktu
+├── price (decimal) - cena
+├── created_at (timestamp)
+└── updated_at (timestamp)
+```
+
+#### API Endpoints (propozycja)
+```
+POST /api/auth/signup - Rejestracja
+POST /api/auth/login - Logowanie
+POST /api/auth/logout - Wylogowanie
+
+POST /api/receipts/scan - Analiza zdjęcia paragonu (OpenAI)
+POST /api/receipts - Utworzenie paragonu
+GET /api/receipts?month=2025-01 - Lista paragonów z miesiąca
+GET /api/receipts/:id - Szczegóły paragonu
+PUT /api/receipts/:id - Edycja paragonu
+DELETE /api/receipts/:id - Usunięcie paragonu
+
+POST /api/receipts/:id/items - Dodanie pozycji
+PUT /api/receipts/:id/items/:itemId - Edycja pozycji
+DELETE /api/receipts/:id/items/:itemId - Usunięcie pozycji
+
+GET /api/categories - Lista wszystkich kategorii
+GET /api/stats/monthly?month=2025-01 - Statystyki miesięczne
+```
+
+</project_details>
 
 Wykonaj następujące kroki, aby stworzyć kompleksowy i dobrze zorganizowany dokument:
 
@@ -126,7 +385,6 @@ Wykonaj następujące kroki, aby stworzyć kompleksowy i dobrze zorganizowany do
    - Upewnij się, że każda historia użytkownika jest testowalna.
 
 Użyj następującej struktury dla każdej historii użytkownika:
-
 - ID
 - Tytuł
 - Opis
@@ -140,7 +398,7 @@ Użyj następującej struktury dla każdej historii użytkownika:
 
 5. Formatowanie PRD:
    - Zachowaj spójne formatowanie i numerację.
-   - Nie używaj pogrubionego formatowania w markdown ( \*\* ).
+   - Nie używaj pogrubionego formatowania w markdown ( ** ).
    - Wymień WSZYSTKIE historyjki użytkownika.
    - Sformatuj PRD w poprawnym markdown.
 
@@ -148,17 +406,11 @@ Przygotuj PRD z następującą strukturą:
 
 ```markdown
 # Dokument wymagań produktu (PRD) - {{app-name}}
-
 ## 1. Przegląd produktu
-
 ## 2. Problem użytkownika
-
 ## 3. Wymagania funkcjonalne
-
 ## 4. Granice produktu
-
 ## 5. Historyjki użytkowników
-
 ## 6. Metryki sukcesu
 ```
 
