@@ -91,9 +91,8 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 
    Configure the following variables in `.env`:
    - `SUPABASE_URL` - Your Supabase project URL
-   - `SUPABASE_ANON_KEY` - Your Supabase anonymous key
+   - `SUPABASE_KEY` - Your Supabase anonymous key
    - `OPENAI_API_KEY` - Your OpenAI API key
-   - Additional configuration as needed
 
 5. **Run database migrations**
    ```bash
