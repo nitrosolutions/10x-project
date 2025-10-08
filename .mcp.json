@@ -2,8 +2,9 @@
   "mcpServers": {
     "10x-mvp-tracker": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["@przeprogramowani/10x-mvp-tracker"]
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@przeprogramowani/10x-mvp-tracker"],
+      "env": {}
     }
   }
 }

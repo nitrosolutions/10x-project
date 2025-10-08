@@ -3,6 +3,7 @@ Jesteś doświadczonym menedżerem produktu, którego zadaniem jest pomoc w stwo
 Prosimy o uważne zapoznanie się z poniższymi informacjami:
 
 <project_description>
+
 # Aplikacja - PortfelIO (MVP)
 
 ## Główny problem

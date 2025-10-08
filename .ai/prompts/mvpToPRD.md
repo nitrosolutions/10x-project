@@ -1,6 +1,7 @@
 Jesteś doświadczonym menedżerem produktu, którego zadaniem jest stworzenie kompleksowego dokumentu wymagań produktu (PRD) w oparciu o poniższe opisy:
 
 <project_description>
+
 # Aplikacja - PortfelIO (MVP)
 
 ## Główny problem
@@ -34,6 +35,7 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 </project_description>
 
 <project_details>
+
 # Podsumowanie rozmowy - PortfelIO MVP PRD
 
 ## Decyzje podjęte przez użytkownika
@@ -88,6 +90,7 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 ### 1. Główne wymagania funkcjonalne
 
 #### Autentykacja i bezpieczeństwo
+
 - System logowania email/hasło z walidacją:
   - Minimum 8 znaków
   - Co najmniej 1 mała litera
@@ -98,6 +101,7 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 - Jeden portfel wydatków na użytkownika
 
 #### Zarządzanie kategoriami
+
 - 9 predefiniowanych kategorii przechowywanych w dedykowanej tabeli DB:
   - Żywność i napoje 🛒
   - Transport 🚗
@@ -112,6 +116,7 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 - Brak możliwości tworzenia własnych kategorii w MVP
 
 #### Dodawanie paragonów
+
 - Trzy metody dodawania:
   1. Zdjęcie aparatem (mobile)
   2. Upload z galerii/pliku
@@ -121,6 +126,7 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 - Obsługa wyłącznie polskich paragonów fiskalnych
 
 #### Analiza AI (OpenAI GPT-4 Vision/GPT-4o)
+
 - Automatyczne rozpoznawanie:
   - Data zakupu
   - Nazwa sklepu (opcjonalnie, na podstawie NIP/nazwy)
@@ -132,6 +138,7 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 - Koszt szacunkowy: $0.01-0.03 za paragon
 
 #### Edycja paragonów
+
 - Pełna edycja po analizie AI:
   - Zmiana daty zakupu (z blokadą dat przyszłych)
   - Edycja nazwy sklepu
@@ -143,6 +150,7 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 - Dropdown do wyboru kategorii dla każdej pozycji
 
 #### Widok miesięczny (główny ekran)
+
 - Struktura dwusegmentowa:
   1. **Górny segment - Wykres donut**:
      - Wizualizacja wydatków podzielona na kategorie
@@ -157,12 +165,14 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 - Domyślnie: bieżący miesiąc
 
 #### PWA (Progressive Web App)
+
 - Możliwość dodania do ekranu głównego (iOS/Android)
 - Brak wsparcia offline w MVP
 - Wymagane stałe połączenie internetowe
 - App-like experience na urządzeniach mobilnych
 
 #### Onboarding
+
 - Brak dedykowanego onboardingu
 - Nowi użytkownicy widzą od razu widok aktualnego miesiąca
 - Empty state z grafiką i przyciskiem "Dodaj pierwszy paragon"
@@ -170,6 +180,7 @@ Manualne śledzenie domowych wydatków jest pracochłonne i podatne na błędy. 
 ### 2. Kluczowe historie użytkownika i ścieżki
 
 #### Historia 1: Dodanie paragonu przez skanowanie (Primary Flow)
+
 ```
 JAKO użytkownik
 CHCĘ zrobić zdjęcie paragonu
@@ -191,6 +202,7 @@ Kroki:
 ```
 
 #### Historia 2: Ręczne dodanie paragonu
+
 ```
 JAKO użytkownik
 CHCĘ ręcznie dodać paragon
@@ -211,6 +223,7 @@ Kroki:
 ```
 
 #### Historia 3: Przeglądanie wydatków z miesiąca
+
 ```
 JAKO użytkownik
 CHCĘ zobaczyć podsumowanie moich wydatków
@@ -227,6 +240,7 @@ Kroki:
 ```
 
 #### Historia 4: Edycja istniejącego paragonu
+
 ```
 JAKO użytkownik
 CHCĘ poprawić błędnie rozpoznane pozycje
@@ -246,6 +260,7 @@ Kroki:
 ```
 
 #### Historia 5: Usunięcie paragonu
+
 ```
 JAKO użytkownik
 CHCĘ usunąć błędnie dodany paragon
@@ -261,6 +276,7 @@ Kroki:
 ```
 
 #### Historia 6: Nawigacja między miesiącami
+
 ```
 JAKO użytkownik
 CHCĘ zobaczyć wydatki z poprzednich miesięcy
@@ -277,6 +293,7 @@ Kroki:
 ### 3. Kryteria sukcesu i metryki
 
 #### Metryki produktowe (z oryginalnego dokumentu)
+
 - **80% adoption skanowania**: 80% nowo dodanych paragonów jest dodawanych za pomocą funkcji skanowania (nie ręcznie)
   - Mierzenie: `(liczba paragonów ze skanowania / całkowita liczba paragonów) * 100`
 
@@ -284,6 +301,7 @@ Kroki:
   - Mierzenie: `(użytkownicy z ≥4 paragonami w miesiącu / wszyscy użytkownicy) * 100`
 
 #### Dodatkowe metryki techniczne
+
 - **Czas przetwarzania AI**: ≤60 sekund dla 95% paragonów
 - **Dokładność rozpoznawania**: ≥85% pozycji rozpoznanych poprawnie (nazwa + cena)
 - **Dokładność kategoryzacji**: ≥75% pozycji w poprawnej kategorii
@@ -291,6 +309,7 @@ Kroki:
 - **PWA install rate**: ≥15% użytkowników instaluje PWA po 3+ dodanych paragonach
 
 #### Metryki UX
+
 - **Time to first receipt**: <2 minuty od rejestracji do dodania pierwszego paragonu
 - **Edit rate**: <30% paragonów wymaga edycji po analizie AI
 - **Error rate**: <5% niepowodzeń analizy AI wymagających ponownego zdjęcia
@@ -298,6 +317,7 @@ Kroki:
 ### 4. Architektura techniczna
 
 #### Stack technologiczny (z CLAUDE.md)
+
 - **Frontend**: Astro 5 + React 19 + TypeScript 5
 - **Styling**: Tailwind CSS 4 + Shadcn/ui
 - **Backend**: Supabase (DB + Auth)
@@ -306,6 +326,7 @@ Kroki:
 - **PWA**: Service Worker + Manifest
 
 #### Struktura bazy danych (propozycja)
+
 ```
 users (Supabase Auth)
 ├── id (uuid)
@@ -339,6 +360,7 @@ receipt_items
 ```
 
 #### API Endpoints (propozycja)
+
 ```
 POST /api/auth/signup - Rejestracja
 POST /api/auth/login - Logowanie
@@ -385,6 +407,7 @@ Wykonaj następujące kroki, aby stworzyć kompleksowy i dobrze zorganizowany do
    - Upewnij się, że każda historia użytkownika jest testowalna.
 
 Użyj następującej struktury dla każdej historii użytkownika:
+
 - ID
 - Tytuł
 - Opis
@@ -398,7 +421,7 @@ Użyj następującej struktury dla każdej historii użytkownika:
 
 5. Formatowanie PRD:
    - Zachowaj spójne formatowanie i numerację.
-   - Nie używaj pogrubionego formatowania w markdown ( ** ).
+   - Nie używaj pogrubionego formatowania w markdown ( \*\* ).
    - Wymień WSZYSTKIE historyjki użytkownika.
    - Sformatuj PRD w poprawnym markdown.
 
@@ -406,11 +429,17 @@ Przygotuj PRD z następującą strukturą:
 
 ```markdown
 # Dokument wymagań produktu (PRD) - {{app-name}}
+
 ## 1. Przegląd produktu
+
 ## 2. Problem użytkownika
+
 ## 3. Wymagania funkcjonalne
+
 ## 4. Granice produktu
+
 ## 5. Historyjki użytkowników
+
 ## 6. Metryki sukcesu
 ```
 

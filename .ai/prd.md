@@ -5,6 +5,7 @@
 PortfelIO to progresywna aplikacja webowa (PWA) do automatycznego śledzenia i kategoryzacji wydatków domowych poprzez skanowanie paragonów fiskalnych. Aplikacja wykorzystuje technologię rozpoznawania obrazu AI (OpenAI GPT-4 Vision/GPT-4o) do automatycznego odczytywania i kategoryzowania pozycji z polskich paragonów fiskalnych, eliminując potrzebę ręcznego wprowadzania danych.
 
 Główne możliwości produktu:
+
 - Automatyczna analiza paragonów za pomocą AI
 - Trzy metody dodawania wydatków: skanowanie aparatem, upload z galerii, ręczne wprowadzanie
 - Wizualizacja miesięcznych wydatków w formie wykresu donut z podziałem na kategorie
@@ -13,6 +14,7 @@ Główne możliwości produktu:
 - Bezpieczne przechowywanie danych z wykorzystaniem Supabase Auth
 
 Stack technologiczny:
+
 - Frontend: Astro 5 + React 19 + TypeScript 5
 - Styling: Tailwind CSS 4 + Shadcn/ui
 - Backend: Supabase (PostgreSQL + Authentication)
@@ -30,6 +32,7 @@ Problem główny:
 Ręczne wpisywanie każdej pozycji z paragonu do arkusza kalkulacyjnego lub aplikacji jest czasochłonne (średnio 5-10 minut na paragon) i podatne na błędy przepisywania. Ta bariera powoduje, że użytkownicy rezygnują z regularnego kontrolowania wydatków już po kilku tygodniach.
 
 Problemy szczegółowe:
+
 - Brak czasu i motywacji do codziennego wprowadzania danych o wydatkach
 - Ryzyko błędów przy ręcznym przepisywaniu kwot i nazw produktów
 - Trudność w utrzymaniu konsekwentnej kategoryzacji wydatków
@@ -37,6 +40,7 @@ Problemy szczegółowe:
 - Istniejące rozwiązania są zbyt skomplikowane lub wymagają płatnej subskrypcji
 
 Docelowa grupa użytkowników:
+
 - Osoby fizyczne w Polsce prowadzące gospodarstwo domowe
 - Użytkownicy urządzeń mobilnych (smartfony z aparatem)
 - Osoby szukające prostego narzędzia do kontroli wydatków bez zaawansowanych funkcji budżetowych
@@ -52,18 +56,20 @@ Redukcja czasu potrzebnego na rejestrację paragonu z 5-10 minut do mniej niż 2
 Wymóg: System rejestracji i logowania użytkowników za pomocą adresu email i hasła
 
 Szczegóły implementacji:
+
 - Wykorzystanie Supabase Auth jako providera autentykacji
 - Walidacja hasła przy rejestracji:
   - Minimum 8 znaków
   - Co najmniej 1 mała litera (a-z)
   - Co najmniej 1 duża litera (A-Z)
   - Co najmniej 1 cyfra (0-9)
-  - Co najmniej 1 znak specjalny (!@#$%^&*)
+  - Co najmniej 1 znak specjalny (!@#$%^&\*)
 - Architektura: jeden portfel wydatków na użytkownika
 - Brak funkcji resetowania hasła w MVP (wykorzystanie standardowej funkcji Supabase)
 - Sesja użytkownika zarządzana przez Astro.cookies (server-side)
 
 Kryteria akceptacji:
+
 - Użytkownik może założyć konto podając email i hasło spełniające wymagania
 - System wyświetla komunikaty walidacyjne dla niepoprawnego hasła
 - Użytkownik może zalogować się używając zarejestrowanych danych
@@ -75,6 +81,7 @@ Kryteria akceptacji:
 Wymóg: Predefiniowany zestaw 9 kategorii przechowywanych w dedykowanej tabeli bazy danych
 
 Lista kategorii z ikonami emoji:
+
 1. Żywność i napoje 🛒
 2. Transport 🚗 (paliwo, bilety, parking)
 3. Zdrowie i uroda 💊 (apteka, kosmetyki)
@@ -86,6 +93,7 @@ Lista kategorii z ikonami emoji:
 9. Inne ❓
 
 Szczegóły implementacji:
+
 - Kategorie przechowywane w tabeli `categories` z polami: id, name, icon, order
 - Kategorie przypisywane na poziomie pojedynczych pozycji paragonu (nie całego paragonu)
 - Brak możliwości tworzenia, edycji lub usuwania kategorii przez użytkownika w MVP
@@ -94,6 +102,7 @@ Szczegóły implementacji:
 - Użytkownik może zmienić kategorię poprzez dropdown podczas edycji
 
 Kryteria akceptacji:
+
 - Wszystkie 9 kategorii są dostępne w systemie
 - Każda pozycja paragonu musi mieć przypisaną dokładnie jedną kategorię
 - Lista kategorii w dropdown jest posortowana według pola `order`
@@ -104,11 +113,13 @@ Kryteria akceptacji:
 Wymóg: Trzy metody dodawania wydatków z interfejsem dostosowanym do urządzeń mobilnych i desktopowych
 
 Metody dodawania:
+
 1. Zdjęcie aparatem (mobile primary use case)
 2. Upload z galerii/systemu plików
 3. Ręczne wprowadzenie danych
 
 Szczegóły implementacji:
+
 - Floating Action Button (FAB) w prawym dolnym rogu jako primary action
 - FAB z ikoną "+" lub aparatu fotograficznego
 - Mobile: bottom sheet z opcjami "Zrób zdjęcie", "Wybierz z galerii", "Dodaj ręcznie"
@@ -118,6 +129,7 @@ Szczegóły implementacji:
 - Walidacja formatu pliku po stronie klienta przed przesłaniem
 
 Flow dla skanowania:
+
 1. Użytkownik klika FAB
 2. Wybiera metodę (aparat/galeria)
 3. Robi zdjęcie lub wybiera plik
@@ -126,6 +138,7 @@ Flow dla skanowania:
 6. Po otrzymaniu odpowiedzi (max 60s) wyświetla się ekran edycji z danymi
 
 Flow dla ręcznego dodawania:
+
 1. Użytkownik klika FAB
 2. Wybiera "Dodaj ręcznie"
 3. Wyświetla się formularz z polami:
@@ -136,6 +149,7 @@ Flow dla ręcznego dodawania:
 5. Przycisk "Zapisz" tworzy paragon
 
 Kryteria akceptacji:
+
 - FAB jest widoczny i łatwo dostępny w prawym dolnym rogu
 - Na mobile można uruchomić aparat natywny urządzenia
 - Można wybrać istniejący plik z galerii/systemu plików
@@ -149,7 +163,8 @@ Kryteria akceptacji:
 Wymóg: Automatyczne rozpoznawanie danych z polskich paragonów fiskalnych za pomocą OpenAI GPT-4 Vision
 
 Rozpoznawane elementy:
-- Data zakupu 
+
+- Data zakupu
 - Nazwa sklepu
 - Lista pozycji z każdego paragonu:
   - Nazwa produktu/usługi
@@ -157,6 +172,7 @@ Rozpoznawane elementy:
 - Suma całkowita
 
 Szczegóły implementacji:
+
 - Provider: OpenAI GPT-4 Vision API lub GPT-4o
 - Zalecany: Azure OpenAI dla zgodności z RODO i hostingu w EU
 - Szacunkowy koszt: $0.01-0.03 za jeden paragon
@@ -167,18 +183,21 @@ Szczegóły implementacji:
 - Odpowiedź AI w formacie JSON z ustrukturyzowanymi danymi
 
 Obsługa błędów:
+
 - Timeout po 60 sekundach z komunikatem o błędzie
 - Nieczytelny paragon: zwrócenie pustego formularza do ręcznego wypełnienia
 - Częściowe rozpoznanie: zwrócenie rozpoznanych danych do weryfikacji
 - Użytkownik samodzielnie ocenia poprawność i edytuje wyniki
 
 Przetwarzanie obrazów:
+
 - Obrazy paragonów NIE są przechowywane w bazie danych
 - Zdjęcia używane jednorazowo podczas analizy "w locie"
 - Po otrzymaniu odpowiedzi z AI obraz jest usuwany z serwera
 - Brak opcji ponownej analizy tego samego zdjęcia
 
 Kryteria akceptacji:
+
 - 95% paragonów jest przetwarzanych w czasie ≤60 sekund
 - System zwraca ustrukturyzowane dane w formacie JSON
 - W przypadku błędu użytkownik otrzymuje czytelny komunikat
@@ -190,6 +209,7 @@ Kryteria akceptacji:
 Wymóg: Pełna możliwość weryfikacji i modyfikacji danych rozpoznanych przez AI oraz ręcznie wprowadzonych paragonów
 
 Edytowalne elementy:
+
 - Data zakupu (z blokadą dat przyszłych)
 - Nazwa sklepu (text input, opcjonalne)
 - Pozycje paragonu:
@@ -199,6 +219,7 @@ Edytowalne elementy:
 - Możliwość usunięcia całego paragonu
 
 Szczegóły implementacji:
+
 - Ekran edycji wyświetlany bezpośrednio po analizie AI lub po kliknięciu na paragon z listy
 - Każda pozycja w formie edytowalnego wiersza z polami:
   - Text input dla nazwy produktu
@@ -211,23 +232,27 @@ Szczegóły implementacji:
 - Przycisk "Usuń paragon" (ikona kosza) w headerze lub na dole
 
 Walidacja:
+
 - Data nie może być w przyszłości
 - Paragon musi zawierać co najmniej jedną pozycję
 - Cena musi być liczbą dodatnią (format: XX.XX)
 - Każda pozycja musi mieć przypisaną kategorię
 
 Historia zmian:
+
 - Brak historii zmian w MVP
 - Wyświetlany jest tylko aktualny stan z bazy danych
 - Pole `updated_at` w tabeli `receipts` śledzi ostatnią modyfikację
 
 Usuwanie paragonu:
+
 - Potwierdzenie przez modal: "Czy na pewno chcesz usunąć ten paragon?"
 - Przyciski: "Anuluj" i "Usuń"
 - Po usunięciu użytkownik wraca do widoku miesięcznego
 - Soft delete NIE jest implementowane w MVP (hard delete z bazy)
 
 Kryteria akceptacji:
+
 - Użytkownik może edytować wszystkie pola paragonu
 - Można dodać minimum 1, maksimum nieograniczoną liczbę pozycji
 - Każda pozycja może być edytowana lub usunięta
@@ -245,6 +270,7 @@ Wymóg: Centralne miejsce do przeglądania wydatków z wybranego miesiąca w for
 Struktura widoku (dwusegmentowa):
 
 Segment 1 - Górna część: Wykres donut
+
 - Wizualizacja wydatków podzielona na kategorie
 - Każdy segment wykresu w kolorze przypisanym do kategorii
 - Środek wykresu (domyślnie): suma wszystkich wydatków z miesiąca
@@ -252,6 +278,7 @@ Segment 1 - Górna część: Wykres donut
 - Nie pokazujemych pustych kategorii (0 PLN) na wykresie
 
 Segment 2 - Dolna część: Lista paragonów
+
 - Wszystkie paragony z wybranego miesiąca załadowane jednorazowo
 - Domyślne sortowanie: data zakupu malejąco (najnowsze na górze)
 - Każdy element listy zawiera:
@@ -262,6 +289,7 @@ Segment 2 - Dolna część: Lista paragonów
 - Kliknięcie w paragon otwiera widok szczegółów/edycji
 
 Nawigacja między miesiącami:
+
 - Header z nazwą aktualnego miesiąca (format: "Styczeń 2025")
 - Strzałki nawigacyjne < > po bokach nazwy miesiąca
 - Kliknięcie "<" przełącza na poprzedni miesiąc
@@ -271,11 +299,13 @@ Nawigacja między miesiącami:
 - Ikona powrotu do aktualnego miesiąca
 
 Domyślny widok:
+
 - Po zalogowaniu użytkownik widzi bieżący miesiąc
 - Brak dedykowanego onboardingu
 - Dla nowych użytkowników: empty state z grafiką i przyciskiem "Dodaj pierwszy paragon"
 
 Szczegóły implementacji:
+
 - Wykres: Biblioteka Chart.js lub Recharts (React)
 - Dane do wykresu: endpoint `/api/stats/monthly?month=2025-01`
 - Dane do listy: endpoint `/api/receipts?month=2025-01`
@@ -283,6 +313,7 @@ Szczegóły implementacji:
 - FAB (Floating Action Button) widoczny przez cały czas
 
 Kryteria akceptacji:
+
 - Wykres donut wyświetla wszystkie kategorie z wydatkami >0 PLN
 - Suma w środku wykresu jest poprawna (suma wszystkich kategorii)
 - Po hover/click na segment wyświetla się kwota dla kategorii
@@ -298,6 +329,7 @@ Kryteria akceptacji:
 Wymóg: Możliwość instalacji aplikacji na urządzeniu mobilnym i desktopowym jako standalone app
 
 Funkcjonalności PWA:
+
 - Możliwość dodania do ekranu głównego (iOS/Android/Desktop)
 - App-like experience po instalacji (ukryty pasek adresu przeglądarki)
 - Ikona aplikacji na ekranie głównym urządzenia
@@ -305,6 +337,7 @@ Funkcjonalności PWA:
 - Responsywny design dostosowany do różnych rozdzielczości
 
 Szczegóły implementacji:
+
 - Web App Manifest (`manifest.json` lub `manifest.webmanifest`):
   - name: "PortfelIO"
   - short_name: "PortfelIO"
@@ -318,12 +351,14 @@ Szczegóły implementacji:
 - Zachęta do instalacji PWA wyświetlana podczas oczekiwania na analizę AI
 
 Ograniczenia MVP:
+
 - Brak wsparcia dla trybu offline
 - Aplikacja wymaga stałego połączenia internetowego
 - Brak synchronizacji danych w tle
 - Service Worker używany tylko do instalacji PWA, nie do cache'owania
 
 Kryteria akceptacji:
+
 - Aplikacja może być zainstalowana na iOS (Safari), Android (Chrome), Desktop (Chrome/Edge)
 - Po instalacji aplikacja otwiera się w trybie standalone
 - Ikona aplikacji jest widoczna na ekranie głównym
@@ -336,11 +371,13 @@ Kryteria akceptacji:
 Wymóg: Pełne wsparcie dla urządzeń mobilnych, tabletów i desktopów z optymalizacją dla mobile-first
 
 Breakpointy (Tailwind CSS):
+
 - Mobile: <640px (sm)
 - Tablet: 640px-1024px (md/lg)
 - Desktop: >1024px (xl)
 
 Dostosowania mobile:
+
 - Bottom sheet dla dodawania paragonu
 - Większe przyciski touch-friendly (min 44x44px)
 - Uproszczona nawigacja (header + FAB)
@@ -348,12 +385,14 @@ Dostosowania mobile:
 - Lista paragonów z gestami swipe (opcjonalnie)
 
 Dostosowania desktop:
+
 - Modal zamiast bottom sheet
 - Sidebar do nawigacji (opcjonalnie w przyszłości)
 - Większy wykres z dodatkowymi informacjami
 - Hover states dla interaktywnych elementów
 
 Kryteria akceptacji:
+
 - Aplikacja jest w pełni funkcjonalna na ekranach 320px-2560px
 - Wszystkie elementy są touch-friendly na mobile (min 44x44px)
 - Tekst jest czytelny bez zoomowania
@@ -365,6 +404,7 @@ Kryteria akceptacji:
 ### 4.1 Co NIE jest częścią MVP
 
 Funkcje budżetowe:
+
 - Ustawianie limitów wydatków na kategorie
 - Alerty i powiadomienia o przekroczeniu budżetu
 - Cele oszczędnościowe
@@ -372,17 +412,20 @@ Funkcje budżetowe:
 - Prognozy wydatków
 
 Zarządzanie kategoriami:
+
 - Tworzenie własnych kategorii przez użytkownika
 - Edycja nazw i ikon kategorii
 - Usuwanie lub ukrywanie kategorii
 - Subkategorie lub zagnieżdżone kategorie
 
 Funkcje społecznościowe i współdzielenie:
+
 - Współdzielenie konta z innymi użytkownikami (rodzina, współlokatorzy)
 - Udostępnianie raportów wydatków
 - Komentarze lub notatki do paragonów
 
 Zaawansowane raporty i analizy:
+
 - Wykresy trendów (liniowe, słupkowe)
 - Porównania międzyokresowe
 - Eksport danych do CSV/PDF
@@ -390,6 +433,7 @@ Zaawansowane raporty i analizy:
 - Statystyki i insights (np. "Wydajesz o 20% więcej na transport")
 
 Funkcje związane z paragonami:
+
 - Przechowywanie zdjęć paragonów po analizie
 - Śledzenie gwarancji produktów
 - Przypomnienia o terminach zwrotów
@@ -397,17 +441,20 @@ Funkcje związane z paragonami:
 - OCR dla paragonów elektronicznych (e-paragony)
 
 Integracje zewnętrzne:
+
 - Połączenie z kontem bankowym
 - Automatyczne importowanie transakcji
 - Integracja z innymi aplikacjami finansowymi
 
 Zaawansowane funkcje PWA:
+
 - Tryb offline (brak synchronizacji danych w tle)
 - Push notifications
 - Udostępnianie przez Web Share API
 - Background sync
 
 Inne:
+
 - Multi-language support (tylko polski w MVP)
 - Multi-currency support (tylko PLN)
 - Różne typy paragonów (tylko fiskalne polskie)
@@ -418,6 +465,7 @@ Inne:
 ### 4.2 Ograniczenia techniczne MVP
 
 Obsługa paragonów:
+
 - Tylko polskie paragony fiskalne (format krajowy)
 - Tylko obrazy JPEG i PNG (max 10MB)
 - Brak walidacji duplikatów paragonów
@@ -425,23 +473,27 @@ Obsługa paragonów:
 - Brak limitu liczby paragonów na użytkownika
 
 Zarządzanie danymi:
+
 - Brak eksportu danych
 - Brak importu danych z innych źródeł
 - Brak kopii zapasowych inicjowanych przez użytkownika
 - Hard delete dla usuniętych paragonów (bez możliwości przywrócenia)
 
 Autentykacja:
+
 - Tylko email + hasło (brak OAuth, social login)
 - Brak dwuskładnikowej autentykacji (2FA)
 - Wykorzystanie standardowej funkcji resetowania hasła Supabase (bez customizacji)
 - Możliwość usunięcia konta
 
 Performance:
+
 - Wszystkie paragony z miesiąca załadowane jednorazowo (brak paginacji)
 - Brak optymalizacji dla użytkowników z >100 paragonami/miesiąc
 - Brak lazy loading dla listy paragonów
 
 Platforma:
+
 - Brak natywnych aplikacji mobilnych (tylko PWA)
 - Wymaga nowoczesnej przeglądarki z obsługą ES6+
 - Wymaga stałego połączenia internetowego
@@ -449,6 +501,7 @@ Platforma:
 ### 4.3 Przyszłe rozszerzenia (Post-MVP)
 
 Priorytet wysoki:
+
 - Tryb offline z synchronizacją
 - Budżety i limity na kategorie
 - Własne kategorie użytkownika
@@ -456,6 +509,7 @@ Priorytet wysoki:
 - Eksport danych do CSV
 
 Priorytet średni:
+
 - Współdzielenie konta (family mode)
 - Śledzenie gwarancji
 - Push notifications
@@ -463,6 +517,7 @@ Priorytet średni:
 - Historia zmian paragonu
 
 Priorytet niski:
+
 - Integracja z kontem bankowym
 - Programy lojalnościowe
 - E-paragony (paragony elektroniczne)
@@ -478,6 +533,7 @@ Chcę założyć konto w aplikacji
 Aby móc bezpiecznie przechowywać swoje dane o wydatkach
 
 Kryteria akceptacji:
+
 - Formularz rejestracji zawiera pola: email, hasło, powtórz hasło
 - System waliduje format email (@ i domena)
 - System waliduje siłę hasła w czasie rzeczywistym:
@@ -498,6 +554,7 @@ Chcę zalogować się do aplikacji
 Aby uzyskać dostęp do moich zapisanych paragonów i wydatków
 
 Kryteria akceptacji:
+
 - Formularz logowania zawiera pola: email, hasło
 - Przycisk "Zaloguj" jest aktywny po wypełnieniu obu pól
 - Po poprawnym zalogowaniu użytkownik jest przekierowywany do widoku miesięcznego
@@ -513,6 +570,7 @@ Chcę zobaczyć podsumowanie moich wydatków z bieżącego miesiąca
 Aby szybko ocenić, na co wydaję najwięcej pieniędzy
 
 Kryteria akceptacji:
+
 - Po zalogowaniu widoczny jest widok miesięczny dla bieżącego miesiąca
 - Wykres donut wyświetla podział wydatków na kategorie
 - Każdy segment wykresu ma inny kolor odpowiadający kategorii
@@ -529,6 +587,7 @@ Chcę zrobić zdjęcie paragonu aparatem telefonu
 Aby szybko dodać wydatki bez ręcznego wpisywania
 
 Kryteria akceptacji:
+
 - Po wybraniu opcji "Zrób zdjęcie" otwiera się natywny aparat urządzenia
 - Użytkownik może zrobić zdjęcie paragonu
 - Po zrobieniu zdjęcia użytkownik może je zaakceptować lub powtórzyć
@@ -544,6 +603,7 @@ Chcę przesłać zdjęcie paragonu z galerii lub systemu plików
 Aby dodać paragon, którego zdjęcie zrobiłem wcześniej
 
 Kryteria akceptacji:
+
 - Po wybraniu opcji "Wybierz z galerii" otwiera się natywny file picker
 - Użytkownik może wybrać plik JPEG lub PNG z urządzenia
 - System akceptuje tylko pliki JPEG i PNG do 10MB
@@ -559,6 +619,7 @@ Chcę aby system automatycznie rozpoznał pozycje z paragonu
 Aby zaoszczędzić czas na ręcznym wpisywaniu danych
 
 Kryteria akceptacji:
+
 - Zdjęcie jest przesyłane do endpointu `/api/receipts/scan`
 - System analizuje paragon za pomocą OpenAI GPT-4 Vision/GPT-4o
 - Podczas analizy wyświetlany jest loader z komunikatem "Analizuję paragon..."
@@ -578,6 +639,7 @@ Chcę otrzymać czytelny komunikat o błędzie i możliwość ponowienia próby
 Aby móc dodać paragon pomimo problemów z rozpoznawaniem
 
 Kryteria akceptacji:
+
 - Po timeout (60s) wyświetlany jest komunikat "Analiza trwa zbyt długo. Spróbuj ponownie."
 - Dla nieczytelnego paragonu: komunikat "Nie udało się rozpoznać paragonu. Dodaj ręcznie lub zrób lepsze zdjęcie."
 - Przyciski: "Spróbuj ponownie" i "Dodaj ręcznie"
@@ -593,6 +655,7 @@ Chcę zweryfikować i poprawić rozpoznane dane przed zapisaniem
 Aby upewnić się, że moje wydatki są dokładnie zarejestrowane
 
 Kryteria akceptacji:
+
 - Po analizie AI wyświetlany jest ekran edycji z formularzem
 - Formularz zawiera pola:
   - Data zakupu (date picker, prefilled z AI)
@@ -611,6 +674,7 @@ Chcę zapisać paragon do swojego portfela
 Aby móc śledzić te wydatki
 
 Kryteria akceptacji:
+
 - Przycisk "Zapisz" jest aktywny gdy wszystkie pola są poprawnie wypełnione
 - Walidacja przed zapisaniem:
   - Co najmniej jedna pozycja
@@ -630,6 +694,7 @@ Chcę ręcznie wprowadzić dane paragonu
 Aby dodać wydatek bez robienia zdjęcia
 
 Kryteria akceptacji:
+
 - Po wybraniu opcji "Dodaj ręcznie" z FAB otwiera się pusty formularz
 - Formularz zawiera pola:
   - Data zakupu (date picker, domyślnie: dzisiaj)
@@ -648,6 +713,7 @@ Chcę zobaczyć szczegóły konkretnego paragonu
 Aby sprawdzić, co kupiłem w tym sklepie
 
 Kryteria akceptacji:
+
 - Z listy paragonów użytkownik może kliknąć dowolny paragon
 - Otwiera się ekran szczegółów paragonu
 - Ekran pokazuje:
@@ -666,6 +732,7 @@ Chcę edytować zapisany paragon
 Aby poprawić błędne dane
 
 Kryteria akceptacji:
+
 - Przycisk "Edytuj" zmienia widok szczegółów w tryb edycji
 - Wszystkie pola stają się edytowalne (data, nazwa sklepu, pozycje)
 - Można dodawać, edytować i usuwać pozycje
@@ -682,6 +749,7 @@ Chcę usunąć błędnie dodany lub niepotrzebny paragon
 Aby mieć czystą listę wydatków
 
 Kryteria akceptacji:
+
 - Ikona kosza jest widoczna w widoku szczegółów paragonu
 - Kliknięcie ikony kosza wyświetla modal potwierdzenia
 - Modal zawiera komunikat: "Czy na pewno chcesz usunąć ten paragon?"
@@ -699,6 +767,7 @@ Chcę zresetować hasło do mojego konta
 Aby odzyskać dostęp do aplikacji
 
 Kryteria akceptacji:
+
 - Link "Zapomniałeś hasła?" jest widoczny na stronie logowania
 - Po kliknięciu linku użytkownik jest przekierowywany do formularza resetu hasła
 - Formularz zawiera pole na adres email
@@ -717,6 +786,7 @@ Chcę usunąć moje konto i wszystkie dane
 Aby zaprzestać korzystania z aplikacji i usunąć moje informacje
 
 Kryteria akceptacji:
+
 - Opcja "Usuń konto" jest dostępna w menu użytkownika lub ustawieniach
 - Po kliknięciu "Usuń konto" wyświetlany jest modal z ostrzeżeniem
 - Komunikat ostrzegawczy: "Czy na pewno chcesz usunąć konto? Ta operacja jest nieodwracalna. Wszystkie twoje paragony i dane zostaną trwale usunięte."
@@ -735,6 +805,7 @@ Kryteria akceptacji:
 ### 6.1 Metryki produktowe (KPI)
 
 Metryka 1: Adoption rate skanowania paragonów
+
 - Cel: 80% nowo dodanych paragonów jest dodawanych za pomocą funkcji skanowania (nie ręcznie)
 - Pomiar: `(liczba paragonów dodanych przez skan / całkowita liczba paragonów) × 100`
 - Źródło danych: Tabela `receipts`, pole `source` (enum: 'scan', 'manual')
@@ -743,6 +814,7 @@ Metryka 1: Adoption rate skanowania paragonów
 - Uzasadnienie: Główną wartością produktu jest automatyzacja przez AI, więc wysoka adopcja skanowania wskazuje na sukces core value proposition
 
 Metryka 2: Aktywni użytkownicy (Engagement)
+
 - Cel: 60% użytkowników dodaje co najmniej 4 paragony w miesiącu
 - Pomiar: `(użytkownicy z ≥4 paragonami w miesiącu / wszyscy zarejestrowani użytkownicy) × 100`
 - Źródło danych: Zapytanie SQL grupujące paragony po `user_id` i miesiącu

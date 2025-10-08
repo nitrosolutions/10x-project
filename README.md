@@ -17,6 +17,7 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 ## ✨ Features
 
 ### Core Functionality
+
 - **🤖 AI-Powered Receipt Analysis**: Automatic extraction of items, prices, dates, and store names from Polish fiscal receipts using OpenAI GPT-4 Vision/GPT-4o
 - **📸 Multiple Input Methods**:
   - Scan receipts with camera
@@ -28,7 +29,9 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 - **🔐 Secure Authentication**: Email/password authentication via Supabase Auth
 
 ### Expense Categories
+
 9 predefined categories with emoji icons:
+
 - 🛒 Food & Beverages
 - 🚗 Transport
 - 💊 Health & Beauty
@@ -42,6 +45,7 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 ## 🛠 Tech Stack
 
 ### Frontend
+
 - **[Astro 5](https://astro.build/)** (v5.14.1) - Modern web framework with static site generation
 - **[React 19](https://react.dev/)** (v19.1.1) - UI library for interactive components
 - **[TypeScript 5](https://www.typescriptlang.org/)** - Type-safe JavaScript
@@ -49,10 +53,12 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 - **[Shadcn/ui](https://ui.shadcn.com/)** - Accessible component library built on Radix UI
 
 ### Backend & Services
+
 - **[Supabase](https://supabase.com/)** - PostgreSQL database + Authentication
 - **[OpenAI API](https://openai.com/)** - GPT-4 Vision/GPT-4o for receipt analysis (recommended: Azure OpenAI for GDPR compliance)
 
 ### DevOps & Hosting
+
 - **[Azure Static Web Apps](https://azure.microsoft.com/en-us/products/app-service/static)** - Hosting platform
 - **[GitHub Actions](https://github.com/features/actions)** - CI/CD pipelines
 
@@ -68,23 +74,27 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd 10x-project
    ```
 
 2. **Use the correct Node version**
+
    ```bash
    nvm use
    # or manually: nvm install 22.20.0 && nvm use 22.20.0
    ```
 
 3. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 4. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    ```
@@ -95,12 +105,14 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
    - `OPENAI_API_KEY` - Your OpenAI API key
 
 5. **Run database migrations**
+
    ```bash
    # Using Supabase CLI
    npx supabase db push
    ```
 
 6. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -109,14 +121,14 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 
 ## 📜 Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server (port 3000) |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build locally |
-| `npm run lint` | Run ESLint for code quality checks |
-| `npm run lint:fix` | Automatically fix ESLint issues |
-| `npm run format` | Format code with Prettier |
+| Command            | Description                          |
+| ------------------ | ------------------------------------ |
+| `npm run dev`      | Start development server (port 3000) |
+| `npm run build`    | Build for production                 |
+| `npm run preview`  | Preview production build locally     |
+| `npm run lint`     | Run ESLint for code quality checks   |
+| `npm run lint:fix` | Automatically fix ESLint issues      |
+| `npm run format`   | Format code with Prettier            |
 
 ### Pre-commit Hooks
 
@@ -127,12 +139,14 @@ This project uses **Husky** and **lint-staged** to automatically lint and format
 ### ✅ Included in MVP
 
 **User Authentication**
+
 - Email/password registration and login
 - Password validation (min 8 chars, uppercase, lowercase, digit, special char)
 - Session management via Astro.cookies
 - Account deletion
 
 **Receipt Management**
+
 - AI-powered receipt scanning (Polish fiscal receipts only)
 - Three input methods: camera, gallery upload, manual entry
 - Support for JPEG/PNG images (max 10MB)
@@ -141,12 +155,14 @@ This project uses **Husky** and **lint-staged** to automatically lint and format
 - Manual category override
 
 **Data Visualization**
+
 - Monthly expense view with donut chart
 - Breakdown by 9 predefined categories
 - Receipt list sorted by date (newest first)
 - Month-to-month navigation
 
 **Progressive Web App**
+
 - Install on iOS/Android/Desktop
 - Standalone app experience
 - Responsive design (mobile-first)
@@ -155,6 +171,7 @@ This project uses **Husky** and **lint-staged** to automatically lint and format
 ### ❌ Not Included in MVP
 
 **Budget Features**
+
 - Spending limits per category
 - Budget alerts and notifications
 - Savings goals
@@ -162,22 +179,26 @@ This project uses **Husky** and **lint-staged** to automatically lint and format
 - Expense forecasting
 
 **Advanced Categories**
+
 - Custom user-defined categories
 - Category editing/deletion
 - Subcategories
 
 **Social & Sharing**
+
 - Multi-user accounts (family mode)
 - Expense report sharing
 - Receipt comments/notes
 
 **Advanced Analytics**
+
 - Trend charts (line, bar)
 - Period comparisons
 - CSV/PDF export
 - Detailed reports and insights
 
 **Advanced Features**
+
 - Receipt image storage after analysis
 - Warranty tracking
 - Offline mode with sync
@@ -193,10 +214,12 @@ For a complete list of future enhancements, see the [PRD](.ai/prd.md#4-granice-p
 **Current Phase**: MVP Development 🚧
 
 ### Success Metrics (KPIs)
+
 - **Scan Adoption Rate**: Target 80% of receipts added via scanning (vs. manual entry)
 - **User Engagement**: Target 60% of users adding ≥4 receipts per month
 
 ### Supported Platforms
+
 - ✅ Polish fiscal receipts only
 - ✅ JPEG/PNG images (max 10MB)
 - ✅ Modern browsers with ES6+ support

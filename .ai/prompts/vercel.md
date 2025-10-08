@@ -5,6 +5,7 @@
 ### **Pliki do UTWORZENIA:**
 
 #### **1. `.github/workflows/vercel-deploy.yml`**
+
 ```yaml
 name: Vercel Deploy with Tests
 
@@ -23,8 +24,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -51,7 +52,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
+          vercel-args: "--prod"
 
   deploy-preview:
     needs: test
@@ -69,6 +70,7 @@ jobs:
 ```
 
 **Co robi:**
+
 - ✅ Uruchamia się na push do `master` i na każdy PR
 - ✅ Job `test`: instaluje deps → lint → format check → build
 - ✅ Job `deploy`: deploy do produkcji (tylko master)
@@ -78,6 +80,7 @@ jobs:
 ---
 
 #### **2. `vercel.json`** (opcjonalny, ale rekomendowany)
+
 ```json
 {
   "buildCommand": "npm run build",
@@ -112,6 +115,7 @@ jobs:
 ```
 
 **Co robi:**
+
 - Region: Frankfurt (EU) dla niskiej latencji w Polsce
 - Max duration: 10s (Free tier) - dla API routes
 - Security headers (XSS protection, clickjacking protection)
@@ -119,6 +123,7 @@ jobs:
 ---
 
 #### **3. `src/pages/test-ssr.astro`** (przykład testowy)
+
 ```astro
 ---
 const serverTime = new Date().toISOString();
@@ -140,12 +145,14 @@ const nodeVersion = process.version;
 ```
 
 **Po co:**
+
 - Weryfikacja że SSR działa poprawnie na Vercel
 - Timestamp zmienia się przy każdym żądaniu = SSR ✅
 
 ---
 
 #### **4. `src/pages/api/hello.ts`** (przykład API route)
+
 ```typescript
 import type { APIRoute } from "astro";
 
@@ -167,6 +174,7 @@ export const GET: APIRoute = async () => {
 ```
 
 **Po co:**
+
 - Weryfikacja że API routes działają jako serverless functions
 - Test: `curl https://twoj-projekt.vercel.app/api/hello`
 
@@ -175,6 +183,7 @@ export const GET: APIRoute = async () => {
 ### **Pliki do MODYFIKACJI:**
 
 #### **5. `astro.config.mjs`**
+
 ```diff
 // @ts-check
 import { defineConfig } from "astro/config";
@@ -201,12 +210,14 @@ export default defineConfig({
 ```
 
 **Zmiana:**
+
 - `output: "static"` → `"server"` (full SSR)
 - Dodanie `adapter: vercel()` z opcjami
 
 ---
 
 #### **6. `package.json`**
+
 ```diff
 {
   "dependencies": {
@@ -220,6 +231,7 @@ export default defineConfig({
 ```
 
 **Instalacja:**
+
 ```bash
 npm install @astrojs/vercel
 ```
@@ -227,9 +239,10 @@ npm install @astrojs/vercel
 ---
 
 #### **7. `CLAUDE.md`** (aktualizacja dokumentacji)
+
 Dodaj sekcję:
 
-```markdown
+````markdown
 ## Deployment - Vercel
 
 ### Build Modes
@@ -250,12 +263,14 @@ Dodaj sekcję:
 Workflow: `.github/workflows/vercel-deploy.yml`
 
 **On Push to `master`:**
+
 1. Run linter (`npm run lint`)
 2. Run format check (`prettier --check`)
 3. Build application (`npm run build`)
 4. Deploy to production (if tests pass)
 
 **On Pull Request:**
+
 1. Run tests (same as above)
 2. Deploy preview environment
 3. Comment PR with preview URL
@@ -275,17 +290,20 @@ vercel
 # Deploy to production
 vercel --prod
 ```
+````
 
 ### Environment Variables (Vercel Dashboard)
 
 Set in: Vercel Dashboard → Project Settings → Environment Variables
 
 Required for production:
+
 - `PUBLIC_SUPABASE_URL`
 - `PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `OPENAI_API_KEY` (or Azure OpenAI credentials)
-```
+
+````
 
 ---
 
@@ -294,9 +312,10 @@ Required for production:
 #### **8. `.github/workflows/azure-staticwebapp.yml`**
 ```bash
 git rm .github/workflows/azure-staticwebapp.yml
-```
+````
 
 **Dlaczego:**
+
 - Nie używamy już Azure Static Web Apps
 - Workflow jest niepotrzebny dla Vercel
 
@@ -318,6 +337,7 @@ W GitHub repo → Settings → Secrets and variables → Actions:
    - J.w. → pole `projectId`
 
 **Jak zdobyć ORG_ID i PROJECT_ID:**
+
 ```bash
 # W katalogu projektu
 npm install -g vercel
@@ -344,6 +364,7 @@ npm install @astrojs/vercel
 ## 🚀 **Kroki deployment (po zmianach):**
 
 ### **1. Lokalne testy:**
+
 ```bash
 # Test buildu
 npm run build
@@ -359,6 +380,7 @@ npx vercel dev
 ```
 
 ### **2. Commit i push:**
+
 ```bash
 git add .
 git commit -m "feat: configure Vercel SSR deployment with CI/CD"
@@ -366,6 +388,7 @@ git push origin master
 ```
 
 ### **3. Konfiguracja Vercel Dashboard:**
+
 1. Wejdź na [vercel.com](https://vercel.com)
 2. Kliknij "Add New Project"
 3. Importuj repo `10x-project`
@@ -376,11 +399,13 @@ git push origin master
    - **Dlaczego?** Bo GitHub Actions będzie zarządzać deployami
 
 ### **4. Dodaj GitHub Secrets:**
+
 - `VERCEL_TOKEN`
 - `VERCEL_ORG_ID`
 - `VERCEL_PROJECT_ID`
 
 ### **5. Push do master → GitHub Actions:**
+
 - Workflow uruchomi się automatycznie
 - Sprawdź: GitHub → Actions tab
 - Po przejściu testów → deploy na Vercel
@@ -390,22 +415,26 @@ git push origin master
 ## ✅ **Weryfikacja po deployment:**
 
 ### **Test 1: SSR działa**
+
 ```bash
 # Odwiedź kilka razy (timestamp powinien się zmieniać)
 curl https://10x-project.vercel.app/test-ssr
 ```
 
 ### **Test 2: API route działa**
+
 ```bash
 curl https://10x-project.vercel.app/api/hello
 # Powinien zwrócić JSON z timestamp
 ```
 
 ### **Test 3: Logi funkcji serverless**
+
 - Vercel Dashboard → Project → Functions → Logs
 - Sprawdź czy są requesty do `/test-ssr` i `/api/hello`
 
 ### **Test 4: Preview deployment (PR)**
+
 1. Utwórz branch: `git checkout -b test-feature`
 2. Zrób zmianę i push
 3. Utwórz PR na GitHub
@@ -416,23 +445,25 @@ curl https://10x-project.vercel.app/api/hello
 
 ## 📊 **Podsumowanie zmian:**
 
-| Plik | Akcja | Opis |
-|------|-------|------|
-| `astro.config.mjs` | ✏️ Modyfikacja | `output: "server"` + `adapter: vercel()` |
-| `package.json` | ✏️ Modyfikacja | Dodanie `@astrojs/vercel` |
-| `.github/workflows/vercel-deploy.yml` | ➕ Nowy | GitHub Actions workflow z testami |
-| `vercel.json` | ➕ Nowy | Konfiguracja Vercel (region, headers) |
-| `src/pages/test-ssr.astro` | ➕ Nowy | Test SSR |
-| `src/pages/api/hello.ts` | ➕ Nowy | Test API route |
-| `CLAUDE.md` | ✏️ Modyfikacja | Dokumentacja deployment |
-| `.github/workflows/azure-staticwebapp.yml` | ❌ Usunięcie | Stary workflow Azure |
+| Plik                                       | Akcja          | Opis                                     |
+| ------------------------------------------ | -------------- | ---------------------------------------- |
+| `astro.config.mjs`                         | ✏️ Modyfikacja | `output: "server"` + `adapter: vercel()` |
+| `package.json`                             | ✏️ Modyfikacja | Dodanie `@astrojs/vercel`                |
+| `.github/workflows/vercel-deploy.yml`      | ➕ Nowy        | GitHub Actions workflow z testami        |
+| `vercel.json`                              | ➕ Nowy        | Konfiguracja Vercel (region, headers)    |
+| `src/pages/test-ssr.astro`                 | ➕ Nowy        | Test SSR                                 |
+| `src/pages/api/hello.ts`                   | ➕ Nowy        | Test API route                           |
+| `CLAUDE.md`                                | ✏️ Modyfikacja | Dokumentacja deployment                  |
+| `.github/workflows/azure-staticwebapp.yml` | ❌ Usunięcie   | Stary workflow Azure                     |
 
 **GitHub Secrets:**
+
 - ➕ `VERCEL_TOKEN`
 - ➕ `VERCEL_ORG_ID`
 - ➕ `VERCEL_PROJECT_ID`
 
 **NPM packages:**
+
 - ➕ `@astrojs/vercel`
 
 ---
@@ -458,6 +489,7 @@ Deployment ready
 ```
 
 **Dla Pull Requests:**
+
 ```
 PR created
     ↓
@@ -473,29 +505,35 @@ Bot komentuje PR z linkiem preview
 ## 🧪 **Różnice: Static vs Server vs Hybrid**
 
 ### **Static (obecna konfiguracja):**
+
 ```js
-output: "static"
+output: "static";
 ```
+
 - ✅ Wszystko generowane podczas build
 - ✅ Najszybsze (pure HTML/CSS/JS)
 - ❌ Brak SSR, brak API routes
 - ❌ Nie działa z Supabase Auth przez `context.locals`
 
 ### **Server (rekomendowane dla PortfelIO):**
+
 ```js
-output: "server"
-adapter: vercel()
+output: "server";
+adapter: vercel();
 ```
+
 - ✅ Pełne SSR dla wszystkich stron
 - ✅ API routes działają jako serverless functions
 - ✅ Supabase Auth przez `context.locals`
 - ⚠️ Każde żądanie = wywołanie funkcji (wyższe koszty)
 
 ### **Hybrid (optymalne dla produkcji):**
+
 ```js
-output: "hybrid"
-adapter: vercel()
+output: "hybrid";
+adapter: vercel();
 ```
+
 - ✅ SSG domyślnie (szybkie)
 - ✅ SSR tylko tam gdzie potrzeba (`export const prerender = false`)
 - ✅ API routes SSR
@@ -503,21 +541,15 @@ adapter: vercel()
 - ✅ Dashboard/auth SSR
 
 **Przykład hybrid:**
+
 ```astro
 ---
 // src/pages/index.astro (landing page)
 export const prerender = true; // SSG - statyczna strona
 ---
 
----
-// src/pages/dashboard.astro
-export const prerender = false; // SSR - wymaga auth
----
-
----
-// src/pages/api/receipts/scan.ts
-export const prerender = false; // SSR - API route (WYMAGANE)
----
+--- // src/pages/dashboard.astro export const prerender = false; // SSR - wymaga auth --- --- //
+src/pages/api/receipts/scan.ts export const prerender = false; // SSR - API route (WYMAGANE) ---
 ```
 
 ---
@@ -525,6 +557,7 @@ export const prerender = false; // SSR - API route (WYMAGANE)
 ## 💰 **Koszty Vercel**
 
 ### **Free tier (Hobby):**
+
 - ✅ Unlimited projects
 - ✅ 100GB bandwidth/miesiąc
 - ✅ 100 GB-hours serverless execution/miesiąc
@@ -532,6 +565,7 @@ export const prerender = false; // SSR - API route (WYMAGANE)
 - ⚠️ Limit: **10s max execution time** (za mało dla skanowania paragonów!)
 
 ### **Pro ($20/miesiąc/użytkownik):**
+
 - ✅ 1TB bandwidth
 - ✅ 1000 GB-hours serverless
 - ✅ **60s max execution time** (zgodne z PRD!)
@@ -539,6 +573,7 @@ export const prerender = false; // SSR - API route (WYMAGANE)
 - ✅ Vercel Analytics
 
 **Dla PortfelIO MVP:**
+
 - **Start:** Free tier (testy, development)
 - **Produkcja:** Pro tier ($20/m) - **wymagane dla 60s timeout AI scanning**
 
@@ -547,11 +582,13 @@ export const prerender = false; // SSR - API route (WYMAGANE)
 ## 📝 **Checklist implementacji:**
 
 ### **Przed implementacją:**
+
 - [ ] Backup projektu (git commit)
 - [ ] Node.js 22 zainstalowany
 - [ ] Konto na Vercel utworzone
 
 ### **Instalacja:**
+
 - [ ] `npm install @astrojs/vercel`
 - [ ] Modyfikacja `astro.config.mjs`
 - [ ] Utworzenie `.github/workflows/vercel-deploy.yml`
@@ -562,23 +599,27 @@ export const prerender = false; // SSR - API route (WYMAGANE)
 - [ ] Usunięcie `.github/workflows/azure-staticwebapp.yml`
 
 ### **Testy lokalne:**
+
 - [ ] `npm run build` (bez błędów)
 - [ ] `npm run lint` (bez błędów)
 - [ ] `npx prettier --check .` (bez błędów)
 - [ ] `npx vercel dev` (opcjonalnie - test lokalny)
 
 ### **Konfiguracja Vercel:**
+
 - [ ] Połączenie repo z Vercel Dashboard
 - [ ] Wyłączenie automatycznego deploy w Vercel
 - [ ] Zdobycie `VERCEL_TOKEN`, `ORG_ID`, `PROJECT_ID`
 - [ ] Dodanie GitHub Secrets
 
 ### **Deployment:**
+
 - [ ] Push do `master`
 - [ ] GitHub Actions przeszły ✅
 - [ ] Vercel deployment sukces ✅
 
 ### **Weryfikacja:**
+
 - [ ] Test SSR: `/test-ssr` (timestamp zmienia się)
 - [ ] Test API: `/api/hello` (zwraca JSON)
 - [ ] Test preview: Utwórz PR → sprawdź preview URL
@@ -589,10 +630,13 @@ export const prerender = false; // SSR - API route (WYMAGANE)
 ## 🔧 **Troubleshooting**
 
 ### **Problem: Build fails na Vercel**
+
 ```
 Error: Cannot find module '@astrojs/vercel'
 ```
+
 **Rozwiązanie:**
+
 ```bash
 npm install @astrojs/vercel
 git add package.json package-lock.json
@@ -601,27 +645,36 @@ git push
 ```
 
 ### **Problem: GitHub Actions nie uruchamia się**
+
 **Rozwiązanie:**
+
 1. Sprawdź ścieżkę: `.github/workflows/vercel-deploy.yml` (nie `workflow`)
 2. Sprawdź YAML syntax (użyj [yamllint.com](https://www.yamllint.com/))
 3. Sprawdź GitHub Actions tab → czy są błędy
 
 ### **Problem: Deployment fails - "Missing secrets"**
+
 ```
 Error: VERCEL_TOKEN not found
 ```
+
 **Rozwiązanie:**
+
 - GitHub repo → Settings → Secrets and variables → Actions
 - Dodaj: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
 
 ### **Problem: SSR nie działa (timestamp się nie zmienia)**
+
 **Rozwiązanie:**
+
 1. Sprawdź `astro.config.mjs`: czy `output: "server"`?
 2. Sprawdź `vercel.json`: czy region jest ustawiony?
 3. Sprawdź logi Vercel: Functions → Logs (czy są requesty?)
 
 ### **Problem: API route zwraca 404**
+
 **Rozwiązanie:**
+
 1. Sprawdź ścieżkę: `src/pages/api/hello.ts` (nie `src/api/`)
 2. Sprawdź czy plik ma `export const GET` lub `export const POST`
 3. Dla hybrid: Dodaj `export const prerender = false` na początku pliku
