@@ -22,29 +22,30 @@ export const ReceiptItemSchema = z.object({
 
 /**
  * Custom validator dla purchase_date:
- * - Data nie może być w przyszłości
- * - Data nie może być starsza niż 10 lat
+ * - Data nie może być więcej niż 1 dzień w przyszłości (tolerancja dla stref czasowych)
  */
 const purchaseDateValidator = z
   .string()
   .refine((dateStr) => {
-    const date = new Date(dateStr);
+    // Parse input date string directly as UTC date (YYYY-MM-DD)
+    const inputDate = new Date(dateStr + "T00:00:00Z");
+
+    // Get current date in UTC, set to midnight
     const now = new Date();
-    const tenYearsAgo = new Date();
-    tenYearsAgo.setFullYear(now.getFullYear() - 10);
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-    // Sprawdzenie czy data jest w przyszłości
-    if (date > now) {
-      return false;
-    }
+    // Allow up to 1 day in the future to handle timezone differences
+    // (users in UTC+X timezones may be on "tomorrow" relative to server)
+    const tomorrowUTC = new Date(todayUTC);
+    tomorrowUTC.setUTCDate(todayUTC.getUTCDate() + 1);
 
-    // Sprawdzenie czy data jest starsza niż 10 lat
-    if (date < tenYearsAgo) {
+    // Sprawdzenie czy data jest więcej niż 1 dzień w przyszłości
+    if (inputDate > tomorrowUTC) {
       return false;
     }
 
     return true;
-  }, "Purchase date must not be in the future and not older than 10 years")
+  }, "Purchase date cannot be more than 1 day in the future")
   .refine((dateStr) => {
     // Sprawdzenie formatu ISO 8601 (YYYY-MM-DD)
     const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -55,7 +56,7 @@ const purchaseDateValidator = z
  * Schema dla CreateReceiptCommand (POST /api/receipts)
  *
  * Waliduje:
- * - purchase_date: wymagane, ISO 8601, nie w przyszłości, nie starsze niż 10 lat
+ * - purchase_date: wymagane, ISO 8601, max 1 dzień w przyszłości (tolerancja stref czasowych)
  * - store_name: opcjonalne, max 255 znaków, trim whitespace
  * - items: opcjonalna tablica, max 100 elementów, każdy element walidowany przez ReceiptItemSchema
  */

@@ -6,7 +6,11 @@ import type { Database } from "../db/database.types.ts";
 
 export const onRequest = defineMiddleware(async (context, next) => {
   // DEV: Use service role client to bypass RLS when authentication is bypassed
-  const bypassAuth = import.meta.env.DEV_BYPASS_AUTH === "true";
+  // Handle both string "true" and boolean true from environment
+  const bypassAuth =
+    typeof import.meta.env.DEV_BYPASS_AUTH === "string"
+      ? import.meta.env.DEV_BYPASS_AUTH.trim() === "true"
+      : import.meta.env.DEV_BYPASS_AUTH === true;
   const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (bypassAuth && serviceRoleKey) {

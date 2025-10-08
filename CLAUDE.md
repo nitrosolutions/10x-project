@@ -208,4 +208,11 @@ Example: `20240906123045_create_profiles.sql`
 
 ## Deployment
 
-Project uses Azure Static Web Apps with GitHub Actions workflow at `.github/workflows/azure-staticwebapp.yml`.
+### Vercel Deployment
+
+The project is configured with `@astrojs/vercel` adapter for serverless deployment.
+
+```bash
+npm install -g vercel
+vercel -p
+```
