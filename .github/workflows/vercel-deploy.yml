@@ -27,7 +27,11 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Deploy to Vercel Production
-        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }} -e SUPABASE_URL=${{ secrets.SUPABASE_URL }} -e SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deployment Summary
         run: |
