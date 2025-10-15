@@ -18,7 +18,7 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 
 ### Core Functionality
 
-- **🤖 AI-Powered Receipt Analysis**: Automatic extraction of items, prices, dates, and store names from Polish fiscal receipts using OpenAI GPT-4 Vision/GPT-4o
+- **🤖 AI-Powered Receipt Analysis**: Automatic extraction of items, prices, dates, and store names from Polish fiscal receipts using Google Gemini
 - **📸 Multiple Input Methods**:
   - Scan receipts with camera
   - Upload from gallery
@@ -55,12 +55,12 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 ### Backend & Services
 
 - **[Supabase](https://supabase.com/)** - PostgreSQL database + Authentication
-- **[OpenAI API](https://openai.com/)** - GPT-4 Vision/GPT-4o for receipt analysis (recommended: Azure OpenAI for GDPR compliance)
+- **[Google Gemini API](https://ai.google.dev/)** - Gemini for receipt analysis
 
 ### DevOps & Hosting
 
-- **[Azure Static Web Apps](https://azure.microsoft.com/en-us/products/app-service/static)** - Hosting platform
-- **[GitHub Actions](https://github.com/features/actions)** - CI/CD pipelines
+- **[Vercel](https://vercel.com/)** - Serverless deployment platform
+- **[GitHub Actions](https://github.com/features/actions)** - CI/CD pipelines for automated deployments
 
 ## 🚀 Getting Started
 
@@ -69,7 +69,7 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 - **Node.js**: v22.20.0 (use [nvm](https://github.com/nvm-sh/nvm) to manage versions)
 - **npm**: v10+ (comes with Node.js)
 - **Supabase Account**: [Sign up here](https://supabase.com/)
-- **OpenAI API Key**: [Get your API key](https://platform.openai.com/api-keys)
+- **Gemini API Key**: [Get your API key](https://aistudio.google.com/app/apikey)
 
 ### Installation
 
@@ -102,7 +102,7 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
    Configure the following variables in `.env`:
    - `SUPABASE_URL` - Your Supabase project URL
    - `SUPABASE_KEY` - Your Supabase anonymous key
-   - `OPENAI_API_KEY` - Your OpenAI API key
+   - `GEMINI_API_KEY` - Your Gemini API key
 
 5. **Run database migrations**
 
@@ -134,6 +134,79 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 
 This project uses **Husky** and **lint-staged** to automatically lint and format code before commits.
 
+## 🚀 Deployment
+
+This project is configured for automated deployment to Vercel via GitHub Actions.
+
+### Setting Up Vercel Deployment
+
+1. **Create a Vercel account** at [vercel.com](https://vercel.com/)
+
+2. **Install Vercel CLI** (optional, for local testing)
+   ```bash
+   npm install -g vercel
+   ```
+
+3. **Get your Vercel credentials**
+
+   Run locally to link your project:
+   ```bash
+   vercel link
+   ```
+
+   This creates a `.vercel/project.json` file containing:
+   - `projectId` - Your Vercel project ID
+   - `orgId` - Your Vercel organization ID
+
+   Get your Vercel token from: [vercel.com/account/tokens](https://vercel.com/account/tokens)
+
+4. **Configure GitHub Secrets**
+
+   Add the following secrets to your GitHub repository at `Settings > Secrets and variables > Actions`:
+
+   **Required Vercel Secrets:**
+   - `VERCEL_TOKEN` - Your Vercel authentication token
+   - `VERCEL_ORG_ID` - Your Vercel organization ID
+   - `VERCEL_PROJECT_ID` - Your Vercel project ID
+
+   **Required Environment Variables:**
+   - `SUPABASE_URL` - Your Supabase project URL
+   - `SUPABASE_KEY` - Your Supabase anonymous/public key
+   - `GEMINI_API_KEY` - Your Gemini API key (for AI receipt analysis)
+
+5. **Trigger Deployment**
+
+   The GitHub Actions workflow ([.github/workflows/vercel-deploy.yml](.github/workflows/vercel-deploy.yml)) will automatically:
+   - Deploy to production on every push to `master` branch
+   - Build the project with environment variables
+   - Run the Vercel deployment
+
+### Manual Deployment
+
+You can also deploy manually using the Vercel CLI:
+
+```bash
+# Deploy to preview
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+### Vercel Configuration
+
+The project uses `@astrojs/vercel` adapter configured in [astro.config.mjs](astro.config.mjs):
+
+```javascript
+import vercel from "@astrojs/vercel/serverless";
+
+export default defineConfig({
+  output: "server",
+  adapter: vercel({}),
+  // ... other config
+});
+```
+
 ## 🎯 Project Scope
 
 ### ✅ Included in MVP
@@ -147,7 +220,7 @@ This project uses **Husky** and **lint-staged** to automatically lint and format
 
 **Receipt Management**
 
-- AI-powered receipt scanning (Polish fiscal receipts only)
+- AI-powered receipt scanning using Google Gemini (Polish fiscal receipts only)
 - Three input methods: camera, gallery upload, manual entry
 - Support for JPEG/PNG images (max 10MB)
 - Full CRUD operations on receipts and items
