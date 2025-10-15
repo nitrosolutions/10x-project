@@ -1,8 +1,13 @@
 ---
-import Welcome from "../components/Welcome.astro";
-import Layout from "../layouts/Layout.astro";
+import Layout from "@/layouts/Layout.astro";
+import { DashboardView } from "@/components/dashboard/DashboardView";
+
+// Tytuł strony
+const title = "Dashboard - Paragony";
 ---
 
-<Layout>
-  <Welcome />
+<Layout title={title}>
+  <main>
+    <DashboardView client:load />
+  </main>
 </Layout>

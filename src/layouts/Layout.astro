@@ -1,11 +1,14 @@
 ---
 import "../styles/global.css";
+import { Toaster } from "@/components/ui/sonner";
+import Navigation from "@/components/Navigation.astro";
 
 interface Props {
   title?: string;
+  showNavigation?: boolean;
 }
 
-const { title = "10x Astro Starter" } = Astro.props;
+const { title = "10x Astro Starter", showNavigation = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -18,7 +21,9 @@ const { title = "10x Astro Starter" } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
+    {showNavigation && <Navigation />}
     <slot />
+    <Toaster client:load />
   </body>
 </html>
 

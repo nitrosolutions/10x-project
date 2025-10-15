@@ -15,6 +15,9 @@ export interface ReceiptDto extends Omit<Database["public"]["Tables"]["receipts"
   items: ReceiptItemDto[];
 }
 
+// DTO dla uproszczonej listy paragonów (bez pozycji) - używane w GET /api/receipts
+export type ReceiptListDto = Omit<Database["public"]["Tables"]["receipts"]["Row"], "user_id" | "source">;
+
 // Command Model dla skanowania paragonu przez API (POST /api/receipts/scan)
 // Pole "image" zawiera obraz w formacie base64
 export interface ScanReceiptCommand {

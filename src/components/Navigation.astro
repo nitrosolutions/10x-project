@@ -1,0 +1,30 @@
+---
+// Komponent nawigacji dla aplikacji
+const currentPath = Astro.url.pathname;
+
+const isActive = (path: string) => {
+  return currentPath === path ? "bg-primary text-primary-foreground" : "hover:bg-accent";
+};
+---
+
+<nav class="bg-background border-b">
+  <div class="container mx-auto px-4 py-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <a href="/" class="text-xl font-bold text-foreground hover:text-primary transition-colors"> Paragony </a>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="/" class={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/")}`}>
+          Dashboard
+        </a>
+        <a
+          href="/receipts/new"
+          class={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive("/receipts/new")}`}
+        >
+          Dodaj paragon
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
