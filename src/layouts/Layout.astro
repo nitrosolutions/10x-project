@@ -35,7 +35,7 @@ const { title = "PortfelIO - Automatyczne śledzenie wydatków", showNavigation 
     {showNavigation && <Navigation />}
     <slot />
     <Toaster client:load />
-    {pwaInfo && <script src={pwaInfo.registerSW.inlinePath} />}
+    {pwaInfo && pwaInfo.registerSW && <script src={pwaInfo.registerSW.inlinePath} />}
   </body>
 </html>
 
