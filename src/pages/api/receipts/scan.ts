@@ -144,22 +144,30 @@ ${categoriesList}
 
 ZASADY EKSTRAKCJI:
 1. purchase_date: Data w formacie YYYY-MM-DD (np. "2025-01-15")
-2. store_name: Nazwa sklepu lub null jeśli nieczytelna
+2. store_name: Nazwa sklepu lub null jeśli kompletnie nieczytelna
 3. items: Tablica produktów, każdy z:
-   - name: Nazwa produktu (string)
+   - name: Nazwa produktu (string) - KRYTYCZNE: ZAWSZE wypełnij, nigdy nie zwracaj null. Nawet jeśli tekst jest trudno czytelny, wpisz swoje NAJLEPSZE przybliżenie/interpretację
    - price: Cena jako liczba (np. 12.99, nie "12.99 zł")
    - category_id: ID z listy kategorii powyżej (liczba całkowita)
 4. total: Suma całkowita jako liczba
 
-PRZYKŁAD POPRAWNEJ ODPOWIEDZI:
+WAŻNE INSTRUKCJE:
+- Zwróć WSZYSTKIE produkty ze paragonu - nie pomijaj żadnych
+- Każdy produkt MUSI mieć wypełnioną nazwę (name)
+- Jeśli nazwa jest niejasna, częściowo nieczytelna lub rozmyta - wpisz ZAWSZE swoje najlepsze przybliżenie
+- Akceptowalne są interpretacje/szacowania - lepiej przybliżona nazwa niż brak
+- Jeśli widzisz fragment tekstu - napisz co widzisz + [interpretacja] jeśli potrzebna
+
+PRZYKŁAD POPRAWNEJ ODPOWIEDZI (z trudno czytelnym produktem):
 {
   "purchase_date": "2025-01-15",
   "store_name": "Biedronka",
   "items": [
     {"name": "Mleko 2%", "price": 4.59, "category_id": 1},
+    {"name": "Masło [tekst rozmyty - interpretacja]", "price": 8.99, "category_id": 1},
     {"name": "Chleb pszenny", "price": 3.99, "category_id": 1}
   ],
-  "total": 8.58
+  "total": 17.57
 }
 
 PAMIĘTAJ: Zwróć TYLKO JSON bez żadnego innego tekstu!

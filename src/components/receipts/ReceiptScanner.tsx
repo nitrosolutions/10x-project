@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Loader2 } from "lucide-react";
+import { Camera, Upload, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 interface ReceiptScannerProps {
   hasCamera: boolean;
@@ -12,6 +13,21 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
   const [progress, setProgress] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const { isInstallable, promptInstall } = usePWAInstall();
+
+  // Obsługa instalacji PWA
+  const handleInstallPWA = async () => {
+    const installed = await promptInstall();
+    if (installed) {
+      toast.success("Aplikacja zainstalowana!", {
+        description: "PortfelIO została dodana do ekranu głównego",
+      });
+    } else {
+      toast.info("Instalacja anulowana", {
+        description: "Możesz zainstalować aplikację później",
+      });
+    }
+  };
 
   // Funkcja pomocnicza do konwersji pliku na base64
   const fileToBase64 = (file: File): Promise<string> => {
@@ -122,10 +138,28 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     <div className="space-y-6">
       {/* Loader podczas skanowania */}
       {isScanning ? (
-        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+        <div className="flex flex-col items-center justify-center py-12 space-y-6">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
           <p className="text-lg font-medium">{progress}</p>
           <p className="text-sm text-muted-foreground">Proszę czekać, to może potrwać do minuty...</p>
+
+          {/* Przycisk instalacji PWA - widoczny tylko podczas skanowania */}
+          {isInstallable && (
+            <div className="w-full max-w-md px-4 mt-6">
+              <Button
+                onClick={handleInstallPWA}
+                size="lg"
+                className="w-full h-20 text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 animate-pulse"
+                variant="default"
+              >
+                <Download className="mr-3 h-7 w-7" />
+                Zainstaluj aplikację na ekranie głównym
+              </Button>
+              <p className="text-sm text-center mt-3 font-medium text-foreground">
+                💡 Dodaj PortfelIO do ekranu głównego urządzenia
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <>

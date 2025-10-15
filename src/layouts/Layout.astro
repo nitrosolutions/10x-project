@@ -2,28 +2,40 @@
 import "../styles/global.css";
 import { Toaster } from "@/components/ui/sonner";
 import Navigation from "@/components/Navigation.astro";
+import { pwaInfo } from "virtual:pwa-info";
 
 interface Props {
   title?: string;
   showNavigation?: boolean;
 }
 
-const { title = "10x Astro Starter", showNavigation = true } = Astro.props;
+const { title = "PortfelIO - Automatyczne śledzenie wydatków", showNavigation = true } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="pl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/png" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="PortfelIO - Automatyczne śledzenie wydatków przez skanowanie paragonów" />
+    <meta name="theme-color" content="#0ea5e9" />
+
+    <!-- PWA Meta Tags -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+
+    {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
   </head>
   <body>
     {showNavigation && <Navigation />}
     <slot />
     <Toaster client:load />
+    {pwaInfo && <script src={pwaInfo.registerSW.inlinePath} />}
   </body>
 </html>
 
