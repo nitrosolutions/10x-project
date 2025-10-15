@@ -215,6 +215,10 @@ Przeanalizuj ten paragon fiskalny i wyciągnij wszystkie dane zgodnie z powyższ
     try {
       let responseText = geminiResponse.text;
 
+      if (!responseText) {
+        throw new Error("Gemini nie zwróciło treści tekstowej");
+      }
+
       // eslint-disable-next-line no-console
       console.log("[POST /api/receipts/scan] Raw response length:", responseText.length);
       // eslint-disable-next-line no-console

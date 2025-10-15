@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import type { GenerateContentRequest, GenerateContentResult, Content } from "@google/genai";
+import type { GenerateContentResponse, ContentUnion } from "@google/genai";
 
 /**
  * GeminiService - Wrapper dla Google Gemini AI API
@@ -22,49 +22,45 @@ export class GeminiService {
 
   /**
    * Generuje treść tekstową na podstawie promptu
-   * @param contents - Zawartość zapytania (string lub Content dla multimodal)
+   * @param contents - Zawartość zapytania (string lub ContentUnion dla multimodal)
    * @param options - Opcjonalne parametry (systemInstruction, temperature, maxOutputTokens)
    * @returns Odpowiedź z wygenerowanym tekstem
    */
   async generateContent(
-    contents: string | Content,
+    contents: ContentUnion,
     options?: {
       systemInstruction?: string;
       temperature?: number;
       maxOutputTokens?: number;
     }
-  ): Promise<GenerateContentResult> {
+  ): Promise<GenerateContentResponse> {
     if (typeof contents === "string" && (!contents || contents.trim().length === 0)) {
       throw new Error("Prompt nie może być pusty");
     }
 
-    const request: GenerateContentRequest = {
-      model: this.#model,
-      contents,
-    };
+    // Prepare config object
+    const config: Record<string, unknown> = {};
 
-    // Dodaj opcjonalne parametry
     if (options) {
-      const generationConfig: Record<string, unknown> = {};
-
       if (options.temperature !== undefined) {
-        generationConfig.temperature = options.temperature;
+        config.temperature = options.temperature;
       }
 
       if (options.maxOutputTokens !== undefined) {
-        generationConfig.maxOutputTokens = options.maxOutputTokens;
-      }
-
-      if (Object.keys(generationConfig).length > 0) {
-        request.generationConfig = generationConfig;
+        config.maxOutputTokens = options.maxOutputTokens;
       }
 
       if (options.systemInstruction) {
-        request.systemInstruction = options.systemInstruction;
+        config.systemInstruction = options.systemInstruction;
       }
     }
 
-    const response = await this.#client.models.generateContent(request);
+    const response = await this.#client.models.generateContent({
+      model: this.#model,
+      contents,
+      config: Object.keys(config).length > 0 ? config : undefined,
+    });
+
     return response;
   }
 }
