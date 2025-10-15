@@ -31,11 +31,12 @@ export async function GET(context: APIContext): Promise<Response> {
 
     // Environment variables
     env_variables: {
+      SUPABASE_URL: maskSecret(import.meta.env.SUPABASE_URL, 30),
+      SUPABASE_KEY: checkExists(import.meta.env.SUPABASE_KEY),
+      SUPABASE_SERVICE_ROLE_KEY: checkExists(import.meta.env.SUPABASE_SERVICE_ROLE_KEY),
+      GEMINI_API_KEY: checkExists(import.meta.env.GEMINI_API_KEY),
       DEV_BYPASS_AUTH: import.meta.env.DEV_BYPASS_AUTH ?? "undefined",
       DEV_USER_ID: import.meta.env.DEV_USER_ID ?? "undefined",
-      SUPABASE_URL: maskSecret(import.meta.env.SUPABASE_URL, 30),
-      SUPABASE_SERVICE_ROLE_KEY: checkExists(import.meta.env.SUPABASE_SERVICE_ROLE_KEY),
-      SUPABASE_ANON_KEY: checkExists(import.meta.env.PUBLIC_SUPABASE_ANON_KEY),
     },
 
     // Runtime environment info

@@ -31,9 +31,13 @@ jobs:
 
       - name: Build Project Artifacts
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Deploy to Vercel Production
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} -e SUPABASE_URL=${{ secrets.SUPABASE_URL }} -e SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} -m SUPABASE_URL=${{ secrets.SUPABASE_URL }} -m SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} -m GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
 
       - name: Deployment Summary
         run: |
