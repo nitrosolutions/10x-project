@@ -25,13 +25,12 @@ jobs:
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
+        
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel Production
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --prod -e SUPABASE_URL=${{ secrets.SUPABASE_URL }} -e SUPABASE_KEY=${{ secrets.SUPABASE_KEY }} -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deployment Summary
         run: |
