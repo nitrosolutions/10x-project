@@ -1,6 +1,10 @@
 # PortfelIO
 
+[![Deploy to Vercel](https://github.com/nitrosolutions/10x-project/actions/workflows/vercel-deploy.yml/badge.svg)](https://github.com/nitrosolutions/10x-project/actions/workflows/vercel-deploy.yml)
+
 > AI-powered household expense tracking through automatic receipt scanning
+
+**🚀 Live App**: [https://10x-project.vercel.app/](https://10x-project.vercel.app/)
 
 PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by automatically analyzing Polish fiscal receipts using AI. Simply scan a receipt with your phone's camera, and let GPT-4 Vision extract and categorize all items instantly—eliminating the tedious manual data entry.
 
