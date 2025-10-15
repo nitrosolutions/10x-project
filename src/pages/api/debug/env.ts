@@ -14,27 +14,15 @@ export const prerender = false;
  * @returns 200 OK - Diagnostic information (safely masked)
  */
 export async function GET(context: APIContext): Promise<Response> {
-  // Safely mask sensitive strings (show prefix only)
-  const maskSecret = (value: string | undefined, showLength = 30): string => {
-    if (!value) return "undefined";
-    if (value.length <= showLength) return value.substring(0, 10) + "...";
-    return value.substring(0, showLength) + "...";
-  };
-
-  // Check if value exists without exposing it
-  const checkExists = (value: string | undefined): string => {
-    return value ? "exists" : "missing";
-  };
-
   const diagnosticInfo = {
     timestamp: new Date().toISOString(),
 
     // Environment variables
     env_variables: {
-      SUPABASE_URL: maskSecret(import.meta.env.SUPABASE_URL, 30),
-      SUPABASE_KEY: checkExists(import.meta.env.SUPABASE_KEY),
-      SUPABASE_SERVICE_ROLE_KEY: checkExists(import.meta.env.SUPABASE_SERVICE_ROLE_KEY),
-      GEMINI_API_KEY: checkExists(import.meta.env.GEMINI_API_KEY),
+      SUPABASE_URL: import.meta.env.SUPABASE_URL ?? "undefined",
+      SUPABASE_KEY: import.meta.env.SUPABASE_KEY ?? "undefined",
+      SUPABASE_SERVICE_ROLE_KEY: import.meta.env.SUPABASE_SERVICE_ROLE_KEY ?? "undefined",
+      GEMINI_API_KEY: import.meta.env.GEMINI_API_KEY ?? "undefined",
       DEV_BYPASS_AUTH: import.meta.env.DEV_BYPASS_AUTH ?? "undefined",
       DEV_USER_ID: import.meta.env.DEV_USER_ID ?? "undefined",
     },
