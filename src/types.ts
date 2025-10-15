@@ -25,12 +25,14 @@ export interface ScanReceiptCommand {
 }
 
 // Command Model dla tworzenia paragonu ręcznie (POST /api/receipts)
-// Pole "store_name" jest opcjonalne, a "source" ustawiane jest wewnętrznie na "manual"
+// Pole "store_name" jest opcjonalne, a "source" ustawiane jest wewnętrznie na "manual" lub "scan"
 export interface CreateReceiptCommand {
   purchase_date: string;
   store_name?: string;
   // Lista pozycji paragonu, każda zgodna z ReceiptItemCommand (opcjonalna)
   items?: ReceiptItemCommand[];
+  // Opcjonalne źródło paragonu - jeśli nie podane, domyślnie "manual"
+  source?: "manual" | "scan";
 }
 
 // Command Model dla aktualizacji paragonu (PUT /api/receipts/{receiptId})

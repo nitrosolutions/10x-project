@@ -1,0 +1,84 @@
+---
+/* src/pages/receipts/[id].astro */
+import Layout from "@/layouts/Layout.astro";
+import type { CategoryDto, ReceiptDto } from "@/types";
+import ReceiptForm from "@/components/receipts/ReceiptForm";
+
+export const prerender = false;
+
+// Pobranie ID paragonu z parametrów ścieżki
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect("/");
+}
+
+// Pobranie szczegółów paragonu z API
+let receipt: ReceiptDto | null = null;
+let categories: CategoryDto[] = [];
+let error: string | null = null;
+
+try {
+  const supabase = Astro.locals.supabase;
+  const userId = Astro.locals.userId;
+
+  if (!supabase || !userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Pobranie paragonu
+  const receiptResponse = await fetch(`${Astro.url.origin}/api/receipts/${id}`, {
+    headers: {
+      Cookie: Astro.request.headers.get("Cookie") || "",
+    },
+  });
+
+  if (receiptResponse.status === 404) {
+    error = "Paragon nie został znaleziony";
+  } else if (!receiptResponse.ok) {
+    throw new Error("Failed to fetch receipt");
+  } else {
+    receipt = await receiptResponse.json();
+  }
+
+  // Pobranie kategorii
+  const { data: categoriesData, error: fetchError } = await supabase
+    .from("categories")
+    .select("*")
+    .order("order", { ascending: true });
+
+  if (fetchError) {
+    // eslint-disable-next-line no-console
+    console.error("Error fetching categories:", fetchError);
+    error = "Nie udało się pobrać kategorii. Odśwież stronę.";
+  } else {
+    categories = categoriesData as CategoryDto[];
+  }
+} catch (err) {
+  // eslint-disable-next-line no-console
+  console.error("Unexpected error fetching receipt:", err);
+  error = "Wystąpił błąd podczas ładowania paragonu.";
+}
+
+// Jeśli wystąpił błąd lub paragon nie istnieje, wyświetl komunikat
+if (error || !receipt) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout title="Edytuj Paragon">
+  <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-3xl font-bold mb-6">Edytuj Paragon</h1>
+
+    {
+      error ? (
+        <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+          <p class="font-medium">Błąd ładowania</p>
+          <p class="text-sm">{error}</p>
+        </div>
+      ) : (
+        <ReceiptForm categories={categories} initialData={receipt} receiptId={id} client:load />
+      )
+    }
+  </main>
+</Layout>

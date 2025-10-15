@@ -12,7 +12,30 @@ interface UseDashboardReturn {
 }
 
 export function useDashboard(): UseDashboardReturn {
-  const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
+  // Inicjalizacja miesiąca z parametru URL lub bieżącego miesiąca
+  const [currentMonth, setCurrentMonth] = useState<Date>(() => {
+    if (typeof window === "undefined") {
+      return new Date();
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const monthParam = urlParams.get("month");
+
+    if (monthParam) {
+      // Format: YYYY-MM
+      const [year, month] = monthParam.split("-");
+      if (year && month) {
+        const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+        // Walidacja czy data jest poprawna
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      }
+    }
+
+    return new Date();
+  });
+
   const [receipts, setReceipts] = useState<ReceiptListDto[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

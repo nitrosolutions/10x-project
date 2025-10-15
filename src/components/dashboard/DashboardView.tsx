@@ -2,6 +2,7 @@ import { useDashboard } from "@/components/hooks/useDashboard";
 import { MonthNavigator } from "./MonthNavigator";
 import { ReceiptsList } from "./ReceiptsList";
 import { EmptyState } from "./EmptyState";
+import { FloatingActionButton } from "./FloatingActionButton";
 
 export function DashboardView() {
   const { currentMonth, receipts, isLoading, error, handlePreviousMonth, handleNextMonth, isNextDisabled } =
@@ -57,15 +58,18 @@ export function DashboardView() {
 
   // Stan główny
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <MonthNavigator
-        currentMonth={currentMonth}
-        onPreviousMonth={handlePreviousMonth}
-        onNextMonth={handleNextMonth}
-        isNextDisabled={isNextDisabled}
-      />
+    <>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <MonthNavigator
+          currentMonth={currentMonth}
+          onPreviousMonth={handlePreviousMonth}
+          onNextMonth={handleNextMonth}
+          isNextDisabled={isNextDisabled}
+        />
 
-      {receipts.length === 0 ? <EmptyState /> : <ReceiptsList receipts={receipts} />}
-    </div>
+        {receipts.length === 0 ? <EmptyState /> : <ReceiptsList receipts={receipts} />}
+      </div>
+      <FloatingActionButton />
+    </>
   );
 }

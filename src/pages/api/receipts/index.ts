@@ -4,8 +4,7 @@
 import type { APIContext } from "astro";
 import { z } from "zod";
 import { CreateReceiptSchema } from "@/lib/schemas/receipt.schema";
-import { createReceipt } from "@/lib/services/receipt.service";
-import { getReceiptsForMonth } from "@/lib/services/receiptService";
+import { createReceipt, getReceiptsForMonth } from "@/lib/services/receiptService";
 import type { ReceiptListDto } from "@/types";
 
 export const prerender = false;

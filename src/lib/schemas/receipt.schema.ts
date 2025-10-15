@@ -59,11 +59,13 @@ const purchaseDateValidator = z
  * - purchase_date: wymagane, ISO 8601, max 1 dzień w przyszłości (tolerancja stref czasowych)
  * - store_name: opcjonalne, max 255 znaków, trim whitespace
  * - items: opcjonalna tablica, max 100 elementów, każdy element walidowany przez ReceiptItemSchema
+ * - source: opcjonalne, "manual" lub "scan" (domyślnie "manual")
  */
 export const CreateReceiptSchema = z.object({
   purchase_date: purchaseDateValidator,
   store_name: z.string().trim().max(255, "Store name must not exceed 255 characters").optional(),
   items: z.array(ReceiptItemSchema).max(100, "Cannot add more than 100 items per receipt").optional(),
+  source: z.enum(["manual", "scan"]).optional(),
 });
 
 /**

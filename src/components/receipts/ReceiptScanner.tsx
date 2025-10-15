@@ -1,0 +1,188 @@
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Camera, Upload, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+interface ReceiptScannerProps {
+  hasCamera: boolean;
+}
+
+export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
+  const [isScanning, setIsScanning] = useState(false);
+  const [progress, setProgress] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Funkcja pomocnicza do konwersji pliku na base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Usuń prefix "data:image/xxx;base64,"
+        const base64 = result.split(",")[1];
+        resolve(base64);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Obsługa wyboru pliku (aparat lub galeria)
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Walidacja typu pliku
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      toast.error("Niewspierany format pliku", {
+        description: "Tylko pliki JPEG i PNG są obsługiwane",
+      });
+      return;
+    }
+
+    // Walidacja rozmiaru (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Plik jest za duży", {
+        description: "Maksymalny rozmiar pliku to 10MB",
+      });
+      return;
+    }
+
+    // Rozpocznij skanowanie
+    setIsScanning(true);
+    setProgress("Przygotowuję obraz...");
+
+    try {
+      // Konwersja obrazu na base64
+      const base64Image = await fileToBase64(file);
+
+      setProgress("Analizuję paragon...");
+
+      // Wysłanie zapytania do API
+      const response = await fetch("/api/receipts/scan", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image: base64Image,
+          mimeType: file.type,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details?.[0] || errorData.error || "Nie udało się przetworzyć paragonu");
+      }
+
+      const scannedData = await response.json();
+
+      setProgress("Przekierowuję do edycji...");
+
+      // Przekierowanie do strony edycji z rozpoznanymi danymi
+      // Dane przekazujemy przez sessionStorage, aby były dostępne na następnej stronie
+      // Dodajemy flagę source: 'scan' do zapisania w bazie danych
+      sessionStorage.setItem(
+        "scannedReceipt",
+        JSON.stringify({
+          ...scannedData,
+          source: "scan",
+        })
+      );
+      window.location.href = "/receipts/new?mode=scan";
+    } catch (error) {
+      console.error("Receipt scanning error:", error);
+      toast.error("Błąd skanowania", {
+        description: error instanceof Error ? error.message : "Spróbuj ponownie lub dodaj paragon ręcznie",
+      });
+      setIsScanning(false);
+      setProgress("");
+    }
+  };
+
+  // Obsługa kliknięcia przycisku aparatu
+  const handleCameraClick = () => {
+    if (cameraInputRef.current) {
+      cameraInputRef.current.click();
+    }
+  };
+
+  // Obsługa kliknięcia przycisku galerii
+  const handleGalleryClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Loader podczas skanowania */}
+      {isScanning ? (
+        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-lg font-medium">{progress}</p>
+          <p className="text-sm text-muted-foreground">Proszę czekać, to może potrwać do minuty...</p>
+        </div>
+      ) : (
+        <>
+          {/* Przyciski wyboru metody skanowania */}
+          <div className="grid gap-4">
+            {hasCamera && (
+              <Button onClick={handleCameraClick} size="lg" className="h-24 text-lg" variant="default">
+                <Camera className="mr-2 h-6 w-6" />
+                Zrób zdjęcie aparatem
+              </Button>
+            )}
+
+            <Button
+              onClick={handleGalleryClick}
+              size="lg"
+              className="h-24 text-lg"
+              variant={hasCamera ? "outline" : "default"}
+            >
+              <Upload className="mr-2 h-6 w-6" />
+              Wybierz z galerii
+            </Button>
+          </div>
+
+          {/* Ukryte inputy dla plików */}
+          {/* Input dla aparatu (capture="environment" otwiera tylny aparat) */}
+          {hasCamera && (
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/jpeg,image/png"
+              capture="environment"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+          )}
+
+          {/* Input dla galerii */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+
+          {/* Informacje o wymaganiach */}
+          <div className="bg-muted/50 border border-border rounded-lg p-4">
+            <h3 className="font-medium mb-2">Wskazówki:</h3>
+            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+              <li>Zrób zdjęcie w dobrym oświetleniu</li>
+              <li>Upewnij się, że cały paragon jest widoczny</li>
+              <li>Unikaj cieni i odbić światła</li>
+              <li>Obsługiwane formaty: JPEG, PNG (max 10MB)</li>
+            </ul>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
