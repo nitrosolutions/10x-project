@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Camera, Upload, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { IOSInstallInstructions } from "@/components/pwa/IOSInstallInstructions";
 
 interface ReceiptScannerProps {
   hasCamera: boolean;
@@ -11,12 +12,31 @@ interface ReceiptScannerProps {
 export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [progress, setProgress] = useState("");
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const { isInstallable, promptInstall } = usePWAInstall();
+  const { isInstallable, promptInstall, platform, supportsNativePrompt } = usePWAInstall();
 
   // Obsługa instalacji PWA
   const handleInstallPWA = async () => {
+    console.log("[PWA] Install button clicked. Platform:", platform, "Supports native:", supportsNativePrompt);
+
+    // Dla iOS Safari - pokaż instrukcje
+    if (platform === "ios" && !supportsNativePrompt) {
+      setShowIOSInstructions(true);
+      return;
+    }
+
+    // Dla Desktop/Android - sprawdź czy beforeinstallprompt został wywołany
+    if (!supportsNativePrompt) {
+      toast.error("Nie można zainstalować aplikacji", {
+        description:
+          "Aplikacja może być już zainstalowana lub przeglądarka nie wspiera instalacji PWA. Sprawdź czy używasz Chrome/Edge.",
+      });
+      return;
+    }
+
+    // Dla platform z natywnym promptem (Desktop Chrome/Edge, Android Chrome)
     const installed = await promptInstall();
     if (installed) {
       toast.success("Aplikacja zainstalowana!", {
@@ -149,7 +169,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               <Button
                 onClick={handleInstallPWA}
                 size="lg"
-                className="w-full h-20 text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 animate-pulse"
+                className="w-full h-20 text-lg font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 animate-pulse"
                 variant="default"
               >
                 <Download className="mr-3 h-7 w-7" />
@@ -217,6 +237,9 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
           </div>
         </>
       )}
+
+      {/* Dialog z instrukcjami instalacji dla iOS */}
+      <IOSInstallInstructions open={showIOSInstructions} onOpenChange={setShowIOSInstructions} />
     </div>
   );
 }

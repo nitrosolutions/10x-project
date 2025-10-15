@@ -24,15 +24,22 @@ Projekt został zaktualizowany o pełne wsparcie Progressive Web App (PWA) z uż
 ### Nowe pliki
 
 1. **src/hooks/usePWAInstall.ts** - Hook React do obsługi instalacji PWA
-   - Wykrywa czy aplikacja może być zainstalowana
+   - Wykrywa platformę (iOS, Android, Desktop)
+   - Sprawdza czy aplikacja może być zainstalowana
    - Sprawdza czy aplikacja jest już zainstalowana
-   - Obsługuje prompt instalacji
+   - Obsługuje natywny prompt instalacji (Chrome/Edge Desktop i Android)
+   - Zwraca informacje o wsparciu dla natywnego promptu
 
-2. **src/pwa.d.ts** - Definicje TypeScript dla virtual modules PWA
+2. **src/components/pwa/IOSInstallInstructions.tsx** - Modal z instrukcjami instalacji dla iOS
+   - Krokowa instrukcja jak dodać aplikację na iOS Safari
+   - Wykorzystuje shadcn/ui Dialog component
+   - Wyświetlana automatycznie dla użytkowników iOS
+
+3. **src/pwa.d.ts** - Definicje TypeScript dla virtual modules PWA
    - Typy dla `virtual:pwa-info`
    - Typy dla `virtual:pwa-register`
 
-3. **public/PWA_ICONS_INSTRUCTIONS.md** - Instrukcje generowania ikon PWA
+4. **public/PWA_ICONS_INSTRUCTIONS.md** - Instrukcje generowania ikon PWA
 
 ### Wygenerowane ikony
 
@@ -60,11 +67,14 @@ Wszystkie ikony zostały automatycznie wygenerowane z `public/favicon.svg`:
    - Dodano automatyczną rejestrację service workera
 
 3. **src/components/receipts/ReceiptScanner.tsx**
-   - Zaimportowano hook `usePWAInstall`
-   - Dodano handler `handleInstallPWA`
-   - Dodano FAB button z ikoną Download
+   - Zaimportowano hook `usePWAInstall` i komponent `IOSInstallInstructions`
+   - Dodano handler `handleInstallPWA` z obsługą różnych platform
+   - Dodano duży, centralny przycisk instalacji z gradientem i animacją pulse
    - Button widoczny tylko podczas skanowania (`isScanning === true`)
    - Button wyświetlany tylko gdy aplikacja jest instalowalna (`isInstallable === true`)
+   - Automatyczne wykrywanie platformy i dostosowanie zachowania:
+     - **Desktop Chrome/Edge, Android**: Natywny prompt instalacji
+     - **iOS Safari**: Modal z instrukcjami krok po kroku
 
 ## Konfiguracja PWA
 
@@ -96,10 +106,22 @@ manifest: {
 
 ### Instalacja aplikacji
 
+#### Desktop Chrome/Edge oraz Android Chrome
+
 1. Użytkownik dodaje nowy paragon poprzez aparat/galerię
-2. Podczas analizy AI pojawia się FAB button z ikoną pobierania
+2. Podczas analizy AI pojawia się duży, centralny przycisk instalacji z gradientem i animacją
 3. Kliknięcie buttona wywołuje natywny prompt instalacji przeglądarki
 4. Po instalacji aplikacja jest dostępna na ekranie głównym
+
+#### iOS Safari
+
+1. Użytkownik dodaje nowy paragon poprzez aparat/galerię
+2. Podczas analizy AI pojawia się duży, centralny przycisk instalacji
+3. Kliknięcie buttona otwiera modal z instrukcjami krok po kroku:
+   - Naciśnij przycisk "Udostępnij" (ikona Share)
+   - Wybierz "Dodaj do ekranu początkowego"
+   - Potwierdź dodanie
+4. Po wykonaniu kroków aplikacja jest dostępna na ekranie głównym
 
 ### Hook `usePWAInstall`
 
@@ -107,9 +129,22 @@ manifest: {
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 function MyComponent() {
-  const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
+  const {
+    isInstallable,      // Czy aplikacja może być zainstalowana
+    isInstalled,        // Czy aplikacja jest już zainstalowana
+    platform,           // "ios" | "android" | "desktop" | "unknown"
+    promptInstall,      // Funkcja do wywołania promptu instalacji
+    supportsNativePrompt // Czy przeglądarka wspiera natywny prompt
+  } = usePWAInstall();
 
   const handleInstall = async () => {
+    // Dla iOS pokaż instrukcje, dla innych platform wywołaj natywny prompt
+    if (platform === "ios" && !supportsNativePrompt) {
+      // Pokaż modal z instrukcjami
+      setShowInstructions(true);
+      return;
+    }
+
     const installed = await promptInstall();
     if (installed) {
       console.log("Aplikacja zainstalowana!");
@@ -148,11 +183,35 @@ Aplikacja dostępna na `http://localhost:3000` (lub inny port)
 
 ### Testowanie instalacji
 
+#### Na Desktop (Chrome/Edge)
+
 1. Przejdź do strony dodawania paragonu
 2. Wybierz zdjęcie (aparat lub galeria)
-3. Podczas analizy sprawdź czy pojawia się FAB button
-4. Kliknij button i potwierdź instalację
-5. Sprawdź czy ikona aplikacji pojawiła się na ekranie głównym
+3. Podczas analizy sprawdź czy pojawia się duży przycisk instalacji (gradient niebieski-cyjan, animacja pulse)
+4. Kliknij przycisk - pojawi się natywny prompt instalacji
+5. Potwierdź instalację
+6. Sprawdź czy ikona aplikacji pojawiła się w menu Start/Application folder
+
+#### Na Android (Chrome)
+
+1. Przejdź do strony dodawania paragonu
+2. Wybierz zdjęcie (aparat lub galeria)
+3. Podczas analizy sprawdź czy pojawia się duży przycisk instalacji
+4. Kliknij przycisk - pojawi się natywny prompt instalacji Android
+5. Potwierdź instalację
+6. Sprawdź czy ikona aplikacji pojawiła się na ekranie głównym
+
+#### Na iOS (Safari)
+
+1. Przejdź do strony dodawania paragonu (używając Safari!)
+2. Wybierz zdjęcie (aparat lub galeria)
+3. Podczas analizy sprawdź czy pojawia się duży przycisk instalacji
+4. Kliknij przycisk - pojawi się modal z instrukcjami
+5. Wykonaj kroki opisane w modalu:
+   - Naciśnij przycisk "Udostępnij" na pasku Safari
+   - Przewiń w dół i wybierz "Dodaj do ekranu początkowego"
+   - Potwierdź dodanie
+6. Sprawdź czy ikona aplikacji pojawiła się na ekranie głównym iOS
 
 ## Build produkcyjny
 
@@ -170,9 +229,10 @@ Service Worker i manifest będą automatycznie wygenerowane podczas buildu.
 
 ### Uwagi dla iOS
 
-- iOS Safari ma ograniczone wsparcie dla `beforeinstallprompt`
-- Użytkownicy iOS muszą używać "Add to Home Screen" z menu Safari
-- FAB button może nie działać na iOS (wykrycie instalacji może być niemożliwe)
+- iOS Safari **nie wspiera** `beforeinstallprompt` API
+- Aplikacja automatycznie wykrywa iOS i wyświetla modal z instrukcjami zamiast natywnego promptu
+- Użytkownicy iOS widzą krok po kroku instrukcje jak dodać aplikację przez menu "Udostępnij"
+- Przycisk instalacji pojawia się również na iOS podczas skanowania paragonu
 
 ## Zgodność z PRD
 
