@@ -1,5 +1,7 @@
 import { useDashboard } from "@/components/hooks/useDashboard";
+import { useStats } from "@/components/hooks/useStats";
 import { MonthNavigator } from "./MonthNavigator";
+import { StatsChart } from "./StatsChart";
 import { ReceiptsList } from "./ReceiptsList";
 import { EmptyState } from "./EmptyState";
 import { FloatingActionButton } from "./FloatingActionButton";
@@ -15,6 +17,12 @@ export function DashboardView() {
     isNextDisabled,
     deleteReceipt,
   } = useDashboard();
+
+  // Formatowanie miesiąca do YYYY-MM
+  const monthParam = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, "0")}`;
+
+  // Pobieranie statystyk dla wybranego miesiąca
+  const { stats, isLoading: statsLoading } = useStats(monthParam);
 
   // Stan ładowania
   if (isLoading) {
@@ -75,6 +83,10 @@ export function DashboardView() {
           isNextDisabled={isNextDisabled}
         />
 
+        {/* Wykres statystyk - wyświetlamy tylko gdy są paragony */}
+        {receipts.length > 0 && <StatsChart stats={stats} isLoading={statsLoading} />}
+
+        {/* Lista paragonów lub empty state */}
         {receipts.length === 0 ? <EmptyState /> : <ReceiptsList receipts={receipts} onDelete={deleteReceipt} />}
       </div>
       <FloatingActionButton />

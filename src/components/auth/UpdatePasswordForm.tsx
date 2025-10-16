@@ -49,7 +49,8 @@ export default function UpdatePasswordForm() {
       toast.success("Hasło zostało zmienione pomyślnie");
       window.location.href = "/login";
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Nie udało się zaktualizować hasła. Spróbuj ponownie.";
+      const errorMessage =
+        error instanceof Error ? error.message : "Nie udało się zaktualizować hasła. Spróbuj ponownie.";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);

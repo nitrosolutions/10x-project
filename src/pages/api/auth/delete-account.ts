@@ -114,10 +114,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     // First, delete all user's receipts and related data
     // This bypasses RLS policies by using admin client
-    const { error: deleteReceiptsError } = await supabaseAdmin
-      .from("receipts")
-      .delete()
-      .eq("user_id", user.id);
+    const { error: deleteReceiptsError } = await supabaseAdmin.from("receipts").delete().eq("user_id", user.id);
 
     if (deleteReceiptsError) {
       console.error("Delete receipts error:", deleteReceiptsError);

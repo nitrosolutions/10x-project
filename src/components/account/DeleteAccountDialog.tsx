@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { toast } from "sonner";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { deleteAccountSchema, type DeleteAccountFormData } from "@/lib/schemas/auth.schema";
 import {
   AlertDialog,
@@ -25,6 +25,7 @@ interface DeleteAccountDialogProps {
 
 export function DeleteAccountDialog({ open, onOpenChange }: DeleteAccountDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<DeleteAccountFormData>({
     resolver: zodResolver(deleteAccountSchema),
@@ -91,7 +92,22 @@ export function DeleteAccountDialog({ open, onOpenChange }: DeleteAccountDialogP
                 <FormItem>
                   <FormLabel>Wprowadź hasło, aby potwierdzić</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Twoje hasło" {...field} />
+                    <div className="relative">
+                      <Input type={showPassword ? "text" : "password"} placeholder="Twoje hasło" {...field} />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

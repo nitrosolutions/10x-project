@@ -16,6 +16,10 @@ const PUBLIC_PATHS = [
   "/api/auth/logout",
 ];
 
+// API paths that require authentication but should not redirect
+// These endpoints will handle authorization checks themselves
+const API_PATHS_PATTERN = /^\/api\//;
+
 export const onRequest = defineMiddleware(async (context, next) => {
   // Create Supabase SSR client with proper cookie management
   const supabase = createSupabaseServerInstance({
@@ -43,6 +47,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Route protection logic
   const isPublicPath = PUBLIC_PATHS.includes(context.url.pathname);
+  const isApiPath = API_PATHS_PATTERN.test(context.url.pathname);
   const isAuthenticated = !!user;
 
   // Redirect authenticated users away from auth pages
@@ -50,8 +55,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return context.redirect("/");
   }
 
-  // Redirect unauthenticated users to login (except for public paths)
-  if (!isAuthenticated && !isPublicPath) {
+  // Redirect unauthenticated users to login (except for public paths and API paths)
+  // API paths should handle their own authorization and return 401
+  if (!isAuthenticated && !isPublicPath && !isApiPath) {
     return context.redirect("/login");
   }
 
