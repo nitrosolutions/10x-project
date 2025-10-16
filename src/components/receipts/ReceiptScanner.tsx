@@ -173,7 +173,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
                 variant="default"
               >
                 <Download className="mr-3 h-7 w-7" />
-                Zainstaluj aplikację na ekranie głównym
+                Zainstaluj aplikację
               </Button>
               <p className="text-sm text-center mt-3 font-medium text-foreground">
                 💡 Dodaj PortfelIO do ekranu głównego urządzenia
