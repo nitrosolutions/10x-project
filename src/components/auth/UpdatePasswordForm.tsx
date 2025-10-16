@@ -40,13 +40,17 @@ export default function UpdatePasswordForm() {
       });
 
       if (!response.ok) {
-        throw new Error("Nie udało się zaktualizować hasła");
+        const errorData = await response.json().catch(() => ({ error: "Nie udało się zaktualizować hasła" }));
+        throw new Error(errorData.error || "Nie udało się zaktualizować hasła");
       }
+
+      const result = await response.json();
 
       toast.success("Hasło zostało zmienione pomyślnie");
       window.location.href = "/login";
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Nie udało się zaktualizować hasła. Spróbuj ponownie.");
+      const errorMessage = error instanceof Error ? error.message : "Nie udało się zaktualizować hasła. Spróbuj ponownie.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

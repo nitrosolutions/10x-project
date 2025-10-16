@@ -78,9 +78,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     if (updateError) {
       console.error("Update password error:", updateError);
+
+      const errorMessage = updateError.message || "";
+
+      // Provide user-friendly error messages for common cases
+      let userFriendlyMessage = errorMessage;
+      if (errorMessage.toLowerCase().includes("same") || errorMessage.toLowerCase().includes("identical")) {
+        userFriendlyMessage = "Nowe hasło musi być inne niż poprzednie hasło";
+      }
+
       return new Response(
         JSON.stringify({
-          error: updateError.message || "Nie udało się zaktualizować hasła",
+          error: userFriendlyMessage || "Nie udało się zaktualizować hasła",
         }),
         {
           status: 400,

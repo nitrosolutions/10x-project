@@ -56,7 +56,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     if (error) {
       // Handle specific Supabase errors
-      if (error.message.includes("already registered")) {
+      const errorMessage = error.message || "";
+
+      // Check for duplicate email errors (different Supabase versions/modes may return different messages)
+      if (
+        errorMessage.toLowerCase().includes("already registered") ||
+        errorMessage.toLowerCase().includes("duplicate") ||
+        errorMessage.toLowerCase().includes("već postoji") ||
+        errorMessage.toLowerCase().includes("user already exists")
+      ) {
         return new Response(
           JSON.stringify({
             error: "Ten email jest już zarejestrowany",
@@ -72,7 +80,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
       return new Response(
         JSON.stringify({
-          error: error.message || "Rejestracja nie powiodła się",
+          error: errorMessage || "Rejestracja nie powiodła się",
         }),
         {
           status: 400,
