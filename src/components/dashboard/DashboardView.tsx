@@ -22,7 +22,14 @@ export function DashboardView() {
   const monthParam = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, "0")}`;
 
   // Pobieranie statystyk dla wybranego miesiąca
-  const { stats, isLoading: statsLoading } = useStats(monthParam);
+  const { stats, isLoading: statsLoading, refetch: refetchStats } = useStats(monthParam);
+
+  // Wrapper do usuwania paragonu i odświeżania statystyk
+  const handleDeleteReceipt = async (receiptId: string) => {
+    await deleteReceipt(receiptId);
+    // Odśwież statystyki po usunięciu paragonu
+    await refetchStats();
+  };
 
   // Stan ładowania
   if (isLoading) {
@@ -87,7 +94,7 @@ export function DashboardView() {
         {receipts.length > 0 && <StatsChart stats={stats} isLoading={statsLoading} />}
 
         {/* Lista paragonów lub empty state */}
-        {receipts.length === 0 ? <EmptyState /> : <ReceiptsList receipts={receipts} onDelete={deleteReceipt} />}
+        {receipts.length === 0 ? <EmptyState /> : <ReceiptsList receipts={receipts} onDelete={handleDeleteReceipt} />}
       </div>
       <FloatingActionButton />
     </>
