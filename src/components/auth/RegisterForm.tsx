@@ -47,8 +47,8 @@ export default function RegisterForm() {
 
       const result = await response.json();
 
-      // Wyświetl wiadomość z backendu (informacja o wysłaniu linku potwierdzającego)
-      toast.success(result.message || "Rejestracja pomyślna. Sprawdź email, aby potwierdzić konto.");
+      // Wyświetl wiadomość o pomyślnej rejestracji i automatycznym zalogowaniu
+      toast.success(result.message || "Konto utworzone! Zostaniesz zalogowany.");
 
       // Czekaj 2 sekundy przed redirectem, aby użytkownik zobaczył wiadomość
       setTimeout(() => {
