@@ -31,9 +31,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.supabase = supabase;
 
   // IMPORTANT: Always get user session first before any other operations
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+    user = authUser;
+  } catch (error) {
+    // Handle refresh token errors gracefully
+    if (error instanceof Error) {
+      // eslint-disable-next-line no-console
+      console.error("[Middleware] Auth error:", error.message);
+    }
+    // Session is invalid, clear user from context
+    user = null;
+  }
 
   // Set user data in locals
   if (user) {
