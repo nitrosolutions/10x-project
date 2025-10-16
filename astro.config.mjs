@@ -17,7 +17,7 @@ export default defineConfig({
     plugins: [
       tailwindcss(),
       VitePWA({
-        registerType: "autoUpdate",
+        registerType: "silent",
         includeAssets: ["favicon.svg", "robots.txt"],
         manifest: {
           name: "PortfelIO",
