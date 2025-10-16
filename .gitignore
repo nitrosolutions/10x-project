@@ -27,3 +27,4 @@ pnpm-debug.log*
 *.local.*
 .ai/prompt-library/
 .vercel
+dev-dist/

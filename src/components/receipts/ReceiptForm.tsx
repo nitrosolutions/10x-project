@@ -284,17 +284,16 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
                 <p className="text-sm mt-1">Kliknij &ldquo;Dodaj pozycję&rdquo; aby dodać produkty</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {fields.map((field, index) => (
-                  <div key={field.id} className="border rounded-lg p-4">
-                    <ReceiptItemRow
-                      index={index}
-                      form={form}
-                      categories={categories}
-                      onRemove={() => remove(index)}
-                      canRemove={true}
-                    />
-                  </div>
+                  <ReceiptItemRow
+                    key={field.id}
+                    index={index}
+                    form={form}
+                    categories={categories}
+                    onRemove={() => remove(index)}
+                    canRemove={true}
+                  />
                 ))}
               </div>
             )}
