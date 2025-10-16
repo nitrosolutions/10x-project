@@ -9,6 +9,7 @@ interface UseDashboardReturn {
   handlePreviousMonth: () => void;
   handleNextMonth: () => void;
   isNextDisabled: boolean;
+  deleteReceipt: (receiptId: string) => Promise<void>;
 }
 
 export function useDashboard(): UseDashboardReturn {
@@ -105,6 +106,28 @@ export function useDashboard(): UseDashboardReturn {
     fetchReceipts();
   }, [currentMonth]);
 
+  // Funkcja do usuwania paragonu
+  const handleDeleteReceipt = async (receiptId: string): Promise<void> => {
+    try {
+      const response = await fetch(`/api/receipts/${receiptId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Nie udało się usunąć paragonu");
+      }
+
+      // Aktualizacja lokalnej listy paragonów - usuwanie usuniętego paragonu
+      setReceipts((prevReceipts) => prevReceipts.filter((receipt) => receipt.id !== receiptId));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Nie udało się usunąć paragonu";
+      setError(errorMessage);
+      // Re-throw error aby komponent mógł go obsłużyć
+      throw err;
+    }
+  };
+
   return {
     currentMonth,
     receipts,
@@ -113,5 +136,6 @@ export function useDashboard(): UseDashboardReturn {
     handlePreviousMonth,
     handleNextMonth,
     isNextDisabled: isNextDisabled(),
+    deleteReceipt: handleDeleteReceipt,
   };
 }

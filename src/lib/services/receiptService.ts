@@ -362,3 +362,53 @@ export async function updateReceipt(
     throw error;
   }
 }
+
+/**
+ * Usuwa istniejący paragon wraz z jego pozycjami
+ *
+ * @param supabase - Klient Supabase z kontekstu użytkownika
+ * @param receiptId - UUID paragonu do usunięcia
+ * @param userId - ID zalogowanego użytkownika (dla autoryzacji)
+ * @returns Promise<boolean> - true jeśli paragon został usunięty, false jeśli nie znaleziono
+ * @throws Error - W przypadku błędu bazy danych
+ */
+export async function deleteReceipt(supabase: SupabaseClient, receiptId: string, userId: string): Promise<boolean> {
+  try {
+    // Krok 1: Weryfikacja, czy paragon istnieje i należy do użytkownika
+    const { data: existingReceipt, error: checkError } = await supabase
+      .from("receipts")
+      .select("id")
+      .eq("id", receiptId)
+      .eq("user_id", userId)
+      .single();
+
+    if (checkError || !existingReceipt) {
+      // Paragon nie istnieje lub nie należy do użytkownika
+      return false;
+    }
+
+    // Krok 2: Usuwanie paragonu (receipt_items zostaną usunięte automatycznie przez CASCADE foreign key constraint)
+    const { error: deleteError } = await supabase.from("receipts").delete().eq("id", receiptId).eq("user_id", userId);
+
+    if (deleteError) {
+      // eslint-disable-next-line no-console
+      console.error("[deleteReceipt] Error deleting receipt:", deleteError);
+      throw new Error(`Failed to delete receipt: ${deleteError.message}`);
+    }
+
+    // Krok 3: Zwrócenie true, aby potwierdzić usunięcie (happy path)
+    return true;
+  } catch (error) {
+    // Logowanie szczegółów błędu
+    // eslint-disable-next-line no-console
+    console.error("[deleteReceipt] Unexpected error:", {
+      error,
+      receiptId,
+      userId,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Re-throw error dla obsługi w API route
+    throw error;
+  }
+}

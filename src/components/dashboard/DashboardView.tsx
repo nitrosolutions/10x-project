@@ -5,8 +5,16 @@ import { EmptyState } from "./EmptyState";
 import { FloatingActionButton } from "./FloatingActionButton";
 
 export function DashboardView() {
-  const { currentMonth, receipts, isLoading, error, handlePreviousMonth, handleNextMonth, isNextDisabled } =
-    useDashboard();
+  const {
+    currentMonth,
+    receipts,
+    isLoading,
+    error,
+    handlePreviousMonth,
+    handleNextMonth,
+    isNextDisabled,
+    deleteReceipt,
+  } = useDashboard();
 
   // Stan ładowania
   if (isLoading) {
@@ -67,7 +75,7 @@ export function DashboardView() {
           isNextDisabled={isNextDisabled}
         />
 
-        {receipts.length === 0 ? <EmptyState /> : <ReceiptsList receipts={receipts} />}
+        {receipts.length === 0 ? <EmptyState /> : <ReceiptsList receipts={receipts} onDelete={deleteReceipt} />}
       </div>
       <FloatingActionButton />
     </>

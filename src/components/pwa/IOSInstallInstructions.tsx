@@ -1,11 +1,5 @@
 import { Share, Plus, Home } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface IOSInstallInstructionsProps {
   open: boolean;
@@ -18,9 +12,7 @@ export function IOSInstallInstructions({ open, onOpenChange }: IOSInstallInstruc
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">Zainstaluj PortfelIO na iOS</DialogTitle>
-          <DialogDescription>
-            Wykonaj poniższe kroki, aby dodać aplikację do ekranu głównego
-          </DialogDescription>
+          <DialogDescription>Wykonaj poniższe kroki, aby dodać aplikację do ekranu głównego</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">

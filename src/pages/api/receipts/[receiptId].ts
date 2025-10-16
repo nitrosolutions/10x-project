@@ -3,7 +3,7 @@
 
 import type { APIContext } from "astro";
 import { z } from "zod";
-import { getReceiptById, updateReceipt } from "@/lib/services/receiptService";
+import { getReceiptById, updateReceipt, deleteReceipt } from "@/lib/services/receiptService";
 import { CreateReceiptSchema } from "@/lib/schemas/receipt.schema";
 
 export const prerender = false;
@@ -269,6 +269,119 @@ export async function PUT(context: APIContext): Promise<Response> {
       // Logowanie szczegółów błędu
       // eslint-disable-next-line no-console
       console.error("[PUT /api/receipts/:receiptId]", {
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Ogólny błąd serwera
+    return new Response(
+      JSON.stringify({
+        error: "Internal server error",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+}
+
+/**
+ * DELETE /api/receipts/{receiptId}
+ *
+ * Usuwa istniejący paragon wraz z jego pozycjami.
+ * Użytkownik może usuwać tylko własne paragony.
+ *
+ * @requires Authentication - Użytkownik musi być zalogowany
+ * @param receiptId - Parametr ścieżki: UUID paragonu
+ * @returns 200 OK - Paragon został pomyślnie usunięty
+ * @returns 400 Bad Request - Nieprawidłowy format UUID
+ * @returns 401 Unauthorized - Brak autoryzacji
+ * @returns 404 Not Found - Paragon nie istnieje lub nie należy do użytkownika
+ * @returns 500 Internal Server Error - Błąd serwera
+ */
+export async function DELETE(context: APIContext): Promise<Response> {
+  try {
+    // Krok 1: Sprawdzenie autoryzacji użytkownika
+    const userId = context.locals.userId;
+
+    if (!userId) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+        }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    // Krok 2: Walidacja parametru ścieżki receiptId
+    const receiptId = context.params.receiptId;
+    const validationResult = receiptIdSchema.safeParse(receiptId);
+
+    if (!validationResult.success) {
+      // Ekstrakcja szczegółowych komunikatów błędów z Zod
+      const errorDetails = validationResult.error.errors.map((err) => err.message);
+
+      return new Response(
+        JSON.stringify({
+          error: "Validation error",
+          details: errorDetails,
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const validatedReceiptId = validationResult.data;
+
+    // Krok 3: Wywołanie service layer do usunięcia paragonu
+    const success = await deleteReceipt(context.locals.supabase, validatedReceiptId, userId);
+
+    // Krok 4: Obsługa braku wyniku (paragon nie istnieje lub nie należy do użytkownika)
+    if (!success) {
+      return new Response(
+        JSON.stringify({
+          error: "Not found",
+        }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    // Krok 5: Zwrócenie odpowiedzi 200 OK z komunikatem o powodzeniu (happy path)
+    return new Response(
+      JSON.stringify({
+        message: "Receipt deleted successfully",
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (error) {
+    // Obsługa błędów po stronie serwera (np. problem z bazą danych)
+    if (error instanceof Error) {
+      // eslint-disable-next-line no-console
+      console.error("[DELETE /api/receipts/:receiptId]", {
         error: error.message,
         stack: error.stack,
         timestamp: new Date().toISOString(),
