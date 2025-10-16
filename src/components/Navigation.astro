@@ -2,11 +2,9 @@
 // Komponent nawigacji dla aplikacji
 import MenuToggle from "./MenuToggle";
 
-const currentPath = Astro.url.pathname;
-
-const isActive = (path: string) => {
-  return currentPath === path ? "bg-primary text-primary-foreground" : "hover:bg-accent";
-};
+// Pobierz dane użytkownika z Astro.locals (ustawione przez middleware)
+const user = Astro.locals.user;
+const userEmail = user?.email;
 ---
 
 <nav class="bg-background border-b">
@@ -17,7 +15,7 @@ const isActive = (path: string) => {
       </div>
 
       <div class="flex items-center gap-2">
-        <MenuToggle client:load />
+        <MenuToggle userEmail={userEmail} client:load />
       </div>
     </div>
   </div>

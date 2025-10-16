@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { DashboardView } from "@/components/dashboard/DashboardView";
+import AccountView from "@/components/account/AccountView";
 
 // Protect this route - only authenticated users can access
 export const prerender = false;
@@ -11,12 +11,12 @@ if (!user) {
   return Astro.redirect("/login");
 }
 
-// Tytuł strony
-const title = "Dashboard - Paragony";
+// Get user email from authenticated session
+const userEmail = user.email;
 ---
 
-<Layout title={title}>
-  <main>
-    <DashboardView client:load />
+<Layout title="Moje konto - PortfelIO">
+  <main class="container mx-auto max-w-2xl px-4 py-8">
+    <AccountView client:load userEmail={userEmail} />
   </main>
 </Layout>

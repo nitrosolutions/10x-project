@@ -1,0 +1,17 @@
+---
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import LoginForm from "@/components/auth/LoginForm";
+
+// Dynamic rendering to allow middleware to check authentication
+export const prerender = false;
+
+// Redirect to homepage if user is already logged in
+const user = Astro.locals.user;
+if (user) {
+  return Astro.redirect("/");
+}
+---
+
+<AuthLayout title="Logowanie - PortfelIO">
+  <LoginForm client:load />
+</AuthLayout>

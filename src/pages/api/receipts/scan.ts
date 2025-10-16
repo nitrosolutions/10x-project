@@ -26,7 +26,7 @@ const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 export async function POST(context: APIContext): Promise<Response> {
   try {
     // Krok 1: Sprawdzenie autoryzacji użytkownika
-    const userId = context.locals.userId;
+    const userId = context.locals.user?.id;
 
     if (!userId) {
       return new Response(

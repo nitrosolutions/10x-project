@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { User } from "lucide-react";
 
-export default function MenuToggle() {
+interface MenuToggleProps {
+  userEmail?: string;
+}
+
+export default function MenuToggle({ userEmail }: MenuToggleProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -20,6 +25,25 @@ export default function MenuToggle() {
     };
   }, [isOpen]);
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        window.location.href = "/login";
+      } else {
+        alert("Nie udało się wylogować. Spróbuj ponownie.");
+      }
+    } catch {
+      alert("Wystąpił błąd podczas wylogowania.");
+    }
+  };
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -28,29 +52,25 @@ export default function MenuToggle() {
         aria-label="Toggle menu"
         aria-expanded={isOpen}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
+        <User size={24} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-background border rounded-md shadow-lg py-1 z-50">
-          <a href="/account/settings" className="block px-4 py-2 text-sm hover:bg-accent transition-colors">
-            Account Settings
+        <div className="absolute right-0 mt-2 w-56 bg-background border rounded-md shadow-lg py-1 z-50">
+          {userEmail && (
+            <div className="px-4 py-2 text-sm text-muted-foreground border-b">
+              <div className="font-medium text-foreground">{userEmail}</div>
+            </div>
+          )}
+          <a href="/account" className="block px-4 py-2 text-sm hover:bg-accent transition-colors">
+            Konto
           </a>
-          {/* More menu items can be added here later */}
+          <button
+            onClick={handleLogout}
+            className="w-full text-left px-4 py-2 text-sm hover:bg-accent transition-colors"
+          >
+            Wyloguj
+          </button>
         </div>
       )}
     </div>

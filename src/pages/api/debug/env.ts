@@ -1,5 +1,5 @@
 /* src/pages/api/debug/env.ts */
-/* Diagnostic endpoint to display Vercel environment configuration */
+/* Diagnostic endpoint to display environment configuration */
 
 import type { APIContext } from "astro";
 
@@ -9,7 +9,7 @@ export const prerender = false;
  * GET /api/debug/env
  *
  * Returns diagnostic information about environment variables and runtime configuration.
- * Useful for debugging DEV_BYPASS_AUTH and other Vercel deployment issues.
+ * Useful for debugging Supabase setup and deployment issues.
  *
  * @returns 200 OK - Diagnostic information (safely masked)
  */
@@ -23,8 +23,6 @@ export async function GET(context: APIContext): Promise<Response> {
       SUPABASE_KEY: import.meta.env.SUPABASE_KEY ?? "undefined",
       SUPABASE_SERVICE_ROLE_KEY: import.meta.env.SUPABASE_SERVICE_ROLE_KEY ?? "undefined",
       GEMINI_API_KEY: import.meta.env.GEMINI_API_KEY ?? "undefined",
-      DEV_BYPASS_AUTH: import.meta.env.DEV_BYPASS_AUTH ?? "undefined",
-      DEV_USER_ID: import.meta.env.DEV_USER_ID ?? "undefined",
     },
 
     // Runtime environment info
@@ -37,24 +35,9 @@ export async function GET(context: APIContext): Promise<Response> {
 
     // Middleware context
     middleware_context: {
-      userId: context.locals.userId ?? "null",
-      // Check if using service role or anon client by attempting to detect
+      user: context.locals.user ?? null,
+      // Check if Supabase client is configured
       supabase_client_configured: !!context.locals.supabase,
-    },
-
-    // Computed values for debugging
-    computed: {
-      bypass_auth_type: typeof import.meta.env.DEV_BYPASS_AUTH,
-      bypass_auth_check: import.meta.env.DEV_BYPASS_AUTH === "true",
-      bypass_auth_check_trimmed:
-        typeof import.meta.env.DEV_BYPASS_AUTH === "string"
-          ? import.meta.env.DEV_BYPASS_AUTH.trim() === "true"
-          : import.meta.env.DEV_BYPASS_AUTH === true,
-      has_service_role_key: !!import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
-      should_bypass:
-        (typeof import.meta.env.DEV_BYPASS_AUTH === "string"
-          ? import.meta.env.DEV_BYPASS_AUTH.trim() === "true"
-          : import.meta.env.DEV_BYPASS_AUTH === true) && !!import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
     },
   };
 

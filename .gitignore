@@ -28,3 +28,8 @@ pnpm-debug.log*
 .ai/prompt-library/
 .vercel
 dev-dist/
+
+# test files (curl, etc)
+cookies.txt
+response.html
+*.test.html

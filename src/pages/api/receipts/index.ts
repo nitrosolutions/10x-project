@@ -31,7 +31,7 @@ const monthQuerySchema = z.object({
 export async function POST(context: APIContext): Promise<Response> {
   try {
     // Krok 1: Sprawdzenie autoryzacji użytkownika
-    const userId = context.locals.userId;
+    const userId = context.locals.user?.id;
 
     if (!userId) {
       return new Response(
@@ -161,7 +161,7 @@ export async function POST(context: APIContext): Promise<Response> {
 export async function GET(context: APIContext): Promise<Response> {
   try {
     // Krok 1: Sprawdzenie autoryzacji użytkownika
-    const userId = context.locals.userId;
+    const userId = context.locals.user?.id;
 
     if (!userId) {
       return new Response(

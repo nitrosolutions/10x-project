@@ -1,46 +1,58 @@
 import { defineMiddleware } from "astro:middleware";
-import { createClient } from "@supabase/supabase-js";
 
-import { supabaseClient } from "../db/supabase.client.ts";
-import type { Database } from "../db/database.types.ts";
+import { createSupabaseServerInstance } from "../db/supabase.client.ts";
+
+// Public paths - Auth pages and API endpoints that don't require authentication
+const PUBLIC_PATHS = [
+  // Server-Rendered Astro Pages
+  "/login",
+  "/register",
+  "/reset-password",
+  "/update-password",
+  // Auth API endpoints
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/reset-password",
+  "/api/auth/logout",
+];
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  // DEV: Use service role client to bypass RLS when authentication is bypassed
-  // Handle both string "true" and boolean true from environment
-  const bypassAuth =
-    typeof import.meta.env.DEV_BYPASS_AUTH === "string"
-      ? import.meta.env.DEV_BYPASS_AUTH.trim() === "true"
-      : import.meta.env.DEV_BYPASS_AUTH === true;
-  const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Create Supabase SSR client with proper cookie management
+  const supabase = createSupabaseServerInstance({
+    cookies: context.cookies,
+    headers: context.request.headers,
+  });
 
-  if (bypassAuth && serviceRoleKey) {
-    const supabaseUrl = import.meta.env.SUPABASE_URL;
+  // Store Supabase client in locals for use in API routes and pages
+  context.locals.supabase = supabase;
 
-    // Create service role client (bypasses RLS)
-    context.locals.supabase = createClient<Database>(supabaseUrl, serviceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
+  // IMPORTANT: Always get user session first before any other operations
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    // Set test user ID from environment
-    context.locals.userId = import.meta.env.DEV_USER_ID;
-
-    // eslint-disable-next-line no-console
-    console.warn(`[DEV MODE] Using Supabase service role client - RLS is bypassed. User ID: ${context.locals.userId}`);
+  // Set user data in locals
+  if (user) {
+    context.locals.user = {
+      email: user.email!,
+      id: user.id,
+    };
   } else {
-    // Use normal anon client
-    context.locals.supabase = supabaseClient;
+    context.locals.user = null;
+  }
 
-    // Attempt to get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await context.locals.supabase.auth.getUser();
+  // Route protection logic
+  const isPublicPath = PUBLIC_PATHS.includes(context.url.pathname);
+  const isAuthenticated = !!user;
 
-    // Set userId (null if not authenticated)
-    context.locals.userId = authError || !user ? null : user.id;
+  // Redirect authenticated users away from auth pages
+  if (isAuthenticated && ["/login", "/register", "/reset-password"].includes(context.url.pathname)) {
+    return context.redirect("/");
+  }
+
+  // Redirect unauthenticated users to login (except for public paths)
+  if (!isAuthenticated && !isPublicPath) {
+    return context.redirect("/login");
   }
 
   return next();

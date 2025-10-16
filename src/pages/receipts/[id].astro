@@ -20,7 +20,7 @@ let error: string | null = null;
 
 try {
   const supabase = Astro.locals.supabase;
-  const userId = Astro.locals.userId;
+  const userId = Astro.locals.user?.id;
 
   if (!supabase || !userId) {
     throw new Error("Unauthorized");
