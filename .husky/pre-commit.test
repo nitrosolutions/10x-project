@@ -1,0 +1,21 @@
+#!/bin/sh
+# Pre-commit hook template for running tests
+#
+# To enable automatic testing before commits:
+# 1. Rename this file: mv .husky/pre-commit.test .husky/pre-commit
+# 2. Make it executable: chmod +x .husky/pre-commit
+# 3. Commit the changes
+#
+# Tests will now run automatically before each commit.
+# If tests fail, the commit will be blocked.
+
+. "$(dirname "$0")/_/husky.sh"
+
+# Run unit tests on staged files only
+npx lint-staged
+
+# Optional: Run full test suite
+# Uncomment to enable:
+# npm run test -- --run
+
+echo "Pre-commit tests completed!"

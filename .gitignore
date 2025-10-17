@@ -33,3 +33,18 @@ dev-dist/
 cookies.txt
 response.html
 *.test.html
+
+# test coverage and reports
+coverage/
+.nyc_output/
+
+# playwright test results
+test-results/
+playwright-report/
+blob-report/
+
+# vitest
+.vitest/
+
+# test cache
+.vitest.cache/
