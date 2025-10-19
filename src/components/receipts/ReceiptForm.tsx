@@ -20,14 +20,17 @@ import { ReceiptItemRow } from "./ReceiptItemRow";
 const receiptItemSchema = z.object({
   id: z.string(),
   product_name: z.string().min(1, "Nazwa produktu jest wymagana"),
-  price: z
-    .number({
-      required_error: "Cena jest wymagana",
-      invalid_type_error: "Cena musi być liczbą",
-    })
+  price: z.number({ required_error: "Cena jest wymagana", invalid_type_error: "Cena musi być liczbą" })
     .positive("Cena musi być większa od zera")
-    .optional()
-    .or(z.number().positive("Cena musi być większa od zera")),
+    .or(z.null())
+    .superRefine((value, ctx) => {
+      if (value === null || value === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Cena jest wymagana",
+        });
+      }
+    }),
   category_id: z.number({
     required_error: "Kategoria jest wymagana",
     invalid_type_error: "Kategoria jest wymagana",
@@ -47,8 +50,17 @@ const receiptFormSchema = z.object({
   items: z.array(receiptItemSchema).optional(),
 });
 
-// ViewModel types wywnioskowane z schematu zod
-type ReceiptViewModel = z.infer<typeof receiptFormSchema>;
+// Display type allows null for price during editing
+type ReceiptFormData = {
+  purchase_date: Date;
+  store_name?: string;
+  items?: Array<{
+    id: string;
+    product_name: string;
+    price: number | null;
+    category_id: number;
+  }>;
+};
 
 interface ReceiptFormProps {
   categories: CategoryDto[];
@@ -61,8 +73,8 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
   const [receiptSource, setReceiptSource] = useState<"manual" | "scan">("manual");
   const isEditMode = !!initialData && !!receiptId;
 
-  const form = useForm<ReceiptViewModel>({
-    resolver: zodResolver(receiptFormSchema),
+  const form = useForm<ReceiptFormData>({
+    resolver: zodResolver(receiptFormSchema) as any,
     mode: "onChange",
     defaultValues: {
       purchase_date: initialData ? new Date(initialData.purchase_date) : new Date(),
@@ -152,7 +164,7 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
     window.location.href = `/?month=${year}-${month}`;
   };
 
-  const onSubmit = async (data: ReceiptViewModel) => {
+  const onSubmit = async (data: ReceiptFormData) => {
     setIsLoading(true);
 
     try {
@@ -199,7 +211,7 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
     append({
       id: crypto.randomUUID(),
       product_name: "",
-      price: undefined,
+      price: null as unknown as number, // Will be validated as required
       category_id: categories[0]?.id || 0,
     });
   };

@@ -84,18 +84,18 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove, "
                     step="0.01"
                     min="0"
                     placeholder="0.00"
-                    {...field}
                     value={field.value ?? ""}
                     onChange={(e) => {
                       const value = e.target.value;
                       // Allow empty string (user is clearing the field)
-                      if (value === "" || value === null) {
-                        field.onChange(undefined);
+                      if (value === "") {
+                        field.onChange(null);
                       } else {
                         const parsed = parseFloat(value);
-                        field.onChange(isNaN(parsed) ? undefined : parsed);
+                        field.onChange(isNaN(parsed) ? null : parsed);
                       }
                     }}
+                    onBlur={field.onBlur}
                     data-testid={`${dataTestId}-price-input`}
                   />
                 </FormControl>
