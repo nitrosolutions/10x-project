@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page, expect } from "@playwright/test";
 
 /**
  * Base Page class for Page Object Model pattern
@@ -7,7 +7,7 @@ import { Page, expect } from '@playwright/test';
 export class BasePage {
   constructor(protected page: Page) {}
 
-  async goto(path: string = '/') {
+  async goto(path = "/") {
     await this.page.goto(path);
   }
 
@@ -15,7 +15,7 @@ export class BasePage {
     return this.page.title();
   }
 
-  async waitForLoadState(state: 'load' | 'domcontentloaded' | 'networkidle' = 'load') {
+  async waitForLoadState(state: "load" | "domcontentloaded" | "networkidle" = "load") {
     await this.page.waitForLoadState(state);
   }
 
@@ -96,7 +96,7 @@ export class BasePage {
    * @param testId The value of data-testid
    */
   async waitForTestId(testId: string) {
-    await this.page.getByTestId(testId).waitFor({ state: 'visible' });
+    await this.page.getByTestId(testId).waitFor({ state: "visible" });
   }
 
   /**

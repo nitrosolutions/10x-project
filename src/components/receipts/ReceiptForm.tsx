@@ -20,7 +20,8 @@ import { ReceiptItemRow } from "./ReceiptItemRow";
 const receiptItemSchema = z.object({
   id: z.string(),
   product_name: z.string().min(1, "Nazwa produktu jest wymagana"),
-  price: z.number({ required_error: "Cena jest wymagana", invalid_type_error: "Cena musi być liczbą" })
+  price: z
+    .number({ required_error: "Cena jest wymagana", invalid_type_error: "Cena musi być liczbą" })
     .positive("Cena musi być większa od zera")
     .or(z.null())
     .superRefine((value, ctx) => {
@@ -51,16 +52,16 @@ const receiptFormSchema = z.object({
 });
 
 // Display type allows null for price during editing
-type ReceiptFormData = {
+interface ReceiptFormData {
   purchase_date: Date;
   store_name?: string;
-  items?: Array<{
+  items?: {
     id: string;
     product_name: string;
     price: number | null;
     category_id: number;
-  }>;
-};
+  }[];
+}
 
 interface ReceiptFormProps {
   categories: CategoryDto[];
@@ -334,7 +335,12 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
             >
               Anuluj
             </Button>
-            <Button type="submit" disabled={isLoading || !form.formState.isValid} className="flex-1" data-testid="receipt-submit-button">
+            <Button
+              type="submit"
+              disabled={isLoading || !form.formState.isValid}
+              className="flex-1"
+              data-testid="receipt-submit-button"
+            >
               {isLoading
                 ? isEditMode
                   ? "Aktualizowanie..."

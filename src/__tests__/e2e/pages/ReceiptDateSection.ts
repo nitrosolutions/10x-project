@@ -1,5 +1,5 @@
-import { Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { Page } from "@playwright/test";
+import { BasePage } from "./BasePage";
 
 /**
  * Receipt Date Selection Section
@@ -11,8 +11,8 @@ import { BasePage } from './BasePage';
  */
 export class ReceiptDateSection extends BasePage {
   // Test ID constants
-  private readonly DATE_TRIGGER = 'receipt-date-trigger';
-  private readonly DATE_CALENDAR = 'receipt-date-calendar';
+  private readonly DATE_TRIGGER = "receipt-date-trigger";
+  private readonly DATE_CALENDAR = "receipt-date-calendar";
 
   constructor(page: Page) {
     super(page);
@@ -28,14 +28,18 @@ export class ReceiptDateSection extends BasePage {
     await this.page.waitForTimeout(300); // Wait for animation
 
     // Wait for calendar month view to be visible (more reliable than role)
-    await this.page.locator('[role="grid"]').first().waitFor({ state: 'visible', timeout: 5000 });
+    await this.page.locator('[role="grid"]').first().waitFor({ state: "visible", timeout: 5000 });
   }
 
   /**
    * Verify date picker is visible
    */
   async isDatePickerVisible() {
-    return await this.page.locator('[role="grid"]').first().isVisible().catch(() => false);
+    return await this.page
+      .locator('[role="grid"]')
+      .first()
+      .isVisible()
+      .catch(() => false);
   }
 
   /**
@@ -73,7 +77,7 @@ export class ReceiptDateSection extends BasePage {
     const calendar = this.page.locator('[role="grid"]').first();
 
     // Strategy 1: Find button with exact text match within the grid
-    let dayButton = calendar.getByRole('gridcell').getByRole('button', { name: String(day), exact: true });
+    let dayButton = calendar.getByRole("gridcell").getByRole("button", { name: String(day), exact: true });
 
     // Check if button exists
     const count = await dayButton.count();
@@ -106,7 +110,7 @@ export class ReceiptDateSection extends BasePage {
   async selectToday() {
     // Form already defaults to today's date, so we just verify it's showing a date
     const displayedDate = await this.getDisplayedDate();
-    if (!displayedDate || displayedDate.includes('Wybierz datę')) {
+    if (!displayedDate || displayedDate.includes("Wybierz datę")) {
       // Only open calendar if no date is selected
       const today = new Date();
       await this.selectDay(today.getDate());
@@ -139,7 +143,7 @@ export class ReceiptDateSection extends BasePage {
   async verifyDatePickerClosed() {
     const isVisible = await this.isDatePickerVisible();
     if (isVisible) {
-      throw new Error('Expected date picker to be closed, but it is visible');
+      throw new Error("Expected date picker to be closed, but it is visible");
     }
   }
 
@@ -147,6 +151,6 @@ export class ReceiptDateSection extends BasePage {
    * Wait for date calendar to appear
    */
   async waitForDateCalendar() {
-    await this.page.locator('[role="grid"]').first().waitFor({ state: 'visible' });
+    await this.page.locator('[role="grid"]').first().waitFor({ state: "visible" });
   }
 }

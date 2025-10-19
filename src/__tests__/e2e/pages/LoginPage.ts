@@ -105,12 +105,17 @@ export class LoginPage extends BasePage {
     if (isDisabled) {
       console.log(`[LoginPage] Submit button still disabled, waiting for validation...`);
       // Wait up to 3 seconds for form to become valid
-      await this.page.waitForFunction(() => {
-        const button = document.querySelector('[data-testid="login-submit-button"]') as HTMLButtonElement;
-        return button && !button.disabled;
-      }, { timeout: 3000 }).catch(() => {
-        console.error(`[LoginPage] Form validation timeout - button still disabled`);
-      });
+      await this.page
+        .waitForFunction(
+          () => {
+            const button = document.querySelector('[data-testid="login-submit-button"]') as HTMLButtonElement;
+            return button && !button.disabled;
+          },
+          { timeout: 3000 }
+        )
+        .catch(() => {
+          console.error(`[LoginPage] Form validation timeout - button still disabled`);
+        });
     }
 
     console.log(`[LoginPage] Submitting form`);

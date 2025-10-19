@@ -89,20 +89,18 @@ export async function setupAuthenticatedSession(page: Page, method: "api" | "ui"
 
     // Verify cookies are set
     const cookies = await page.context().cookies();
-    const authCookies = cookies.filter(c =>
-      c.name.includes('auth') ||
-      c.name.includes('sb-') ||
-      c.name.includes('supabase')
+    const authCookies = cookies.filter(
+      (c) => c.name.includes("auth") || c.name.includes("sb-") || c.name.includes("supabase")
     );
 
     if (authCookies.length > 0) {
       console.log(`[Auth Helper] Auth cookies found: ${authCookies.length} cookie(s)`);
-      authCookies.forEach(c => {
+      authCookies.forEach((c) => {
         console.log(`  - ${c.name}: ${c.value.substring(0, 30)}...`);
       });
     } else {
       console.warn(`[Auth Helper] WARNING: No auth cookies found!`);
-      console.log(`[Auth Helper] All cookies:`, cookies.map(c => c.name).join(', '));
+      console.log(`[Auth Helper] All cookies:`, cookies.map((c) => c.name).join(", "));
     }
 
     // Wait a moment for all async processes to complete

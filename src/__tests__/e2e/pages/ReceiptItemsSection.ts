@@ -1,6 +1,6 @@
-import { Page } from '@playwright/test';
-import { BasePage } from './BasePage';
-import { ReceiptItemRowSection } from './ReceiptItemRowSection';
+import { Page } from "@playwright/test";
+import { BasePage } from "./BasePage";
+import { ReceiptItemRowSection } from "./ReceiptItemRowSection";
 
 /**
  * Receipt Items Section
@@ -13,9 +13,9 @@ import { ReceiptItemRowSection } from './ReceiptItemRowSection';
  */
 export class ReceiptItemsSection extends BasePage {
   // Test ID constants
-  private readonly ITEMS_SECTION = 'receipt-items-section';
-  private readonly ADD_ITEM_BUTTON = 'receipt-add-item-button';
-  private readonly ITEMS_LIST = 'receipt-items-list';
+  private readonly ITEMS_SECTION = "receipt-items-section";
+  private readonly ADD_ITEM_BUTTON = "receipt-add-item-button";
+  private readonly ITEMS_LIST = "receipt-items-list";
 
   constructor(page: Page) {
     super(page);
@@ -174,11 +174,11 @@ export class ReceiptItemsSection extends BasePage {
    * @param items Array of item data {productName, price, categoryId}
    */
   async addItemsWithData(
-    items: Array<{
+    items: {
       productName: string;
       price: string | number;
       categoryId: number;
-    }>,
+    }[]
   ) {
     const addedItems: ReceiptItemRowSection[] = [];
 

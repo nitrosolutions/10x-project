@@ -79,7 +79,12 @@ export default function LoginForm() {
                 <FormLabel>Hasło</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Input type={showPassword ? "text" : "password"} placeholder="••••••••" data-testid="login-password-input" {...field} />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      data-testid="login-password-input"
+                      {...field}
+                    />
                     <Button
                       type="button"
                       variant="ghost"
@@ -101,7 +106,12 @@ export default function LoginForm() {
             )}
           />
 
-          <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full" data-testid="login-submit-button">
+          <Button
+            type="submit"
+            disabled={isLoading || !form.formState.isValid}
+            className="w-full"
+            data-testid="login-submit-button"
+          >
             {isLoading ? "Logowanie..." : "Zaloguj się"}
           </Button>
         </form>

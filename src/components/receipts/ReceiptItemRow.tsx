@@ -28,7 +28,14 @@ interface ReceiptItemRowProps {
   "data-testid"?: string;
 }
 
-export function ReceiptItemRow({ index, form, categories, onRemove, canRemove, "data-testid": dataTestId }: ReceiptItemRowProps) {
+export function ReceiptItemRow({
+  index,
+  form,
+  categories,
+  onRemove,
+  canRemove,
+  "data-testid": dataTestId,
+}: ReceiptItemRowProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDeleteConfirm = () => {
@@ -121,7 +128,11 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove, "
                   </FormControl>
                   <SelectContent className="w-full">
                     {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()} data-testid={`${dataTestId}-category-option-${category.id}`}>
+                      <SelectItem
+                        key={category.id}
+                        value={category.id.toString()}
+                        data-testid={`${dataTestId}-category-option-${category.id}`}
+                      >
                         <span className="flex items-center gap-2">
                           <span>{category.icon}</span>
                           <span>{category.name}</span>
@@ -148,7 +159,11 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove, "
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel data-testid={`${dataTestId}-delete-dialog-cancel`}>Anuluj</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90" data-testid={`${dataTestId}-delete-dialog-confirm`}>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive hover:bg-destructive/90"
+              data-testid={`${dataTestId}-delete-dialog-confirm`}
+            >
               Usuń
             </AlertDialogAction>
           </AlertDialogFooter>

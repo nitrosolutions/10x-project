@@ -1,7 +1,7 @@
-import { Page } from '@playwright/test';
-import { BasePage } from './BasePage';
-import { ReceiptDateSection } from './ReceiptDateSection';
-import { ReceiptItemsSection } from './ReceiptItemsSection';
+import { Page } from "@playwright/test";
+import { BasePage } from "./BasePage";
+import { ReceiptDateSection } from "./ReceiptDateSection";
+import { ReceiptItemsSection } from "./ReceiptItemsSection";
 
 /**
  * Receipt Form Page Object Model
@@ -22,13 +22,13 @@ import { ReceiptItemsSection } from './ReceiptItemsSection';
  */
 export class ReceiptFormPage extends BasePage {
   // Test ID constants
-  private readonly FORM_CONTAINER = 'receipt-form-container';
-  private readonly FORM = 'receipt-form';
-  private readonly STORE_NAME_INPUT = 'receipt-store-name-input';
-  private readonly TOTAL_SECTION = 'receipt-total';
-  private readonly TOTAL_AMOUNT = 'receipt-total-amount';
-  private readonly CANCEL_BUTTON = 'receipt-cancel-button';
-  private readonly SUBMIT_BUTTON = 'receipt-submit-button';
+  private readonly FORM_CONTAINER = "receipt-form-container";
+  private readonly FORM = "receipt-form";
+  private readonly STORE_NAME_INPUT = "receipt-store-name-input";
+  private readonly TOTAL_SECTION = "receipt-total";
+  private readonly TOTAL_AMOUNT = "receipt-total-amount";
+  private readonly CANCEL_BUTTON = "receipt-cancel-button";
+  private readonly SUBMIT_BUTTON = "receipt-submit-button";
 
   // Sub-sections
   private dateSection: ReceiptDateSection;
@@ -44,7 +44,7 @@ export class ReceiptFormPage extends BasePage {
    * Navigate to the new receipt form
    */
   async goToNewReceipt() {
-    await this.goto('/receipts/new');
+    await this.goto("/receipts/new");
   }
 
   /**
@@ -69,7 +69,7 @@ export class ReceiptFormPage extends BasePage {
     await this.waitForTestId(this.FORM_CONTAINER);
 
     // Wait for React hydration - check if add item button is interactive
-    const addButton = this.page.getByTestId('receipt-add-item-button');
+    const addButton = this.page.getByTestId("receipt-add-item-button");
     await addButton.waitFor({ state: "attached", timeout: 5000 }).catch(() => {
       // Button might not exist yet, that's ok
     });
@@ -144,11 +144,11 @@ export class ReceiptFormPage extends BasePage {
    * Convenience method: Add multiple items
    */
   async addItemsWithData(
-    items: Array<{
+    items: {
       productName: string;
       price: string | number;
       categoryId: number;
-    }>,
+    }[]
   ) {
     return await this.itemsSection.addItemsWithData(items);
   }
@@ -279,7 +279,7 @@ export class ReceiptFormPage extends BasePage {
     }
 
     if (!isValid) {
-      throw new Error('Form did not become valid within timeout');
+      throw new Error("Form did not become valid within timeout");
     }
   }
 
@@ -324,14 +324,14 @@ export class ReceiptFormPage extends BasePage {
    * Verify submit button shows "Zapisz" (Save)
    */
   async verifySubmitButtonIsSave() {
-    await this.expectTextByTestId(this.SUBMIT_BUTTON, 'Zapisz');
+    await this.expectTextByTestId(this.SUBMIT_BUTTON, "Zapisz");
   }
 
   /**
    * Verify submit button shows "Zaktualizuj" (Update)
    */
   async verifySubmitButtonIsUpdate() {
-    await this.expectTextByTestId(this.SUBMIT_BUTTON, 'Zaktualizuj');
+    await this.expectTextByTestId(this.SUBMIT_BUTTON, "Zaktualizuj");
   }
 
   /**
@@ -339,7 +339,7 @@ export class ReceiptFormPage extends BasePage {
    */
   async isSubmitButtonLoading() {
     const text = await this.getSubmitButtonText();
-    return text?.includes('ując') === true || text?.includes('owanie') === true;
+    return text?.includes("ując") === true || text?.includes("owanie") === true;
   }
 
   // ====== Complete Workflows ======
@@ -351,11 +351,11 @@ export class ReceiptFormPage extends BasePage {
   async fillForm(data: {
     date?: string;
     storeName?: string;
-    items?: Array<{
+    items?: {
       productName: string;
       price: string | number;
       categoryId: number;
-    }>;
+    }[];
   }) {
     if (data.date) {
       await this.selectDate(data.date);
@@ -377,11 +377,11 @@ export class ReceiptFormPage extends BasePage {
   async createReceipt(data: {
     date?: string;
     storeName?: string;
-    items: Array<{
+    items: {
       productName: string;
       price: string | number;
       categoryId: number;
-    }>;
+    }[];
   }) {
     await this.fillForm(data);
     await this.waitForFormValid();
