@@ -202,7 +202,7 @@ vercel --prod
 The project uses `@astrojs/vercel` adapter configured in [astro.config.mjs](astro.config.mjs):
 
 ```javascript
-import vercel from "@astrojs/vercel/serverless";
+import vercel from "@astrojs/vercel";
 
 export default defineConfig({
   output: "server",

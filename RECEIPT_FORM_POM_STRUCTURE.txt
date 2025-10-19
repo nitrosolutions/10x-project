@@ -1,0 +1,561 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║          RECEIPT FORM - PAGE OBJECT MODEL (POM) ARCHITECTURE                ║
+║                    Complete Structure & Class Hierarchy                      ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                          CLASS HIERARCHY                                    ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+                            BasePage (Abstract)
+                                  │
+                                  │ extends
+                                  │
+                ┌─────────────────┼─────────────────┐
+                │                 │                 │
+         ReceiptFormPage  ReceiptDateSection  ReceiptItemsSection
+                │                                       │
+         Main Page Object                         Composition
+         - Navigation                         - Item Collection
+         - Form Fields                        - Add Items
+         - Validation                         - Count Items
+         - Submission                         - Delete Items
+                                                    │
+                                                    │
+                                           ReceiptItemRowSection
+                                           - Per Item Instance
+                                           - Product Field
+                                           - Price Field
+                                           - Category Field
+                                           - Delete Dialog
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                      FILE STRUCTURE & LOCATIONS                             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+src/__tests__/e2e/
+│
+├── pages/
+│   ├── BasePage.ts                    [174 lines]
+│   │   ├─ goto(path)
+│   │   ├─ getTitle()
+│   │   ├─ waitForLoadState()
+│   │   ├─ screenshot(name)
+│   │   ├─ getByTestId(testId)         [CORE METHOD]
+│   │   ├─ clickByTestId(testId)
+│   │   ├─ fillByTestId(testId, text)
+│   │   ├─ getTextByTestId(testId)
+│   │   ├─ isVisibleByTestId(testId)
+│   │   ├─ waitForTestId(testId)
+│   │   ├─ expectVisibleByTestId(testId)
+│   │   ├─ expectHiddenByTestId(testId)
+│   │   ├─ expectEnabledByTestId(testId)
+│   │   ├─ expectDisabledByTestId(testId)
+│   │   ├─ expectTextByTestId(testId, text)
+│   │   ├─ expectValueByTestId(testId, value)
+│   │   ├─ expectUrlMatch(pattern)
+│   │   └─ waitForNavigation()
+│   │
+│   ├── ReceiptFormPage.ts              [~380 lines]
+│   │   ├─ COMPOSITION
+│   │   │  ├─ dateSection: ReceiptDateSection
+│   │   │  └─ itemsSection: ReceiptItemsSection
+│   │   │
+│   │   ├─ NAVIGATION
+│   │   │  ├─ goToNewReceipt()
+│   │   │  ├─ goToEditReceipt(id)
+│   │   │  ├─ isFormVisible()
+│   │   │  └─ waitForForm()
+│   │   │
+│   │   ├─ DATE SECTION ACCESS
+│   │   │  ├─ getDateSection()
+│   │   │  ├─ openDatePicker()
+│   │   │  ├─ selectDate(dateString)
+│   │   │  ├─ selectToday()
+│   │   │  └─ getDisplayedDate()
+│   │   │
+│   │   ├─ ITEMS SECTION ACCESS
+│   │   │  ├─ getItemsSection()
+│   │   │  ├─ clickAddItemButton()
+│   │   │  ├─ addItemWithData(...)
+│   │   │  ├─ addItemsWithData([...])
+│   │   │  └─ countItems()
+│   │   │
+│   │   ├─ STORE NAME FIELD
+│   │   │  ├─ fillStoreName(storeName)
+│   │   │  ├─ getStoreName()
+│   │   │  ├─ verifyStoreName(name)
+│   │   │  └─ clearStoreName()
+│   │   │
+│   │   ├─ TOTAL SECTION
+│   │   │  ├─ getTotalAmount()
+│   │   │  ├─ verifyTotalAmount(amount)
+│   │   │  ├─ getTotalAmountNumeric()
+│   │   │  └─ verifyTotalAmountNumeric(amount)
+│   │   │
+│   │   ├─ FORM VALIDATION
+│   │   │  ├─ isSubmitButtonEnabled()
+│   │   │  ├─ isSubmitButtonDisabled()
+│   │   │  ├─ verifyFormValid()
+│   │   │  ├─ verifyFormInvalid()
+│   │   │  └─ waitForFormValid()
+│   │   │
+│   │   ├─ FORM ACTIONS
+│   │   │  ├─ clickCancelButton()
+│   │   │  ├─ clickSubmitButton()
+│   │   │  ├─ submitForm()
+│   │   │  ├─ cancelForm()
+│   │   │  ├─ getSubmitButtonText()
+│   │   │  ├─ verifySubmitButtonIsSave()
+│   │   │  ├─ verifySubmitButtonIsUpdate()
+│   │   │  ├─ isSubmitButtonLoading()
+│   │   │  └─ takeFormScreenshot(name)
+│   │   │
+│   │   └─ COMPLETE WORKFLOWS
+│   │      ├─ fillForm(data)
+│   │      ├─ createReceipt(data)
+│   │      ├─ createMinimalReceipt(date)
+│   │      └─ verifySubmissionSuccess()
+│   │
+│   ├── ReceiptDateSection.ts           [~100 lines]
+│   │   ├─ CALENDAR CONTROL
+│   │   │  ├─ openDatePicker()
+│   │   │  ├─ closeDatePicker()
+│   │   │  ├─ isDatePickerVisible()
+│   │   │  └─ waitForDateCalendar()
+│   │   │
+│   │   ├─ DATE SELECTION
+│   │   │  ├─ selectDay(day)
+│   │   │  ├─ selectDate(dateString)
+│   │   │  ├─ selectToday()
+│   │   │  └─ selectRelativeDate(daysOffset)
+│   │   │
+│   │   └─ VERIFICATION
+│   │      ├─ getDisplayedDate()
+│   │      ├─ verifyDisplayedDate(text)
+│   │      └─ verifyDatePickerClosed()
+│   │
+│   ├── ReceiptItemsSection.ts          [~220 lines]
+│   │   ├─ SECTION CONTROL
+│   │   │  ├─ isItemsSectionVisible()
+│   │   │  └─ waitForItemsSection()
+│   │   │
+│   │   ├─ ADD ITEMS
+│   │   │  ├─ clickAddItemButton()
+│   │   │  ├─ addItem()
+│   │   │  ├─ addItems(count)
+│   │   │  ├─ addItemWithData(...)
+│   │   │  └─ addItemsWithData([...])
+│   │   │
+│   │   ├─ ITEM ACCESS
+│   │   │  └─ getItemRow(index): ReceiptItemRowSection
+│   │   │
+│   │   ├─ LIST QUERIES
+│   │   │  ├─ isItemsListVisible()
+│   │   │  ├─ waitForItemsList()
+│   │   │  ├─ verifyItemVisible(index)
+│   │   │  ├─ countItems()
+│   │   │  └─ verifyItemCount(count)
+│   │   │
+│   │   ├─ DATA ACCESS
+│   │   │  └─ getAllItemsData()
+│   │   │
+│   │   └─ CLEANUP
+│   │      └─ deleteAllItems()
+│   │
+│   └── ReceiptItemRowSection.ts        [~240 lines]
+│       ├─ INITIALIZATION
+│       │  ├─ constructor(page, itemIndex)
+│       │  └─ itemIndex: number
+│       │
+│       ├─ VISIBILITY
+│       │  ├─ isItemRowVisible()
+│       │  └─ waitForItemRow()
+│       │
+│       ├─ PRODUCT NAME FIELD
+│       │  ├─ fillProductName(name)
+│       │  ├─ getProductName()
+│       │  └─ verifyProductName(name)
+│       │
+│       ├─ PRICE FIELD
+│       │  ├─ fillPrice(price)
+│       │  ├─ getPrice()
+│       │  ├─ verifyPrice(price)
+│       │  └─ clearPrice()
+│       │
+│       ├─ CATEGORY FIELD
+│       │  ├─ openCategorySelect()
+│       │  ├─ selectCategory(id)
+│       │  ├─ getSelectedCategory()
+│       │  ├─ verifyCategoryOptionExists(id)
+│       │  └─ getCategoryOptions()
+│       │
+│       ├─ DELETE FUNCTIONALITY
+│       │  ├─ clickDeleteButton()
+│       │  ├─ isDeleteDialogVisible()
+│       │  ├─ waitForDeleteDialog()
+│       │  ├─ cancelDeletion()
+│       │  ├─ confirmDeletion()
+│       │  ├─ deleteItem()              [Composite]
+│       │  ├─ tryDeleteButCancel()      [Composite]
+│       │  └─ verifyDeleteDialogClosed()
+│       │
+│       └─ COMPOSITE OPERATIONS
+│          ├─ fillItemComplete(...)
+│          ├─ verifyItemFields(...)
+│          └─ getItemData()
+│
+├── receipt-form.spec.ts                [~650 lines]
+│   ├─ Scenario 1: Add Receipt with Single Item
+│   │  ├─ should successfully create receipt with one item [MAIN]
+│   │  ├─ should not allow submission with invalid form
+│   │  └─ should enable submit button when form is valid
+│   │
+│   ├─ Scenario 2: Add Receipt with Multiple Items
+│   │  ├─ should create receipt with three items
+│   │  └─ should add items dynamically
+│   │
+│   ├─ Scenario 3: Item Deletion
+│   │  ├─ should delete item after confirming
+│   │  ├─ should cancel item deletion
+│   │  └─ should delete multiple items
+│   │
+│   ├─ Scenario 4: Date Selection
+│   │  ├─ should select date from calendar
+│   │  ├─ should select today
+│   │  └─ should not allow selecting future dates
+│   │
+│   ├─ Scenario 5: Form Navigation
+│   │  ├─ should cancel and redirect to home
+│   │  ├─ should show save button text
+│   │  └─ should show update button text when editing
+│   │
+│   ├─ Scenario 6: Form Validation States
+│   │  ├─ should show errors for empty required fields
+│   │  ├─ should update validation on field changes
+│   │  └─ should handle item field validation
+│   │
+│   └─ Scenario 7: Total Calculation
+│      ├─ should calculate total correctly
+│      ├─ should update total when price changes
+│      ├─ should handle decimal prices correctly
+│      └─ should show zero total with no items
+│
+└── example.spec.ts                     [Existing example test]
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                     METHOD ORGANIZATION BY LAYER                            ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┌──────────────────────────────────────────────────────────────┐
+│ TEST LAYER (receipt-form.spec.ts)                           │
+│                                                              │
+│  Uses high-level page object methods:                        │
+│  - receiptForm.createReceipt({...})                         │
+│  - receiptForm.addItemsWithData([...])                      │
+│  - receiptForm.verifyTotalAmountNumeric(19.99)              │
+│  - receiptForm.verifySubmissionSuccess()                    │
+└──────────────────────────────────────────────────────────────┘
+                           ↓
+┌──────────────────────────────────────────────────────────────┐
+│ PAGE OBJECT LAYER (ReceiptFormPage + Sub-sections)          │
+│                                                              │
+│  Composite objects with business logic:                      │
+│  - receiptForm.fillForm({date, storeName, items})          │
+│  - receiptForm.createReceipt({...})                         │
+│  - itemsSection.addItemWithData(...) [returns RowSection]  │
+│  - dateSection.selectDate(dateString)                       │
+│  - itemRow.fillItemComplete(...)                            │
+└──────────────────────────────────────────────────────────────┘
+                           ↓
+┌──────────────────────────────────────────────────────────────┐
+│ BASEPAGE UTILITY LAYER (BasePage)                           │
+│                                                              │
+│  Reusable test utilities:                                    │
+│  - clickByTestId(testId)                                    │
+│  - fillByTestId(testId, text)                               │
+│  - expectVisibleByTestId(testId)                            │
+│  - getTextByTestId(testId)                                  │
+│  - expectValueByTestId(testId, value)                       │
+└──────────────────────────────────────────────────────────────┘
+                           ↓
+┌──────────────────────────────────────────────────────────────┐
+│ PLAYWRIGHT LAYER (page object from Playwright)              │
+│                                                              │
+│  Raw Playwright API:                                         │
+│  - page.getByTestId(testId).click()                         │
+│  - page.getByTestId(testId).fill(text)                      │
+│  - page.getByTestId(testId).isVisible()                     │
+│  - expect(locator).toBeVisible()                            │
+└──────────────────────────────────────────────────────────────┘
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                      TYPICAL TEST FLOW EXAMPLE                              ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+test.beforeEach(async ({ page }) => {
+  // 1. Create page object instance
+  receiptForm = new ReceiptFormPage(page);
+
+  // 2. Navigate to form
+  await receiptForm.goToNewReceipt();
+
+  // 3. Wait for form to load
+  await receiptForm.waitForForm();
+});
+
+test('should create receipt', async () => {
+  // TEST STARTS HERE
+
+  // ARRANGE - Set up test data
+  const testData = {
+    date: '2024-10-15',
+    storeName: 'Biedronka',
+    items: [
+      { productName: 'Mleko 1L', price: '19.99', categoryId: 1 },
+      { productName: 'Chleb', price: '5.99', categoryId: 2 },
+    ],
+  };
+
+  // ACT - User interactions
+  await receiptForm.fillForm(testData);     // High-level workflow
+
+  // ASSERT - Verify expected states
+  await receiptForm.verifyFormValid();
+  await receiptForm.verifyTotalAmountNumeric(25.98);
+
+  // ACT - Continue actions
+  await receiptForm.submitForm();
+
+  // ASSERT - Final verification
+  await receiptForm.verifySubmissionSuccess();
+});
+
+
+INTERNAL FLOW (What happens inside):
+
+receiptForm.fillForm(testData)
+    ↓
+receiptForm.selectDate('2024-10-15')
+    ↓
+dateSection.selectDate('2024-10-15')
+    ↓
+this.clickByTestId('receipt-date-trigger')
+    ↓
+this.page.getByTestId('receipt-date-trigger').click()
+    ↓
+Playwright API executes click
+    ↓
+[Calendar appears - date selected]
+
+┌─────────────────────────────────────────────────┐
+
+receiptForm.addItemsWithData([...])
+    ↓
+itemsSection.addItemsWithData([...])
+    ↓
+for each item:
+  - clickAddItemButton()
+    ↓
+    this.clickByTestId('receipt-add-item-button')
+    ↓
+    page.getByTestId(...).click()
+
+  - new ReceiptItemRowSection(page, index)
+
+  - itemRow.fillItemComplete(...)
+    ↓
+    itemRow.fillProductName(name)
+    itemRow.fillPrice(price)
+    itemRow.selectCategory(categoryId)
+    ↓
+    Uses ReceiptItemRowSection methods
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                      DATA FLOW THROUGH POM                                  ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+TEST CODE
+    ↓
+    └─→ ReceiptFormPage.fillForm(data)
+            ↓
+            ├─→ dateSection.selectDate(date)
+            │       ↓
+            │       └─→ BasePage.clickByTestId()
+            │               ↓
+            │               └─→ Playwright: page.getByTestId().click()
+            │
+            ├─→ fillStoreName(storeName)
+            │       ↓
+            │       └─→ BasePage.fillByTestId()
+            │               ↓
+            │               └─→ Playwright: page.getByTestId().fill()
+            │
+            └─→ itemsSection.addItemsWithData(items)
+                    ↓
+                    ├─→ clickAddItemButton()
+                    │       └─→ BasePage.clickByTestId()
+                    │
+                    └─→ for each item:
+                            ├─→ new ReceiptItemRowSection(index)
+                            │
+                            └─→ itemRow.fillItemComplete()
+                                    ├─→ fillProductName()
+                                    │   └─→ BasePage.fillByTestId()
+                                    ├─→ fillPrice()
+                                    │   └─→ BasePage.fillByTestId()
+                                    └─→ selectCategory()
+                                        └─→ BasePage.clickByTestId()
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                        TEST ID MAPPING IN POM                               ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+ReceiptFormPage
+├─ 'receipt-form-container'              ← isFormVisible()
+├─ 'receipt-form'                        ← (form wrapper)
+├─ 'receipt-date-trigger'                ← getDateSection().selectDate()
+├─ 'receipt-date-calendar'               ← getDateSection().selectDay()
+├─ 'receipt-store-name-input'            ← fillStoreName()
+├─ 'receipt-items-section'               ← getItemsSection()
+├─ 'receipt-add-item-button'             ← clickAddItemButton()
+├─ 'receipt-items-list'                  ← getItemsSection().isItemsListVisible()
+├─ 'receipt-total'                       ← (total container)
+├─ 'receipt-total-amount'                ← getTotalAmount()
+├─ 'receipt-cancel-button'               ← clickCancelButton()
+└─ 'receipt-submit-button'               ← clickSubmitButton()
+
+ReceiptItemRowSection (per item)
+├─ 'receipt-item-row-{index}'            ← isItemRowVisible()
+├─ 'receipt-item-row-{index}-product-name-input'    ← fillProductName()
+├─ 'receipt-item-row-{index}-price-input'           ← fillPrice()
+├─ 'receipt-item-row-{index}-category-select'       ← selectCategory()
+├─ 'receipt-item-row-{index}-category-option-{id}'  ← selectCategory()
+├─ 'receipt-item-row-{index}-delete-button'         ← deleteItem()
+├─ 'receipt-item-row-{index}-delete-dialog'         ← waitForDeleteDialog()
+├─ 'receipt-item-row-{index}-delete-dialog-cancel'  ← cancelDeletion()
+└─ 'receipt-item-row-{index}-delete-dialog-confirm' ← confirmDeletion()
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                      COMPOSITION VS INHERITANCE                             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+WHY COMPOSITION?
+
+✓ ReceiptItemRowSection needs new instance per item
+✓ Different index for each item (0, 1, 2, ...)
+✓ Easy to get specific item: getItemRow(0), getItemRow(1)
+✓ Clear separation of concerns
+
+vs
+
+✗ Inheritance would require:
+  - Static item count
+  - Complex indexing logic
+  - Single item per page object
+  - Violation of Single Responsibility Principle
+
+
+COMPOSITION PATTERN:
+
+ReceiptFormPage
+    ├─ composition: ReceiptDateSection (shared)
+    └─ composition: ReceiptItemsSection
+                        └─ creates: ReceiptItemRowSection(index) [per request]
+
+BENEFITS:
+- Each section is independent
+- Easy to test sections in isolation
+- Clear data flow and responsibility
+- Flexible creation of item sections as needed
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                         METHOD NAMING CONVENTIONS                           ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+Verb-Based Action Methods:
+├─ fill*()               - Set input field values
+├─ click*()              - Click elements
+├─ select*()             - Select from dropdown/radio
+├─ open*()               - Open modal/popup
+├─ close*()              - Close modal/popup
+├─ delete*()             - Delete item/data
+├─ cancel*()             - Cancel action
+├─ submit*()             - Submit form
+├─ wait*()               - Wait for element/state
+└─ go*()                 - Navigate to page
+
+Query Methods (get*, is*):
+├─ get*()                - Get value (string)
+├─ is*()                 - Check state (boolean)
+├─ count*()              - Count items
+└─ getAll*()             - Get all items
+
+Assertion Methods (verify*, expect*):
+├─ verify*()             - Custom verification logic
+├─ expect*ByTestId()     - Playwright expect assertions
+└─ should*()             - Verification methods
+
+Composite Methods:
+├─ fill*Complete()       - Fill all fields
+├─ try*ButCancel()       - Action + cancel
+├─ create*()             - Full workflow
+└─ add*WithData()        - Add + populate
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                        STATISTICS & SUMMARY                                 ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+Files Created:
+  ✓ BasePage.ts (174 lines)
+  ✓ ReceiptFormPage.ts (380 lines)
+  ✓ ReceiptDateSection.ts (100 lines)
+  ✓ ReceiptItemsSection.ts (220 lines)
+  ✓ ReceiptItemRowSection.ts (240 lines)
+  ✓ receipt-form.spec.ts (650 lines)
+  ─────────────────────────────
+    TOTAL: 1,764 lines of code
+
+Methods:
+  BasePage:          19 methods (core utilities)
+  ReceiptFormPage:   30+ methods (main page object)
+  ReceiptDateSection: 10 methods (date handling)
+  ReceiptItemsSection: 15 methods (items management)
+  ReceiptItemRowSection: 20+ methods (per item)
+  ─────────────────────────────
+  TOTAL: 94+ public methods
+
+Test Cases:
+  Scenario Groups: 7
+  Individual Tests: 20+
+  Total Assertions: 100+
+
+POM Benefits:
+  ✓ Single source of truth for selectors
+  ✓ Reusable methods across tests
+  ✓ Easy maintenance (UI changes = one place to update)
+  ✓ Readable test code (business logic focus)
+  ✓ Reduced code duplication (DRY principle)
+  ✓ Better test organization
+  ✓ Type-safe with TypeScript
+  ✓ IDE autocomplete support
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+Version: 1.0 (2024-10-19)
+Pattern: Page Object Model (POM)
+Framework: Playwright
+Language: TypeScript
+Guidelines: .ai/rules/playwright-e2e-testing.md
+
+═════════════════════════════════════════════════════════════════════════════

@@ -2,8 +2,20 @@
   "mcpServers": {
     "10x-mvp-tracker": {
       "type": "stdio",
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "@przeprogramowani/10x-mvp-tracker"],
+      "command": "npx",
+      "args": [
+        "-y",
+        "@przeprogramowani/10x-mvp-tracker"
+      ],
+      "env": {}
+    },
+    "gemini-cli": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "gemini-mcp-tool"
+      ],
       "env": {}
     }
   }

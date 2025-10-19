@@ -56,7 +56,7 @@ export default function LoginForm() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" data-testid="login-form">
           <FormField
             control={form.control}
             name="email"
@@ -64,7 +64,7 @@ export default function LoginForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="twoj@email.pl" {...field} />
+                  <Input type="email" placeholder="twoj@email.pl" data-testid="login-email-input" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -79,13 +79,14 @@ export default function LoginForm() {
                 <FormLabel>Hasło</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                    <Input type={showPassword ? "text" : "password"} placeholder="••••••••" data-testid="login-password-input" {...field} />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
+                      data-testid="login-toggle-password-visibility"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -100,7 +101,7 @@ export default function LoginForm() {
             )}
           />
 
-          <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full">
+          <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full" data-testid="login-submit-button">
             {isLoading ? "Logowanie..." : "Zaloguj się"}
           </Button>
         </form>

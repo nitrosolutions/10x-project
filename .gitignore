@@ -15,6 +15,8 @@ pnpm-debug.log*
 
 # environment variables
 .env
+.env.text
+.env.test
 .env.production
 
 # macOS-specific files
@@ -25,7 +27,6 @@ pnpm-debug.log*
 
 # local config files
 *.local.*
-.ai/prompt-library/
 .vercel
 dev-dist/
 
@@ -48,3 +49,8 @@ blob-report/
 
 # test cache
 .vitest.cache/
+
+# AI
+.ai/prompt-library/
+.ai/prompts/
+.ai/rules/

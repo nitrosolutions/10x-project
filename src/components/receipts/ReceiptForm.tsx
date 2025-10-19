@@ -216,9 +216,9 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
   const total = calculateTotal();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="receipt-form-container">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" data-testid="receipt-form">
           {/* Date and Store Name Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Purchase Date Field */}
@@ -234,13 +234,14 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
                         <Button
                           variant={"outline"}
                           className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                          data-testid="receipt-date-trigger"
                         >
                           {field.value ? format(field.value, "PPP", { locale: pl }) : <span>Wybierz datę</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0" align="start" data-testid="receipt-date-calendar">
                       <Calendar
                         mode="single"
                         selected={field.value}
@@ -262,7 +263,7 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
                 <FormItem>
                   <FormLabel>Nazwa sklepu (opcjonalnie)</FormLabel>
                   <FormControl>
-                    <Input placeholder="np. Biedronka" {...field} />
+                    <Input placeholder="np. Biedronka" {...field} data-testid="receipt-store-name-input" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -271,10 +272,10 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
           </div>
 
           {/* Items list */}
-          <div className="space-y-4">
+          <div className="space-y-4" data-testid="receipt-items-section">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Pozycje paragonu (opcjonalnie)</h2>
-              <Button type="button" onClick={addItem} variant="outline" size="sm">
+              <Button type="button" onClick={addItem} variant="outline" size="sm" data-testid="receipt-add-item-button">
                 + Dodaj pozycję
               </Button>
             </div>
@@ -284,7 +285,7 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
                 <p className="text-sm mt-1">Kliknij &ldquo;Dodaj pozycję&rdquo; aby dodać produkty</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4" data-testid="receipt-items-list">
                 {fields.map((field, index) => (
                   <ReceiptItemRow
                     key={field.id}
@@ -293,6 +294,7 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
                     categories={categories}
                     onRemove={() => remove(index)}
                     canRemove={true}
+                    data-testid={`receipt-item-row-${index}`}
                   />
                 ))}
               </div>
@@ -300,9 +302,9 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
           </div>
 
           {/* Total */}
-          <div className="flex justify-between items-center text-lg font-semibold">
+          <div className="flex justify-between items-center text-lg font-semibold" data-testid="receipt-total">
             <span>Suma:</span>
-            <span>{total.toFixed(2)} zł</span>
+            <span data-testid="receipt-total-amount">{total.toFixed(2)} zł</span>
           </div>
 
           {/* Action Buttons */}
@@ -316,10 +318,11 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
                 redirectToHome(currentDate);
               }}
               className="flex-1"
+              data-testid="receipt-cancel-button"
             >
               Anuluj
             </Button>
-            <Button type="submit" disabled={isLoading || !form.formState.isValid} className="flex-1">
+            <Button type="submit" disabled={isLoading || !form.formState.isValid} className="flex-1" data-testid="receipt-submit-button">
               {isLoading
                 ? isEditMode
                   ? "Aktualizowanie..."

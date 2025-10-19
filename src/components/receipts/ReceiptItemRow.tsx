@@ -25,9 +25,10 @@ interface ReceiptItemRowProps {
   categories: CategoryDto[];
   onRemove: () => void;
   canRemove: boolean;
+  "data-testid"?: string;
 }
 
-export function ReceiptItemRow({ index, form, categories, onRemove, canRemove }: ReceiptItemRowProps) {
+export function ReceiptItemRow({ index, form, categories, onRemove, canRemove, "data-testid": dataTestId }: ReceiptItemRowProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDeleteConfirm = () => {
@@ -36,7 +37,7 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove }:
   };
 
   return (
-    <div className="relative border border-border rounded-lg p-4">
+    <div className="relative border border-border rounded-lg p-4" data-testid={dataTestId}>
       {/* Remove Button - positioned in top right corner on the border */}
       {canRemove && (
         <Button
@@ -45,6 +46,7 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove }:
           size="icon"
           onClick={() => setIsDeleteDialogOpen(true)}
           className="absolute -top-3 right-3 h-7 w-7 rounded-full bg-background border border-border text-destructive hover:text-destructive hover:bg-destructive/10"
+          data-testid={`${dataTestId}-delete-button`}
         >
           <Trash2 className="h-4 w-4" />
         </Button>
@@ -60,7 +62,7 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove }:
               <FormItem>
                 <FormLabel>Nazwa produktu</FormLabel>
                 <FormControl>
-                  <Input placeholder="np. Mleko" {...field} />
+                  <Input placeholder="np. Mleko" {...field} data-testid={`${dataTestId}-product-name-input`} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -83,7 +85,18 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove }:
                     min="0"
                     placeholder="0.00"
                     {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty string (user is clearing the field)
+                      if (value === "" || value === null) {
+                        field.onChange(undefined);
+                      } else {
+                        const parsed = parseFloat(value);
+                        field.onChange(isNaN(parsed) ? undefined : parsed);
+                      }
+                    }}
+                    data-testid={`${dataTestId}-price-input`}
                   />
                 </FormControl>
                 <FormMessage />
@@ -102,13 +115,13 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove }:
                 <FormLabel>Kategoria</FormLabel>
                 <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
                   <FormControl>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full" data-testid={`${dataTestId}-category-select`}>
                       <SelectValue placeholder="Wybierz kategorię" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="w-full">
                     {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
+                      <SelectItem key={category.id} value={category.id.toString()} data-testid={`${dataTestId}-category-option-${category.id}`}>
                         <span className="flex items-center gap-2">
                           <span>{category.icon}</span>
                           <span>{category.name}</span>
@@ -126,7 +139,7 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove }:
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid={`${dataTestId}-delete-dialog`}>
           <AlertDialogHeader>
             <AlertDialogTitle>Czy na pewno chcesz usunąć tę pozycję?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -134,8 +147,8 @@ export function ReceiptItemRow({ index, form, categories, onRemove, canRemove }:
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Anuluj</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90">
+            <AlertDialogCancel data-testid={`${dataTestId}-delete-dialog-cancel`}>Anuluj</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive hover:bg-destructive/90" data-testid={`${dataTestId}-delete-dialog-confirm`}>
               Usuń
             </AlertDialogAction>
           </AlertDialogFooter>

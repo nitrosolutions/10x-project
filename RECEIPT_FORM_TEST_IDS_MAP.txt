@@ -1,0 +1,382 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                  RECEIPT FORM - DATA-TEST-ID HIERARCHY MAP                  ┃
+┃                                                                               ┃
+┃  Scenario: Add new receipt → Fill item → Save                              ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+                          RECEIPT FORM STRUCTURE
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│                    receipt-form-container                                 │
+│                    (Main container div)                                   │
+│                                                                            │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │                        receipt-form                                 │ │
+│  │                     (<form> element)                               │ │
+│  │                                                                     │ │
+│  │  ┌────────────────────────────────────────────────────────────┐  │ │
+│  │  │  SECTION 1: Date & Store (Grid 2 columns)                │  │ │
+│  │  │                                                            │  │ │
+│  │  │  ┌──────────────────┐  ┌──────────────────────────────┐  │  │ │
+│  │  │  │ Purchase Date    │  │ Store Name (optional)       │  │  │ │
+│  │  │  │                  │  │                              │  │  │ │
+│  │  │  │ ┌──────────────┐ │  │ ┌──────────────────────────┐ │  │  │ │
+│  │  │  │ │receipt-date- │ │  │ │receipt-store-name-input │ │  │  │ │
+│  │  │  │ │trigger       │ │  │ │                          │ │  │  │ │
+│  │  │  │ │(Button)      │ │  │ │(Text Input)              │ │  │  │ │
+│  │  │  │ └──────────────┘ │  │ └──────────────────────────┘ │  │  │ │
+│  │  │  │                  │  │                              │  │  │ │
+│  │  │  │ ┌──────────────┐ │  │                              │  │  │ │
+│  │  │  │ │receipt-date- │ │  │                              │  │  │ │
+│  │  │  │ │calendar      │ │  │                              │  │  │ │
+│  │  │  │ │(Popover)     │ │  │                              │  │  │ │
+│  │  │  │ └──────────────┘ │  │                              │  │  │ │
+│  │  │  └──────────────────┘  └──────────────────────────────┘  │  │ │
+│  │  └────────────────────────────────────────────────────────────┘  │ │
+│  │                                                                     │ │
+│  │  ┌────────────────────────────────────────────────────────────┐  │ │
+│  │  │  SECTION 2: Items (receipt-items-section)                │  │ │
+│  │  │                                                            │  │ │
+│  │  │  Header:                                                  │  │ │
+│  │  │  "Pozycje paragonu (opcjonalnie)"                        │  │ │
+│  │  │  ┌──────────────────────────────────────────────────────┐ │  │ │
+│  │  │  │receipt-add-item-button (+ Dodaj pozycję)             │ │  │ │
+│  │  │  └──────────────────────────────────────────────────────┘ │  │ │
+│  │  │                                                            │  │ │
+│  │  │  ┌──────────────────────────────────────────────────────┐ │  │ │
+│  │  │  │         receipt-items-list                           │ │  │ │
+│  │  │  │  (Wrapper for all items - visible when > 0)         │ │  │ │
+│  │  │  │                                                       │ │  │ │
+│  │  │  │  ┌──────────────────────────────────────────────┐  │ │  │ │
+│  │  │  │  │    receipt-item-row-0  (ITEM 1)            │  │ │  │ │
+│  │  │  │  │  (ReceiptItemRow component - index 0)      │  │ │  │ │
+│  │  │  │  │                                              │  │ │  │ │
+│  │  │  │  │  ┌─────────────────────────────────────┐  │  │ │  │ │
+│  │  │  │  │  │receipt-item-row-0-delete-button    │  │  │ │  │ │
+│  │  │  │  │  │(Trash icon - top right)            │  │  │ │  │ │
+│  │  │  │  │  └─────────────────────────────────────┘  │  │ │  │ │
+│  │  │  │  │                                              │  │ │  │ │
+│  │  │  │  │  Grid (3 columns on desktop):               │  │ │  │ │
+│  │  │  │  │                                              │  │ │  │ │
+│  │  │  │  │  ┌──────────────┐ ┌────────┐ ┌────────────┐ │  │ │  │ │
+│  │  │  │  │  │ Product Name │ │ Price  │ │ Category  │ │  │ │  │ │
+│  │  │  │  │  │              │ │        │ │           │ │  │ │  │ │
+│  │  │  │  │  │ receipt-item-│ │receipt-│ │receipt-   │ │  │ │  │ │
+│  │  │  │  │  │ row-0-       │ │item-   │ │item-row- │ │  │ │  │ │
+│  │  │  │  │  │ product-name-│ │row-0-  │ │0-category-│ │  │ │  │ │
+│  │  │  │  │  │ input        │ │price-  │ │select    │ │  │ │  │ │
+│  │  │  │  │  │              │ │input   │ │          │ │  │ │  │ │
+│  │  │  │  │  │(Text Input)  │ │(Number)│ │(Select)  │ │  │ │  │ │
+│  │  │  │  │  │              │ │        │ │          │ │  │ │  │ │
+│  │  │  │  │  │              │ │        │ │┌────────┐│ │  │ │  │ │
+│  │  │  │  │  │              │ │        │ ││Options ││ │  │ │  │ │
+│  │  │  │  │  │              │ │        │ ││option- ││ │  │ │  │ │
+│  │  │  │  │  │              │ │        │ ││{id}    ││ │  │ │  │ │
+│  │  │  │  │  │              │ │        │ │└────────┘│ │  │ │  │ │
+│  │  │  │  │  └──────────────┘ └────────┘ └────────────┘ │  │ │  │ │
+│  │  │  │  │                                              │  │ │  │ │
+│  │  │  │  │  ┌──────────────────────────────────────┐  │  │ │  │ │
+│  │  │  │  │  │receipt-item-row-0-delete-dialog    │  │  │ │  │ │
+│  │  │  │  │  │(AlertDialog - hidden until trigger)│  │  │ │  │ │
+│  │  │  │  │  │                                      │  │  │ │  │ │
+│  │  │  │  │  │  Title: "Czy na pewno usunąć..."   │  │  │ │  │ │
+│  │  │  │  │  │  Description: Info text             │  │  │ │  │ │
+│  │  │  │  │  │                                      │  │  │ │  │ │
+│  │  │  │  │  │  ┌──────────────────────────────┐  │  │  │ │  │ │
+│  │  │  │  │  │  │Anuluj Button:                │  │  │  │ │  │ │
+│  │  │  │  │  │  │receipt-item-row-0-delete-   │  │  │  │ │  │ │
+│  │  │  │  │  │  │dialog-cancel                │  │  │  │ │  │ │
+│  │  │  │  │  │  └──────────────────────────────┘  │  │  │ │  │ │
+│  │  │  │  │  │                                      │  │  │ │  │ │
+│  │  │  │  │  │  ┌──────────────────────────────┐  │  │  │ │  │ │
+│  │  │  │  │  │  │Usuń Button (Destructive):    │  │  │  │ │  │ │
+│  │  │  │  │  │  │receipt-item-row-0-delete-   │  │  │  │ │  │ │
+│  │  │  │  │  │  │dialog-confirm                │  │  │  │ │  │ │
+│  │  │  │  │  │  └──────────────────────────────┘  │  │  │ │  │ │
+│  │  │  │  │  └──────────────────────────────────┘  │  │ │  │ │
+│  │  │  │  └──────────────────────────────────────────┘  │ │  │ │
+│  │  │  │                                                  │ │  │ │
+│  │  │  │  [Additional items (if added):                 │ │  │ │
+│  │  │  │   receipt-item-row-1, receipt-item-row-2, etc]│ │  │ │
+│  │  │  │                                                  │ │  │ │
+│  │  │  └──────────────────────────────────────────────────┘ │  │ │
+│  │  └────────────────────────────────────────────────────────┘  │ │
+│  │                                                                     │ │
+│  │  ┌────────────────────────────────────────────────────────────┐  │ │
+│  │  │  SECTION 3: Total                                         │  │ │
+│  │  │                                                            │  │ │
+│  │  │  ┌──────────────────────────────────────────────────────┐ │  │ │
+│  │  │  │           receipt-total                              │ │  │ │
+│  │  │  │        (Total section wrapper)                       │ │  │ │
+│  │  │  │                                                       │ │  │ │
+│  │  │  │  Label: "Suma:"                                      │ │  │ │
+│  │  │  │  ┌──────────────────────────────────────────────┐   │ │  │ │
+│  │  │  │  │ receipt-total-amount                         │   │ │  │ │
+│  │  │  │  │ Display: "XX.XX zł"                          │   │ │  │ │
+│  │  │  │  │ (Updated in real-time as items are filled)   │   │ │  │ │
+│  │  │  │  └──────────────────────────────────────────────┘   │ │  │ │
+│  │  │  └──────────────────────────────────────────────────────┘ │  │ │
+│  │  └────────────────────────────────────────────────────────────┘  │ │
+│  │                                                                     │ │
+│  │  ┌────────────────────────────────────────────────────────────┐  │ │
+│  │  │  SECTION 4: Action Buttons (Flexbox, 2 columns)          │  │ │
+│  │  │                                                            │  │ │
+│  │  │  ┌──────────────────────────┬──────────────────────────┐ │  │ │
+│  │  │  │                          │                          │ │  │ │
+│  │  │  │receipt-cancel-button     │receipt-submit-button    │ │  │ │
+│  │  │  │(Outline variant)         │(Primary variant)        │ │  │ │
+│  │  │  │"Anuluj"                  │"Zapisz" / "Zaktualizuj" │ │  │ │
+│  │  │  │                          │(disabled if invalid)    │ │  │ │
+│  │  │  │                          │(loading state: text)    │ │  │ │
+│  │  │  │                          │                          │ │  │ │
+│  │  │  │flex-1                    │flex-1                   │ │  │ │
+│  │  │  │                          │                          │ │  │ │
+│  │  │  └──────────────────────────┴──────────────────────────┘ │  │ │
+│  │  └────────────────────────────────────────────────────────────┘  │ │
+│  │                                                                     │ │
+│  └─────────────────────────────────────────────────────────────┘     │ │
+│                                                                        │ │
+└───────────────────────────────────────────────────────────────────────┘
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+                        TEST IDS QUICK REFERENCE
+
+═════════════════════════════════════════════════════════════════════════════
+
+CONTAINER & FORM
+├─ receipt-form-container       [div] Main container
+└─ receipt-form                 [form] Form element
+
+DATE & STORE SECTION
+├─ receipt-date-trigger         [button] Date picker trigger
+├─ receipt-date-calendar        [div] Calendar popover
+└─ receipt-store-name-input     [input] Store name text field
+
+ITEMS SECTION
+├─ receipt-items-section        [div] Items section wrapper
+├─ receipt-add-item-button      [button] Add item button
+└─ receipt-items-list           [div] Items list container
+   │
+   ├─ receipt-item-row-0        [div] First item container
+   ├─ receipt-item-row-1        [div] Second item container
+   └─ receipt-item-row-N        [div] Nth item container
+      │
+      ├─ receipt-item-row-N-product-name-input    [input]
+      ├─ receipt-item-row-N-price-input           [input]
+      ├─ receipt-item-row-N-category-select       [button] Select trigger
+      │  └─ receipt-item-row-N-category-option-ID [div] Option item
+      ├─ receipt-item-row-N-delete-button         [button] Trash button
+      └─ receipt-item-row-N-delete-dialog         [div] Dialog container
+         ├─ receipt-item-row-N-delete-dialog-cancel     [button]
+         └─ receipt-item-row-N-delete-dialog-confirm    [button]
+
+TOTAL SECTION
+├─ receipt-total                [div] Total section
+└─ receipt-total-amount         [span] Amount display
+
+ACTION BUTTONS
+├─ receipt-cancel-button        [button] Cancel/Back button
+└─ receipt-submit-button        [button] Save/Update button
+
+Where N = 0-based index (0, 1, 2, ...)
+Where ID = category ID number
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+                           USER JOURNEY MAP
+
+═════════════════════════════════════════════════════════════════════════════
+
+Step 1: Navigate to form
+        └─ Verify: receipt-form-container exists
+
+Step 2: Select Purchase Date
+        ├─ Click: receipt-date-trigger
+        └─ Result: receipt-date-calendar appears
+
+Step 3: Fill Store Name (optional)
+        └─ Type: receipt-store-name-input
+
+Step 4: Add Receipt Item
+        ├─ Click: receipt-add-item-button
+        └─ Result: receipt-item-row-0 appears
+
+Step 5: Fill Item Details
+        ├─ Type Product Name
+        │  └─ receipt-item-row-0-product-name-input
+        ├─ Type Price
+        │  └─ receipt-item-row-0-price-input
+        └─ Select Category
+           ├─ Click: receipt-item-row-0-category-select
+           └─ Click: receipt-item-row-0-category-option-{ID}
+
+Step 6: Verify Total Updates
+        └─ Check: receipt-total-amount contains new value
+
+Step 7: Save Receipt
+        ├─ Click: receipt-submit-button
+        └─ Result: Page redirects to /?month=YYYY-MM
+
+OR: Cancel Receipt
+        ├─ Click: receipt-cancel-button
+        └─ Result: Page redirects to home
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+                        ITEM MANAGEMENT SCENARIOS
+
+═════════════════════════════════════════════════════════════════════════════
+
+Add Multiple Items:
+  Step 1: receipt-add-item-button
+         └─ receipt-item-row-0 appears
+
+  Step 2: receipt-add-item-button (again)
+         └─ receipt-item-row-1 appears
+
+  Step 3: receipt-add-item-button (again)
+         └─ receipt-item-row-2 appears
+
+
+Delete Item (with confirmation):
+  Step 1: Click receipt-item-row-{N}-delete-button
+         └─ receipt-item-row-{N}-delete-dialog appears
+
+  Step 2a (Cancel): Click receipt-item-row-{N}-delete-dialog-cancel
+                   └─ Dialog closes, item remains
+
+  Step 2b (Confirm): Click receipt-item-row-{N}-delete-dialog-confirm
+                    └─ Item removed, remaining items reindex
+
+
+Edit Item (Update field):
+  Step 1: Type in receipt-item-row-{N}-product-name-input
+  Step 2: Type in receipt-item-row-{N}-price-input
+  Step 3: receipt-total-amount updates automatically
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+                         KEY RELATIONSHIPS
+
+═════════════════════════════════════════════════════════════════════════════
+
+PARENT-CHILD RELATIONSHIPS:
+  receipt-form
+    ├─ receipt-date-trigger
+    │  └─ receipt-date-calendar
+    ├─ receipt-store-name-input
+    ├─ receipt-items-section
+    │  ├─ receipt-add-item-button
+    │  └─ receipt-items-list
+    │     └─ receipt-item-row-{N}
+    │        ├─ receipt-item-row-{N}-product-name-input
+    │        ├─ receipt-item-row-{N}-price-input
+    │        ├─ receipt-item-row-{N}-category-select
+    │        │  └─ receipt-item-row-{N}-category-option-{ID}
+    │        ├─ receipt-item-row-{N}-delete-button
+    │        └─ receipt-item-row-{N}-delete-dialog
+    │           ├─ receipt-item-row-{N}-delete-dialog-cancel
+    │           └─ receipt-item-row-{N}-delete-dialog-confirm
+    ├─ receipt-total
+    │  └─ receipt-total-amount
+    ├─ receipt-cancel-button
+    └─ receipt-submit-button
+
+DEPENDENCIES:
+  receipt-submit-button status ← form.formState.isValid
+  receipt-item-row-N visible ← fields.length > 0
+  receipt-items-list visible ← receipt-items-section visible
+  receipt-total-amount value ← sum of receipt-item-row-N-price-input
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+                          TESTING CHECKLIST
+
+═════════════════════════════════════════════════════════════════════════════
+
+□ Form Initialization
+  □ receipt-form-container is visible
+  □ receipt-form is rendered
+  □ receipt-date-trigger shows current/default date
+
+□ Date Selection
+  □ Click receipt-date-trigger opens receipt-date-calendar
+  □ Date selection updates receipt-date-trigger text
+  □ Cannot select future dates
+
+□ Store Name
+  □ receipt-store-name-input accepts text
+  □ Value persists when other fields change
+
+□ Add Item
+  □ Click receipt-add-item-button creates receipt-item-row-0
+  □ Multiple clicks create receipt-item-row-1, receipt-item-row-2, etc.
+  □ receipt-items-list appears when items > 0
+
+□ Fill Item Fields
+  □ receipt-item-row-N-product-name-input accepts text
+  □ receipt-item-row-N-price-input accepts numbers (0.01 precision)
+  □ receipt-item-row-N-category-select opens dropdown
+  □ Options display with icon and category name
+
+□ Total Calculation
+  □ receipt-total-amount updates when prices change
+  □ Total format: "XX.XX zł"
+  □ Total = sum of all item prices
+
+□ Delete Item
+  □ Click receipt-item-row-N-delete-button shows dialog
+  □ Dialog title is clear and confirmatory
+  □ Cancel button closes dialog
+  □ Confirm button removes item and recalculates total
+
+□ Form Validation
+  □ receipt-submit-button is disabled when form invalid
+  □ receipt-submit-button is enabled when form valid
+  □ purchase_date is required
+  □ At least one item needs complete fields to be valid (or zero items is valid)
+
+□ Form Submission
+  □ Click receipt-submit-button submits form
+  □ Button shows loading state: "Zapisywanie..."
+  □ Page redirects to /?month=YYYY-MM on success
+  □ Error toast appears on failure
+
+□ Form Cancellation
+  □ Click receipt-cancel-button redirects to home
+  □ Form data is discarded (not persisted)
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+                            NOTES
+
+═════════════════════════════════════════════════════════════════════════════
+
+Version: 1.0 (2024-10-19)
+
+Total Test IDs: 17+ unique identifiers
+  • ReceiptForm.tsx: 9 attributes
+  • ReceiptItemRow.tsx: 8+ attributes per item instance
+
+Files Modified:
+  • src/components/receipts/ReceiptForm.tsx
+  • src/components/receipts/ReceiptItemRow.tsx
+
+Documentation:
+  • RECEIPT_FORM_TEST_IDS.md (comprehensive guide)
+  • RECEIPT_FORM_TEST_IDS_MAP.txt (this file)
+
+Related:
+  • Test scenarios can be written using Playwright
+  • Compatible with Testing Library for unit tests
+  • Follow naming convention for consistency
+
+═════════════════════════════════════════════════════════════════════════════
