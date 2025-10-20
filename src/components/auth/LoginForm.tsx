@@ -1,18 +1,24 @@
 /* src/components/auth/LoginForm.tsx */
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/auth.schema";
+import { usePasswordVisibility } from "@/components/hooks/usePasswordVisibility";
+import { useAuthSubmission } from "@/components/hooks/useAuthSubmission";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
 export default function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  // Password visibility management
+  const { isVisible, toggleVisibility } = usePasswordVisibility();
 
+  // Auth submission management
+  const { isSubmitting, submitLoginForm } = useAuthSubmission({
+    successMessage: "Zalogowano pomyślnie",
+  });
+
+  // Form state and validation
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
@@ -22,30 +28,9 @@ export default function LoginForm() {
     },
   });
 
+  // Simple submission handler
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: "Błąd logowania" }));
-        throw new Error(error.message || "Nieprawidłowy email lub hasło");
-      }
-
-      toast.success("Zalogowano pomyślnie");
-      window.location.href = "/";
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Nie udało się zalogować. Spróbuj ponownie.");
-    } finally {
-      setIsLoading(false);
-    }
+    await submitLoginForm(data);
   };
 
   return (
@@ -80,7 +65,7 @@ export default function LoginForm() {
                 <FormControl>
                   <div className="relative">
                     <Input
-                      type={showPassword ? "text" : "password"}
+                      type={isVisible("password") ? "text" : "password"}
                       placeholder="••••••••"
                       data-testid="login-password-input"
                       {...field}
@@ -90,10 +75,10 @@ export default function LoginForm() {
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => toggleVisibility("password")}
                       data-testid="login-toggle-password-visibility"
                     >
-                      {showPassword ? (
+                      {isVisible("password") ? (
                         <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
                         <Eye className="h-4 w-4 text-muted-foreground" />
@@ -108,11 +93,11 @@ export default function LoginForm() {
 
           <Button
             type="submit"
-            disabled={isLoading || !form.formState.isValid}
+            disabled={isSubmitting || !form.formState.isValid}
             className="w-full"
             data-testid="login-submit-button"
           >
-            {isLoading ? "Logowanie..." : "Zaloguj się"}
+            {isSubmitting ? "Logowanie..." : "Zaloguj się"}
           </Button>
         </form>
       </Form>

@@ -70,6 +70,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response(
       JSON.stringify({
         success: true,
+        message: "Zalogowano pomyślnie",
         user: {
           id: data.user.id,
           email: data.user.email,

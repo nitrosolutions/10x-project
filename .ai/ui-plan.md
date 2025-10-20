@@ -1,6 +1,7 @@
 # Architektura UI dla PortfelIO
 
 ## 1. Przegląd struktury UI
+
 Interfejs użytkownika oparty jest na Astro 5 i React, z wykorzystaniem komponentów shadcn/ui. Projekt jest wdrożony jako progresywna aplikacja webowa (PWA) o responsywnym designie. Główne widoki są zabezpieczone mechanizmami autoryzacji (JWT) oraz zarządzane za pomocą wbudowanych hooków React i Context. Dane pobierane są dynamicznie przez API, a kluczowe informacje prezentowane są za pomocą interaktywnych komponentów, takich jak wykresy czy listy paragonów.
 
 ## 2. Lista widoków
@@ -69,6 +70,7 @@ Interfejs użytkownika oparty jest na Astro 5 i React, z wykorzystaniem komponen
   - **UX, dostępność i bezpieczeństwo:** Przejrzysty interfejs zarządzania kontem; wyraźne ostrzeżenia; potwierdzenie krytycznych operacji (usunięcie konta).
 
 ## 3. Mapa podróży użytkownika
+
 1. **Autoryzacja:**
    - Użytkownik odwiedza stronę logowania lub rejestracji.
    - Po ukończeniu procesu autoryzacji zostaje przekierowany do widoku Miesięcznego.
@@ -86,12 +88,14 @@ Interfejs użytkownika oparty jest na Astro 5 i React, z wykorzystaniem komponen
    - Użytkownik przechodzi do ustawień, gdzie może dokonać zmian w koncie, zresetować hasło lub usunąć konto (po potwierdzeniu).
 
 ## 4. Układ i struktura nawigacji
+
 - **Główna nawigacja:** Umieszczona w nagłówku z elementami odsyłającymi do Dashboardu, Dodawania Paragonu i Ustawień.
 - **Nawigacja po miesiącach:** Widoczna w nagłówku Dashboardu, z przyciskami strzałek umożliwiającymi przełączanie między miesiącami.
 - **FAB (Floating Action Button):** Stały przycisk w prawym dolnym rogu, umożliwiający szybkie dodanie nowego paragonu.
 - **Menu mobilne:** Ikona hamburgera lub rozwijane menu dla łatwego dostępu do ustawień i dodatkowych opcji na urządzeniach mobilnych.
 
 ## 5. Kluczowe komponenty
+
 - **Formularze autoryzacyjne:** Zarządzające procesami logowania, rejestracji i resetu hasła.
 - **Komponent wykresu:** Do wizualizacji danych wydatków (wykres donut) z obsługą interakcji.
 - **Lista paragonów:** Prezentująca paragon w formie karty, umożliwiająca wybór do edycji lub szczegółowego przeglądu.

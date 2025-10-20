@@ -84,24 +84,24 @@ AFTER ALL TESTS (Global Teardown)
 
 ### Key Files
 
-- **[src/__tests__/e2e/global-setup.ts](src/__tests__/e2e/global-setup.ts)** - Global setup (login once)
-- **[src/__tests__/e2e/global-teardown.ts](src/__tests__/e2e/global-teardown.ts)** - Global teardown (cleanup test data)
-- **[src/__tests__/e2e/pages/LoginPage.ts](src/__tests__/e2e/pages/LoginPage.ts)** - Login page POM
+- **[src/**tests**/e2e/global-setup.ts](src/__tests__/e2e/global-setup.ts)** - Global setup (login once)
+- **[src/**tests**/e2e/global-teardown.ts](src/__tests__/e2e/global-teardown.ts)** - Global teardown (cleanup test data)
+- **[src/**tests**/e2e/pages/LoginPage.ts](src/__tests__/e2e/pages/LoginPage.ts)** - Login page POM
 - **[.env.test](.env.test)** - Test credentials (git-ignored)
 - **[playwright.config.ts](playwright.config.ts)** - Playwright configuration with globalSetup and globalTeardown
 
 ### Usage in Tests
 
 ```typescript
-import { test } from '@playwright/test';
-import { setupAuthenticatedSession } from './helpers/auth.helper';
+import { test } from "@playwright/test";
+import { setupAuthenticatedSession } from "./helpers/auth.helper";
 
 test.beforeEach(async ({ page }) => {
   // Authenticate before each test
   await setupAuthenticatedSession(page);
 
   // Now you can navigate to protected routes
-  await page.goto('/receipts/new');
+  await page.goto("/receipts/new");
 });
 ```
 
@@ -112,6 +112,7 @@ test.beforeEach(async ({ page }) => {
 **Cause**: The login page is not loading properly.
 
 **Solutions**:
+
 1. Ensure the dev server is running (`npm run dev`)
 2. Check that the base URL in `playwright.config.ts` matches your dev server
 3. Verify the LoginForm component has the correct test IDs
@@ -121,6 +122,7 @@ test.beforeEach(async ({ page }) => {
 **Cause**: Test user doesn't exist or credentials are wrong.
 
 **Solutions**:
+
 1. Verify the test user exists in Supabase Authentication
 2. Check that `.env.test` has the correct credentials
 3. Ensure the user's email is confirmed (if required)
@@ -130,6 +132,7 @@ test.beforeEach(async ({ page }) => {
 **Cause**: Login is not completing successfully.
 
 **Solutions**:
+
 1. Check browser console for errors (run with `--headed` flag)
 2. Verify Supabase is configured correctly
 3. Check middleware is not blocking the login endpoint
@@ -140,6 +143,7 @@ test.beforeEach(async ({ page }) => {
 **Cause**: User is logged in but lacks permissions or the form isn't loading.
 
 **Solutions**:
+
 1. Check middleware and route guards
 2. Verify the test user has necessary permissions in database
 3. Check RLS policies in Supabase
@@ -149,6 +153,7 @@ test.beforeEach(async ({ page }) => {
 **Cause**: The VSCode Playwright plugin may not properly invoke `globalTeardown` in all scenarios.
 
 **Why this happens**:
+
 - VSCode plugin runs Playwright differently than CLI
 - If VSCode is closed or plugin is stopped, cleanup may not execute
 - Global teardown timeout may not be respected by the plugin
@@ -160,6 +165,7 @@ The project now has **redundant cleanup mechanisms** to ensure data is always cl
 2. **Test-level Cleanup** (`receipt-form.spec.ts`) - Added `test.afterAll()` hook that runs cleanup even if global teardown doesn't
 
 **What this means:**
+
 - ✅ Tests will **always** clean up test data, regardless of how they're run
 - ✅ Works with CLI (`npm run test:e2e`)
 - ✅ Works with VSCode plugin
@@ -167,6 +173,7 @@ The project now has **redundant cleanup mechanisms** to ensure data is always cl
 - ✅ Safe: cleanup runs twice but is idempotent (safe to run multiple times)
 
 **If data still accumulates**:
+
 1. Check `.env.test` has correct `SUPABASE_SERVICE_ROLE_KEY`
 2. Verify `E2E_USERNAME_ID` matches your test user ID
 3. Try running cleanup manually:
@@ -186,20 +193,24 @@ After all tests complete, the global teardown automatically cleans up test data:
 ```
 
 **What gets cleaned:**
+
 - ✅ All receipts created by test user (`receipts` table)
 - ✅ All receipt items (cascade deleted via `ON DELETE CASCADE`)
 
 **What gets preserved:**
+
 - ✅ Test user account (for reuse in next test run)
 - ✅ Categories (shared data)
 
 **How it works:**
+
 1. Uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS
 2. Deletes all receipts where `user_id = E2E_USERNAME_ID`
 3. Database cascades delete to related `receipt_items`
 4. Verifies cleanup completed successfully
 
 **Benefits:**
+
 - 🧹 Clean slate for every test run
 - 🚀 No manual cleanup needed
 - 📊 Tests don't interfere with each other
@@ -212,18 +223,18 @@ You can create multiple test users for different scenarios:
 ```typescript
 // Create admin test user in Supabase first, then use:
 const adminCredentials = {
-  email: 'admin@test.com',
-  password: 'AdminPass123!'
+  email: "admin@test.com",
+  password: "AdminPass123!",
 };
 
 // In your test
-import { LoginPage } from './pages/LoginPage';
+import { LoginPage } from "./pages/LoginPage";
 
-test('admin can access admin panel', async ({ page }) => {
+test("admin can access admin panel", async ({ page }) => {
   const loginPage = new LoginPage(page);
   await loginPage.login(adminCredentials.email, adminCredentials.password);
 
-  await page.goto('/admin');
+  await page.goto("/admin");
   // ... test admin features
 });
 ```

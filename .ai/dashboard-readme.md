@@ -106,6 +106,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ### Tryb deweloperski (DEV_BYPASS_AUTH)
 
 Dla uproszczenia testowania, ustaw `DEV_BYPASS_AUTH=true` w pliku `.env`:
+
 - Omija autentykację użytkownika
 - Używa `DEV_USER_ID` jako ID użytkownika
 - Wykorzystuje Service Role Key (omija RLS)
@@ -117,14 +118,17 @@ Dla uproszczenia testowania, ustaw `DEV_BYPASS_AUTH=true` w pliku `.env`:
 ### Endpoint: GET /api/receipts
 
 **Request:**
+
 ```
 GET /api/receipts?month=2025-10
 ```
 
 **Query Parameters:**
+
 - `month` (required): Miesiąc w formacie YYYY-MM
 
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -137,12 +141,13 @@ GET /api/receipts?month=2025-10
     "id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
     "purchase_date": "2025-10-13",
     "store_name": null,
-    "total_amount": 50.00
+    "total_amount": 50.0
   }
 ]
 ```
 
 **Response (400 Bad Request):**
+
 ```json
 {
   "error": "Validation error",
@@ -151,6 +156,7 @@ GET /api/receipts?month=2025-10
 ```
 
 **Response (401 Unauthorized):**
+
 ```json
 {
   "error": "Unauthorized"
@@ -162,6 +168,7 @@ GET /api/receipts?month=2025-10
 ### DashboardView
 
 Główny komponent kontenera, który:
+
 - Wykorzystuje hook `useDashboard`
 - Renderuje warunkowe stany (loading, error, empty, success)
 - Zarządza layoutem strony
@@ -175,6 +182,7 @@ Główny komponent kontenera, który:
 Komponent nawigacji między miesiącami.
 
 **Props:**
+
 ```typescript
 {
   currentMonth: Date,
@@ -185,13 +193,9 @@ Komponent nawigacji między miesiącami.
 ```
 
 **Przykład użycia:**
+
 ```tsx
-<MonthNavigator
-  currentMonth={new Date()}
-  onPreviousMonth={() => {}}
-  onNextMonth={() => {}}
-  isNextDisabled={false}
-/>
+<MonthNavigator currentMonth={new Date()} onPreviousMonth={() => {}} onNextMonth={() => {}} isNextDisabled={false} />
 ```
 
 ### ReceiptsList
@@ -199,6 +203,7 @@ Komponent nawigacji między miesiącami.
 Komponent listy paragonów.
 
 **Props:**
+
 ```typescript
 {
   receipts: ReceiptListDto[]
@@ -206,6 +211,7 @@ Komponent listy paragonów.
 ```
 
 **Przykład użycia:**
+
 ```tsx
 <ReceiptsList receipts={receipts} />
 ```
@@ -215,20 +221,24 @@ Komponent listy paragonów.
 Komponent pojedynczego elementu listy.
 
 **Props:**
+
 ```typescript
 {
-  receipt: ReceiptListDto
+  receipt: ReceiptListDto;
 }
 ```
 
 **Przykład użycia:**
+
 ```tsx
-<ReceiptListItem receipt={{
-  id: "uuid",
-  purchase_date: "2025-10-14",
-  store_name: "Biedronka",
-  total_amount: 123.45
-}} />
+<ReceiptListItem
+  receipt={{
+    id: "uuid",
+    purchase_date: "2025-10-14",
+    store_name: "Biedronka",
+    total_amount: 123.45,
+  }}
+/>
 ```
 
 ### EmptyState
@@ -244,6 +254,7 @@ Komponent stanu pustego (brak paragonów).
 Custom hook zarządzający stanem Dashboard.
 
 **Zwraca:**
+
 ```typescript
 {
   currentMonth: Date,
@@ -257,16 +268,10 @@ Custom hook zarządzający stanem Dashboard.
 ```
 
 **Przykład użycia:**
+
 ```tsx
-const {
-  currentMonth,
-  receipts,
-  isLoading,
-  error,
-  handlePreviousMonth,
-  handleNextMonth,
-  isNextDisabled,
-} = useDashboard();
+const { currentMonth, receipts, isLoading, error, handlePreviousMonth, handleNextMonth, isNextDisabled } =
+  useDashboard();
 ```
 
 ## Typy
@@ -275,10 +280,10 @@ const {
 
 ```typescript
 interface ReceiptListDto {
-  id: string;                    // UUID paragonu
-  purchase_date: string;         // Data zakupu (YYYY-MM-DD)
-  store_name: string | null;     // Nazwa sklepu (opcjonalna)
-  total_amount: number;          // Kwota całkowita
+  id: string; // UUID paragonu
+  purchase_date: string; // Data zakupu (YYYY-MM-DD)
+  store_name: string | null; // Nazwa sklepu (opcjonalna)
+  total_amount: number; // Kwota całkowita
 }
 ```
 
@@ -317,6 +322,7 @@ Główne klasy używane w Dashboard:
 Pełny przewodnik testowania dostępny w pliku: `.ai/dashboard-testing-guide.md`
 
 **Szybki checklist:**
+
 - [ ] Strona główna renderuje Dashboard
 - [ ] Nawigacja między miesiącami działa
 - [ ] EmptyState wyświetla się gdy brak danych
@@ -342,11 +348,13 @@ npm run build
 ### Problem: Strona nie ładuje się
 
 **Możliwe przyczyny:**
+
 1. Brak konfiguracji Supabase (.env)
 2. Nieprawidłowy URL lub klucz Supabase
 3. Brak połączenia z bazą danych
 
 **Rozwiązanie:**
+
 - Sprawdź plik `.env`
 - Zweryfikuj dane logowania do Supabase
 - Sprawdź logi w konsoli przeglądarki
@@ -354,11 +362,13 @@ npm run build
 ### Problem: Błąd 401 Unauthorized
 
 **Możliwe przyczyny:**
+
 1. Użytkownik nie jest zalogowany
 2. Token wygasł
 3. Middleware nie przekazuje userId
 
 **Rozwiązanie:**
+
 - Ustaw `DEV_BYPASS_AUTH=true` w dev mode
 - Sprawdź konfigurację middleware
 - Zweryfikuj czy `DEV_USER_ID` jest poprawny
@@ -366,11 +376,13 @@ npm run build
 ### Problem: Pusta lista pomimo danych w bazie
 
 **Możliwe przyczyny:**
+
 1. Paragony należą do innego użytkownika
 2. Paragony są w innym miesiącu
 3. RLS blokuje dostęp
 
 **Rozwiązanie:**
+
 - Sprawdź `user_id` w tabeli receipts
 - Zweryfikuj daty paragonów
 - Sprawdź polityki RLS w Supabase
@@ -378,11 +390,13 @@ npm run build
 ### Problem: Błąd formatowania daty/kwoty
 
 **Możliwe przyczyny:**
+
 1. Nieprawidłowy format daty w bazie
 2. Nieprawidłowy typ kolumny total_amount
 3. Problem z Intl.DateTimeFormat/NumberFormat
 
 **Rozwiązanie:**
+
 - Sprawdź typ kolumny `purchase_date` (powinien być DATE)
 - Sprawdź typ kolumny `total_amount` (powinien być NUMERIC)
 - Zweryfikuj locale w przeglądarce
@@ -397,16 +411,19 @@ npm run build
 ## Roadmap / Przyszłe Ulepszenia
 
 ### Wersja 1.1
+
 - [ ] Cache miesięcy w stanie (unikanie nadmiarowych requestów)
 - [ ] Optymistyczny UI (instant feedback)
 - [ ] Paginacja (limit 50-100 paragonów)
 
 ### Wersja 1.2
+
 - [ ] Statystyki miesiąca (suma wydatków)
 - [ ] Wykres wydatków w czasie
 - [ ] Filtrowanie po kwocie/sklepie
 
 ### Wersja 2.0
+
 - [ ] Grupoważnie po dniach/tygodniach
 - [ ] Export do CSV/PDF
 - [ ] Wyszukiwanie pełnotekstowe
@@ -429,6 +446,7 @@ npm run build
 ## Wsparcie
 
 Jeśli potrzebujesz pomocy:
+
 1. Sprawdź sekcję Troubleshooting
 2. Przejrzyj przewodnik testowania
 3. Sprawdź logi w konsoli

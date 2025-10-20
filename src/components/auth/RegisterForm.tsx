@@ -1,19 +1,24 @@
 /* src/components/auth/RegisterForm.tsx */
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { registerSchema, type RegisterFormData } from "@/lib/schemas/auth.schema";
+import { usePasswordVisibility } from "@/components/hooks/usePasswordVisibility";
+import { useAuthSubmission } from "@/components/hooks/useAuthSubmission";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
 export default function RegisterForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // Password visibility management
+  const { isVisible, toggleVisibility } = usePasswordVisibility();
 
+  // Auth submission management
+  const { isSubmitting, submitRegisterForm } = useAuthSubmission({
+    successMessage: "Konto utworzone! Zostaniesz zalogowany.",
+  });
+
+  // Form state and validation
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
@@ -24,40 +29,9 @@ export default function RegisterForm() {
     },
   });
 
+  // Simple submission handler
   const onSubmit = async (data: RegisterFormData) => {
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          confirmPassword: data.confirmPassword,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: "Błąd rejestracji" }));
-        throw new Error(error.error || "Nie udało się utworzyć konta");
-      }
-
-      const result = await response.json();
-
-      // Wyświetl wiadomość o pomyślnej rejestracji i automatycznym zalogowaniu
-      toast.success(result.message || "Konto utworzone! Zostaniesz zalogowany.");
-
-      // Czekaj 2 sekundy przed redirectem, aby użytkownik zobaczył wiadomość
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Nie udało się zarejestrować. Spróbuj ponownie.");
-      setIsLoading(false);
-    }
+    await submitRegisterForm(data);
   };
 
   return (
@@ -91,15 +65,15 @@ export default function RegisterForm() {
                 <FormLabel>Hasło</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                    <Input type={isVisible("password") ? "text" : "password"} placeholder="••••••••" {...field} />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => toggleVisibility("password")}
                     >
-                      {showPassword ? (
+                      {isVisible("password") ? (
                         <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
                         <Eye className="h-4 w-4 text-muted-foreground" />
@@ -123,15 +97,19 @@ export default function RegisterForm() {
                 <FormLabel>Powtórz hasło</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                    <Input
+                      type={isVisible("confirmPassword") ? "text" : "password"}
+                      placeholder="••••••••"
+                      {...field}
+                    />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() => toggleVisibility("confirmPassword")}
                     >
-                      {showConfirmPassword ? (
+                      {isVisible("confirmPassword") ? (
                         <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
                         <Eye className="h-4 w-4 text-muted-foreground" />
@@ -144,8 +122,8 @@ export default function RegisterForm() {
             )}
           />
 
-          <Button type="submit" disabled={isLoading || !form.formState.isValid} className="w-full">
-            {isLoading ? "Tworzenie konta..." : "Utwórz konto"}
+          <Button type="submit" disabled={isSubmitting || !form.formState.isValid} className="w-full">
+            {isSubmitting ? "Tworzenie konta..." : "Utwórz konto"}
           </Button>
         </form>
       </Form>

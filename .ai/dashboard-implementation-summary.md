@@ -11,9 +11,11 @@ Widok Dashboard został w pełni zaimplementowany zgodnie z planem implementacji
 ## Zaimplementowane Komponenty
 
 ### 1. Hook: `useDashboard.ts`
+
 **Lokalizacja:** `src/components/hooks/useDashboard.ts`
 
 **Odpowiedzialności:**
+
 - Zarządzanie stanem aktualnego miesiąca
 - Pobieranie danych z API `/api/receipts?month=YYYY-MM`
 - Obsługa stanów: loading, error, success
@@ -21,6 +23,7 @@ Widok Dashboard został w pełni zaimplementowany zgodnie z planem implementacji
 - Walidacja przyszłych miesięcy (blokada)
 
 **Stan:**
+
 ```typescript
 {
   currentMonth: Date,           // Aktualnie wybrany miesiąc
@@ -34,28 +37,34 @@ Widok Dashboard został w pełni zaimplementowany zgodnie z planem implementacji
 ```
 
 ### 2. Komponent: `DashboardView.tsx`
+
 **Lokalizacja:** `src/components/dashboard/DashboardView.tsx`
 
 **Odpowiedzialności:**
+
 - Integracja hooka `useDashboard`
 - Warunkowe renderowanie stanów (loading, error, empty, data)
 - Wyświetlanie odpowiedniego UI dla każdego stanu
 
 **Stany renderowania:**
+
 - **Loading:** Spinner z komunikatem "Ładowanie paragonów..."
 - **Error:** Komunikat błędu z przyciskiem "Spróbuj ponownie"
 - **Empty:** Komponent `EmptyState` z CTA do dodania pierwszego paragonu
 - **Data:** Lista paragonów z nawigacją miesięczną
 
 ### 3. Komponent: `MonthNavigator.tsx`
+
 **Lokalizacja:** `src/components/dashboard/MonthNavigator.tsx`
 
 **Odpowiedzialności:**
+
 - Wyświetlanie nazwy miesiąca (np. "październik 2025")
 - Przyciski nawigacji (poprzedni/następny miesiąc)
 - Blokada przycisku "następny" dla przyszłych miesięcy
 
 **Props:**
+
 ```typescript
 {
   currentMonth: Date,
@@ -66,17 +75,21 @@ Widok Dashboard został w pełni zaimplementowany zgodnie z planem implementacji
 ```
 
 **Użyte komponenty Shadcn/ui:**
+
 - `Button` (variant: outline, size: icon)
 - Ikony: `ChevronLeft`, `ChevronRight` (lucide-react)
 
 ### 4. Komponent: `ReceiptsList.tsx`
+
 **Lokalizacja:** `src/components/dashboard/ReceiptsList.tsx`
 
 **Odpowiedzialności:**
+
 - Renderowanie listy paragonów
 - Semantyczny HTML z ARIA attributes (role="list", role="listitem")
 
 **Props:**
+
 ```typescript
 {
   receipts: ReceiptListDto[]
@@ -84,59 +97,72 @@ Widok Dashboard został w pełni zaimplementowany zgodnie z planem implementacji
 ```
 
 ### 5. Komponent: `ReceiptListItem.tsx`
+
 **Lokalizacja:** `src/components/dashboard/ReceiptListItem.tsx`
 
 **Odpowiedzialności:**
+
 - Wyświetlanie pojedynczego paragonu
 - Formatowanie daty zakupu (pl-PL)
 - Formatowanie kwoty (PLN)
 - Link do szczegółów paragonu
 
 **Props:**
+
 ```typescript
 {
-  receipt: ReceiptListDto
+  receipt: ReceiptListDto;
 }
 ```
 
 **Formatowanie:**
+
 - Data: `DD.MM.YYYY` (np. "14.10.2025")
 - Kwota: `XX,XX zł` (np. "123,45 zł")
 
 **Layout:**
+
 ```
 [Data • Nazwa sklepu]     [Kwota]
 ```
 
 ### 6. Komponent: `EmptyState.tsx`
+
 **Lokalizacja:** `src/components/dashboard/EmptyState.tsx`
 
 **Odpowiedzialności:**
+
 - Wyświetlanie przyjaznego komunikatu gdy brak paragonów
 - CTA do dodania pierwszego paragonu
 
 **Elementy:**
+
 - Ikona: 📋
 - Nagłówek: "Brak paragonów"
 - Opis: Informacja o braku paragonów w miesiącu
 - CTA: Link do `/receipts/new`
 
 ### 7. Nawigacja: `Navigation.astro`
+
 **Lokalizacja:** `src/components/Navigation.astro`
 
 **Odpowiedzialności:**
+
 - Globalna nawigacja aplikacji
 - Aktywny stan dla bieżącej strony
 - Linki do Dashboard (/) i Dodaj paragon (/receipts/new)
 
 **Linki:**
+
 - `Dashboard` → `/`
 - `Dodaj paragon` → `/receipts/new`
 
 ### 8. Strona: `index.astro`
+
 **Lokalizacja:** `src/pages/index.astro` (główna strona)
 
 **Odpowiedzialności:**
+
 - Renderowanie komponentu `DashboardView`
 - Użycie dyrektywy `client:load` dla React
 
@@ -145,11 +171,13 @@ Widok Dashboard został w pełni zaimplementowany zgodnie z planem implementacji
 ### Endpoint: `GET /api/receipts?month=YYYY-MM`
 
 **Request:**
+
 ```
 GET /api/receipts?month=2025-10
 ```
 
 **Response (success):**
+
 ```json
 [
   {
@@ -162,6 +190,7 @@ GET /api/receipts?month=2025-10
 ```
 
 **Response (error):**
+
 ```json
 {
   "error": "Validation error",
@@ -170,6 +199,7 @@ GET /api/receipts?month=2025-10
 ```
 
 **Kody statusu:**
+
 - `200 OK` - Sukces (zwraca tablicę, może być pusta)
 - `400 Bad Request` - Nieprawidłowy format parametru month
 - `401 Unauthorized` - Brak autoryzacji
@@ -190,13 +220,16 @@ User → MonthNavigator → useDashboard → API → receiptService → Supabase
 ## Obsługa Błędów
 
 ### 1. Błędy API
+
 - Wyświetlenie komunikatu błędu z przycisku "Spróbuj ponownie"
 - Reload strony po kliknięciu
 
 ### 2. Brak danych
+
 - Wyświetlenie `EmptyState` z CTA do dodania paragonu
 
 ### 3. Błędy walidacji
+
 - Formatowanie parametru `month` w hooku przed wysłaniem do API
 - Walidacja na poziomie API (Zod schema)
 
@@ -205,43 +238,52 @@ User → MonthNavigator → useDashboard → API → receiptService → Supabase
 ### Tailwind CSS Classes
 
 **Kontener:**
+
 - `container mx-auto px-4 py-8 max-w-4xl`
 
 **Nawigacja miesięczna:**
+
 - Flexbox z `justify-between`
 - Przyciski z wariantem `outline`
 
 **Lista paragonów:**
+
 - `space-y-3` dla odstępów między elementami
 - Hover state: `hover:bg-accent`
 - Focus state: `focus-visible:ring-2`
 
 **EmptyState:**
+
 - Centred layout: `flex flex-col items-center justify-center`
 - Maksymalna szerokość tekstu: `max-w-md`
 
 ### Komponenty Shadcn/ui
+
 - `Button` - Nawigacja miesięczna
 - Tailwind utility classes - Wszystkie pozostałe komponenty
 
 ## Accessibility (A11y)
 
 ### Semantic HTML
+
 - `<nav>` dla nawigacji
 - `<main>` dla głównej treści
 - `role="list"` i `role="listitem"` dla listy paragonów
 
 ### ARIA Attributes
+
 - `aria-label="Poprzedni miesiąc"` na przycisku wstecz
 - `aria-label="Następny miesiąc"` na przycisku do przodu
 - `aria-label="Lista paragonów"` na liście
 
 ### Keyboard Navigation
+
 - Wszystkie przyciski dostępne przez Tab
 - Enter/Space dla aktywacji przycisków
 - Focus visible indicators
 
 ### Screen Readers
+
 - Semantyczne nagłówki (h2, h3)
 - Alternatywne teksty dla stanów
 - `sr-only` dla spinnerów
@@ -249,11 +291,13 @@ User → MonthNavigator → useDashboard → API → receiptService → Supabase
 ## Performance
 
 ### Optymalizacje
+
 - React.lazy nie jest wymagane (komponenty są małe)
 - useEffect z dependency na `currentMonth` (brak nadmiarowych requestów)
 - Minimalna ilość re-renderów dzięki odpowiedniej strukturze stanu
 
 ### Bundle Size
+
 - DashboardView: ~5.79 KB (gzipped: 1.94 KB)
 - Ikony (chevron): ~29.37 KB (gzipped: 9.76 KB)
 - Razem: akceptowalny rozmiar dla funkcjonalności
@@ -263,23 +307,27 @@ User → MonthNavigator → useDashboard → API → receiptService → Supabase
 ### Checklist Testowy
 
 #### ✅ Renderowanie
+
 - [ ] Strona główna (/) renderuje Dashboard
 - [ ] Nawigacja jest widoczna na górze strony
 - [ ] MonthNavigator wyświetla aktualny miesiąc
 
 #### ✅ Nawigacja między miesiącami
+
 - [ ] Kliknięcie "poprzedni miesiąc" zmienia miesiąc
 - [ ] Kliknięcie "następny miesiąc" zmienia miesiąc (jeśli nie zablokowane)
 - [ ] Przycisk "następny" jest zablokowany dla bieżącego/przyszłych miesięcy
 - [ ] Zmiana miesiąca pobiera nowe dane z API
 
 #### ✅ Stany UI
+
 - [ ] Loading state: wyświetla spinner podczas ładowania
 - [ ] Empty state: wyświetla komunikat gdy brak paragonów
 - [ ] Error state: wyświetla błąd gdy API zwraca błąd
 - [ ] Success state: wyświetla listę paragonów
 
 #### ✅ Lista paragonów
+
 - [ ] Każdy paragon ma datę, nazwę sklepu (opcjonalna) i kwotę
 - [ ] Data jest sformatowana jako DD.MM.YYYY
 - [ ] Kwota jest sformatowana jako XX,XX zł
@@ -287,11 +335,13 @@ User → MonthNavigator → useDashboard → API → receiptService → Supabase
 - [ ] Hover state działa poprawnie
 
 #### ✅ Integracja API
+
 - [ ] Hook `useDashboard` wysyła request do `/api/receipts?month=YYYY-MM`
 - [ ] Format parametru `month` jest poprawny (YYYY-MM)
 - [ ] Błędy API są obsługiwane gracefully
 
 #### ✅ Accessibility
+
 - [ ] Nawigacja klawiaturą działa (Tab, Enter, Space)
 - [ ] Focus indicators są widoczne
 - [ ] Screen reader ogłasza zmiany stanu
@@ -368,6 +418,7 @@ src/
 ## Zgodność z Planem Implementacji
 
 ✅ Wszystkie punkty z planu implementacji zostały zrealizowane:
+
 - ✅ Struktura komponentów
 - ✅ Hook useDashboard
 - ✅ Integracja z API

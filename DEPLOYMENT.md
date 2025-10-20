@@ -24,6 +24,7 @@ vercel link
 ```
 
 Follow the prompts:
+
 - Select your Vercel account/team
 - Choose to link to an existing project or create a new one
 - Confirm the project settings
@@ -48,25 +49,26 @@ Add the following secrets one by one:
 
 #### Vercel Credentials
 
-| Secret Name | Description | Where to Find |
-|------------|-------------|---------------|
-| `VERCEL_TOKEN` | Vercel authentication token | Created in step 2 |
-| `VERCEL_ORG_ID` | Your Vercel organization ID | `.vercel/project.json` → `orgId` |
-| `VERCEL_PROJECT_ID` | Your Vercel project ID | `.vercel/project.json` → `projectId` |
+| Secret Name         | Description                 | Where to Find                        |
+| ------------------- | --------------------------- | ------------------------------------ |
+| `VERCEL_TOKEN`      | Vercel authentication token | Created in step 2                    |
+| `VERCEL_ORG_ID`     | Your Vercel organization ID | `.vercel/project.json` → `orgId`     |
+| `VERCEL_PROJECT_ID` | Your Vercel project ID      | `.vercel/project.json` → `projectId` |
 
 #### Application Environment Variables
 
-| Secret Name | Description | Where to Find |
-|------------|-------------|---------------|
-| `SUPABASE_URL` | Supabase project URL | [Supabase Dashboard](https://app.supabase.com/project/_/settings/api) → Project URL |
-| `SUPABASE_KEY` | Supabase anonymous/public key | [Supabase Dashboard](https://app.supabase.com/project/_/settings/api) → anon/public key |
-| `GEMINI_API_KEY` | Gemini API key | [Google AI Studio](https://aistudio.google.com/app/apikey) |
+| Secret Name      | Description                   | Where to Find                                                                           |
+| ---------------- | ----------------------------- | --------------------------------------------------------------------------------------- |
+| `SUPABASE_URL`   | Supabase project URL          | [Supabase Dashboard](https://app.supabase.com/project/_/settings/api) → Project URL     |
+| `SUPABASE_KEY`   | Supabase anonymous/public key | [Supabase Dashboard](https://app.supabase.com/project/_/settings/api) → anon/public key |
+| `GEMINI_API_KEY` | Gemini API key                | [Google AI Studio](https://aistudio.google.com/app/apikey)                              |
 
 ### 4. Verify the Workflow File
 
 The workflow file is already created at [.github/workflows/vercel-deploy.yml](.github/workflows/vercel-deploy.yml).
 
 It will automatically:
+
 - Trigger on every push to the `master` branch
 - Install dependencies
 - Build your Astro project with the Vercel adapter
@@ -119,6 +121,7 @@ Instead of passing environment variables during the build step in GitHub Actions
 **Issue**: Build fails with "Missing environment variables"
 
 **Solution**: Ensure all required secrets are added to GitHub repository secrets:
+
 - `VERCEL_TOKEN`
 - `VERCEL_ORG_ID`
 - `VERCEL_PROJECT_ID`
@@ -131,6 +134,7 @@ Instead of passing environment variables during the build step in GitHub Actions
 **Issue**: Deployment fails with "Invalid token"
 
 **Solution**:
+
 1. Regenerate your Vercel token at [vercel.com/account/tokens](https://vercel.com/account/tokens)
 2. Update the `VERCEL_TOKEN` secret in GitHub
 
@@ -139,6 +143,7 @@ Instead of passing environment variables during the build step in GitHub Actions
 **Issue**: Deployment goes to the wrong Vercel project
 
 **Solution**:
+
 1. Check that `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` match your `.vercel/project.json`
 2. Run `vercel link` again to ensure correct project linkage
 
@@ -147,6 +152,7 @@ Instead of passing environment variables during the build step in GitHub Actions
 **Issue**: App works locally but fails in production
 
 **Solution**:
+
 1. Check Vercel deployment logs in the Vercel Dashboard
 2. Verify all environment variables are correctly set
 3. Test the production build locally:
@@ -185,6 +191,7 @@ vercel --prod
 ## Need Help?
 
 If you encounter issues:
+
 1. Check the GitHub Actions workflow logs
 2. Check Vercel deployment logs
 3. Verify all secrets are correctly configured

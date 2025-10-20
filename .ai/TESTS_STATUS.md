@@ -7,20 +7,22 @@
 
 ## 📊 Podsumowanie
 
-| Funkcja | Testy | Status | Coverage |
-|---------|-------|--------|----------|
-| `getReceiptsForMonth()` | 30 | ✅ 30/30 | 100% |
-| `getReceiptById()` | 28 | ✅ 28/28 | 100% |
-| **RAZEM** | **58** | **✅ 58/58** | **100%** |
+| Funkcja                 | Testy  | Status       | Coverage |
+| ----------------------- | ------ | ------------ | -------- |
+| `getReceiptsForMonth()` | 30     | ✅ 30/30     | 100%     |
+| `getReceiptById()`      | 28     | ✅ 28/28     | 100%     |
+| **RAZEM**               | **58** | **✅ 58/58** | **100%** |
 
 ---
 
 ## 🎯 Dwie Funkcje Przetestowane
 
 ### 1. `getReceiptsForMonth()` - 30 testów ✅
+
 **Plik:** `src/__tests__/unit/receiptService.getReceiptsForMonth.test.ts`
 
 Kategorie:
+
 - ✅ Obliczanie startDate (3 testy)
 - ✅ Obliczanie nextMonthDate (5 testów)
 - ✅ Edge case'y dat (2 testy)
@@ -32,9 +34,11 @@ Kategorie:
 - ✅ Skala (2 testy)
 
 ### 2. `getReceiptById()` - 28 testów ✅
+
 **Plik:** `src/__tests__/unit/receiptService.getReceiptById.test.ts`
 
 Kategorie:
+
 - ✅ Happy Path (4 testy)
 - ✅ Bez items (3 testy)
 - ✅ PGRST116 error (3 testy) ⭐
@@ -51,12 +55,14 @@ Kategorie:
 ## ⭐ Kluczowe Odkrycia
 
 ### getReceiptsForMonth()
+
 - **Przejście roku** - Grudzień → Następny rok (edge case)
 - **Wiodące zera** - Miesiące muszą być formatowane poprawnie
 - **RLS security** - user_id filtering zawsze wymagane
 - **Sortowanie** - Malejące po purchase_date
 
 ### getReceiptById()
+
 - **PGRST116 special case** - Nie rzucić error, zwrócić null
 - **Zagnieżdżone items** - Prawidłowe mapowanie `receipt_items`
 - **Null handling** - items, store_name muszą być obsługiwane
@@ -79,28 +85,31 @@ RAZEM: 62 testy
 
 ## 📈 Metryki
 
-| Metrika | Wartość |
-|---------|---------|
-| Liczba testów | 58 (produktywne) |
-| Status | ✅ 58/58 passing |
-| Pokrycie | 100% obu funkcji |
-| Czas wykonania | < 150ms |
-| Linii kodu testów | ~1300 |
-| Mock strategia | Fluent API pattern |
+| Metrika           | Wartość            |
+| ----------------- | ------------------ |
+| Liczba testów     | 58 (produktywne)   |
+| Status            | ✅ 58/58 passing   |
+| Pokrycie          | 100% obu funkcji   |
+| Czas wykonania    | < 150ms            |
+| Linii kodu testów | ~1300              |
+| Mock strategia    | Fluent API pattern |
 
 ---
 
 ## 📚 Dokumentacja
 
 ### Dla getReceiptsForMonth()
+
 - [test-analysis-getReceiptsForMonth.md](.ai/test-analysis-getReceiptsForMonth.md)
 - [receiptService.getReceiptsForMonth.test.ts](src/__tests__/unit/receiptService.getReceiptsForMonth.test.ts)
 
 ### Dla getReceiptById()
+
 - [test-analysis-getReceiptById.md](.ai/test-analysis-getReceiptById.md)
 - [receiptService.getReceiptById.test.ts](src/__tests__/unit/receiptService.getReceiptById.test.ts)
 
 ### Ogólne
+
 - [unit-testing-guide.md](.ai/prompts/unit-testing-guide.md)
 - [TESTING_QUICK_START.md](.ai/TESTING_QUICK_START.md)
 
@@ -132,14 +141,14 @@ npm run test:coverage
 
 ## 🎯 Następne Funkcje (Roadmap)
 
-| Funkcja | LOC | Testy | Status |
-|---------|-----|-------|--------|
-| ✅ `getReceiptsForMonth()` | 45 | 30 | DONE |
-| ✅ `getReceiptById()` | 51 | 28 | DONE |
-| 📝 `createReceipt()` | 112 | ~30 | TODO |
-| 📝 `updateReceipt()` | 124 | ~30 | TODO |
-| 📝 `deleteReceipt()` | 40 | ~10 | TODO |
-| 📝 `getMonthlyStats()` | 108 | ~25 | TODO |
+| Funkcja                    | LOC | Testy | Status |
+| -------------------------- | --- | ----- | ------ |
+| ✅ `getReceiptsForMonth()` | 45  | 30    | DONE   |
+| ✅ `getReceiptById()`      | 51  | 28    | DONE   |
+| 📝 `createReceipt()`       | 112 | ~30   | TODO   |
+| 📝 `updateReceipt()`       | 124 | ~30   | TODO   |
+| 📝 `deleteReceipt()`       | 40  | ~10   | TODO   |
+| 📝 `getMonthlyStats()`     | 108 | ~25   | TODO   |
 
 **Progress:** 2/8 funkcji testowanych (25%)
 **Razem testów:** ~58 (target: ~165)
@@ -187,6 +196,7 @@ npm run test:coverage
 ## 🎉 Status: PRODUCTION READY ✅
 
 **Ukończone:**
+
 - ✅ 58 testów (30 + 28)
 - ✅ 100% pokrycia logiki
 - ✅ Wszystkie przechodzą
@@ -194,6 +204,7 @@ npm run test:coverage
 - ✅ Guide do replikacji
 
 **Gotowe do:**
+
 - ✅ Code review
 - ✅ Production
 - ✅ Replikacji na inne funkcje

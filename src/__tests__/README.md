@@ -72,10 +72,10 @@ npm run test:e2e:debug
 ### Test jednostkowy
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('MyFunction', () => {
-  it('should return correct result', () => {
+describe("MyFunction", () => {
+  it("should return correct result", () => {
     const result = myFunction(2, 3);
     expect(result).toBe(5);
   });
@@ -99,12 +99,12 @@ describe('Button', () => {
 ### Test E2E
 
 ```typescript
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('user can click button', async ({ page }) => {
-  await page.goto('/');
-  await page.click('button');
-  await expect(page.locator('.result')).toContainText('Success');
+test("user can click button", async ({ page }) => {
+  await page.goto("/");
+  await page.click("button");
+  await expect(page.locator(".result")).toContainText("Success");
 });
 ```
 
@@ -113,7 +113,7 @@ test('user can click button', async ({ page }) => {
 Dla testów E2E zalecane jest używanie Page Object Model pattern w celu utrzymania czytelności i łatwości konserwacji:
 
 ```typescript
-import { BasePage } from './pages/BasePage';
+import { BasePage } from "./pages/BasePage";
 
 class LoginPage extends BasePage {
   async fillUsername(username: string) {
@@ -160,9 +160,9 @@ class LoginPage extends BasePage {
 ### Mockowanie modułów
 
 ```typescript
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
-vi.mock('@/lib/services/api', () => ({
+vi.mock("@/lib/services/api", () => ({
   fetchData: vi.fn().mockResolvedValue({ success: true }),
 }));
 ```
@@ -181,13 +181,16 @@ const mockSupabase = {
 ## Troubleshooting
 
 ### Błąd: "Cannot find module '@/...'"
+
 - Upewnij się, że `vitest.config.ts` zawiera poprawny `alias` dla `@/`
 
 ### Testy E2E się zawieszają
+
 - Sprawdź czy dev server (`npm run dev`) jest uruchomiony
 - Zwiększ timeout w konfiguracji Playwright
 
 ### Problemy z DOM w Vitest
+
 - Upewnij się, że `environment: 'jsdom'` w konfiguracji
 - Sprawdź czy `vitest.setup.ts` jest załadowany
 

@@ -1,4 +1,4 @@
-import { chromium, FullConfig } from "@playwright/test";
+import { chromium, type FullConfig } from "@playwright/test";
 import { getTestCredentials } from "./helpers/auth.helper";
 
 /**
@@ -71,18 +71,19 @@ async function globalSetup(config: FullConfig) {
 
     // Submit the form
     console.log("5. Submitting login form...");
-    await Promise.all([
-      page.waitForURL((url) => url.pathname === "/", { timeout: 15000 }),
-      submitButton.click({ force: true }), // Force click in case button is still disabled
-    ]);
+    await submitButton.click({ force: true }); // Force click in case button is still disabled
 
-    console.log("6. Login successful! Current URL:", page.url());
+    // Wait for the redirect (happens after 2-second delay in useAuthSubmission)
+    console.log("6. Waiting for redirect to homepage...");
+    await page.waitForURL((url) => url.pathname === "/", { timeout: 20000 });
+
+    console.log("7. Login successful! Current URL:", page.url());
 
     // Wait for network to settle
     await page.waitForLoadState("networkidle");
 
     // Save authentication state
-    console.log("7. Saving authentication state...");
+    console.log("8. Saving authentication state...");
     await page.context().storageState({ path: "./test-results/.auth/user.json" });
 
     console.log("✅ Global setup complete!\n");

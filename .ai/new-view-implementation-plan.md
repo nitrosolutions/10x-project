@@ -1,15 +1,19 @@
 # Plan implementacji widoku: Ręczne Dodawanie Paragonu
 
 ## 1. Przegląd
+
 Celem tego widoku jest umożliwienie użytkownikom ręcznego dodawania nowego paragonu do systemu. Widok będzie zawierał formularz z polami na datę zakupu, opcjonalną nazwę sklepu oraz dynamiczną listę pozycji paragonu. Formularz będzie walidowany w czasie rzeczywistym i po pomyślnym zapisie przekieruje użytkownika z powrotem do głównego widoku.
 
 ## 2. Routing widoku
+
 Widok będzie dostępny pod następującą ścieżką:
+
 - `/receipts/new`
 
 Plik strony zostanie utworzony w lokalizacji `src/pages/receipts/new.astro`.
 
 ## 3. Struktura komponentów
+
 Hierarchia komponentów będzie zorganizowana w następujący sposób, z wykorzystaniem komponentów Astro dla struktury strony i React dla interaktywnego formularza.
 
 ```
@@ -31,7 +35,9 @@ src/pages/receipts/new.astro
 ```
 
 ## 4. Szczegóły komponentów
+
 ### `ReceiptForm.tsx`
+
 - **Opis komponentu:** Główny komponent React, który zarządza całym stanem formularza, logiką walidacji oraz komunikacją z API. Będzie wykorzystywał bibliotekę `react-hook-form` do zarządzania stanem i walidacją.
 - **Główne elementy:** Komponent `<Form>` z Shadcn/ui, `DatePicker` do wyboru daty, `Input` dla nazwy sklepu, dynamicznie renderowana lista komponentów `ReceiptItemRow`, przyciski do dodawania pozycji i zapisu formularza.
 - **Obsługiwane interakcje:**
@@ -48,6 +54,7 @@ src/pages/receipts/new.astro
   - `categories: Category[]`: Lista dostępnych kategorii do wyboru, przekazana z komponentu Astro.
 
 ### `ReceiptItemRow.tsx`
+
 - **Opis komponentu:** Komponent reprezentujący pojedynczy wiersz pozycji na paragonie. Zawiera pola do wpisania nazwy produktu, ceny, wyboru kategorii oraz przycisk do usunięcia wiersza.
 - **Główne elementy:** Trzy pola formularza (`Input` dla nazwy, `Input` dla ceny, `Select` dla kategorii) oraz `Button` z ikoną kosza.
 - **Obsługiwane interakcje:**
@@ -65,9 +72,11 @@ src/pages/receipts/new.astro
   - `categories: Category[]`: Lista dostępnych kategorii.
 
 ## 5. Typy
+
 Do implementacji widoku wymagane będą następujące typy.
 
 - **DTO (Data Transfer Object) - do komunikacji z API:**
+
   ```typescript
   // DTO dla pojedynczej pozycji wysyłanej do API
   interface ReceiptItemCreateDto {
@@ -85,6 +94,7 @@ Do implementacji widoku wymagane będą następujące typy.
   ```
 
 - **ViewModel - do zarządzania stanem w UI:**
+
   ```typescript
   // ViewModel dla pojedynczej pozycji w formularzu
   interface ReceiptItemViewModel {
@@ -112,6 +122,7 @@ Do implementacji widoku wymagane będą następujące typy.
   ```
 
 ## 6. Zarządzanie stanem
+
 Zarządzanie stanem formularza zostanie zrealizowane przy użyciu biblioteki `react-hook-form` w połączeniu z `zod` do walidacji.
 
 - **`useForm`:** Główny hook do inicjalizacji formularza, rejestracji pól, obsługi walidacji i procesu wysyłania danych.
@@ -122,6 +133,7 @@ Zarządzanie stanem formularza zostanie zrealizowane przy użyciu biblioteki `re
 Nie przewiduje się potrzeby tworzenia złożonego, niestandardowego hooka, ponieważ `react-hook-form` dostarcza wszystkie niezbędne narzędzia.
 
 ## 7. Integracja API
+
 Integracja z backendem będzie polegała na wysłaniu żądania `POST` na endpoint `/api/receipts`.
 
 - **Endpoint:** `POST /api/receipts`
@@ -134,12 +146,14 @@ Integracja z backendem będzie polegała na wysłaniu żądania `POST` na endpoi
 Przed wysłaniem, dane z `ReceiptViewModel` zostaną przekształcone do formatu `ReceiptCreateDto` (np. konwersja `Date` na string, parsowanie ceny ze stringa na liczbę).
 
 ## 8. Interakcje użytkownika
+
 - **Dodawanie pozycji:** Kliknięcie przycisku "+ Dodaj pozycję" powoduje dodanie nowego, pustego wiersza `ReceiptItemRow` na końcu listy.
 - **Usuwanie pozycji:** Kliknięcie ikony kosza w danym wierszu usuwa tę pozycję z formularza.
 - **Wypełnianie formularza:** Użytkownik wprowadza dane w polach. Walidacja jest uruchamiana przy zmianie wartości (`onChange`) lub utracie fokusu (`onBlur`).
 - **Zapisywanie paragonu:** Kliknięcie przycisku "Zapisz" (aktywnego tylko gdy formularz jest poprawny) uruchamia proces wysyłania danych do API. W trakcie zapisu przycisk jest nieaktywny, a interfejs wskazuje stan ładowania.
 
 ## 9. Warunki i walidacja
+
 Walidacja będzie zaimplementowana za pomocą schematu `zod` i `react-hook-form`.
 
 - **Data zakupu:** Musi być datą z przeszłości lub datą dzisiejszą. Komunikat o błędzie pojawi się, jeśli użytkownik wybierze przyszłą datę.
@@ -151,11 +165,13 @@ Walidacja będzie zaimplementowana za pomocą schematu `zod` i `react-hook-form`
 Przycisk "Zapisz" będzie w stanie `disabled` dopóki wszystkie powyższe warunki nie zostaną spełnione.
 
 ## 10. Obsługa błędów
+
 - **Błędy walidacji:** Komunikaty o błędach będą wyświetlane bezpośrednio pod odpowiednimi polami formularza.
 - **Błędy API (np. 4xx, 5xx):** Po nieudanej próbie zapisu zostanie wyświetlony globalny komunikat (Toast) z informacją: "Nie udało się zapisać. Spróbuj ponownie.". Formularz pozostanie w edytowalnym stanie, umożliwiając użytkownikowi ponowną próbę.
 - **Błąd ładowania kategorii:** Jeśli pobranie listy kategorii nie powiedzie się, formularz zostanie zablokowany, a użytkownik zobaczy komunikat o błędzie uniemożliwiającym dodanie paragonu.
 
 ## 11. Kroki implementacji
+
 1.  **Utworzenie pliku strony:** Stworzenie pliku `src/pages/receipts/new.astro`, który będzie renderował główny layout i komponent `ReceiptForm`.
 2.  **Pobranie danych początkowych:** W pliku `.astro` zaimplementować logikę pobierania listy kategorii z API i przekazania jej jako props do komponentu React.
 3.  **Struktura komponentu `ReceiptForm`:** Zbudowanie szkieletu komponentu `ReceiptForm.tsx`, w tym inicjalizacja `react-hook-form` i `zod` dla schematu walidacji.

@@ -5,24 +5,29 @@ Data: 2025-10-17
 ## Zainstalowane narzędzia
 
 ### Vitest (Testy jednostkowe)
+
 - `vitest@^3.2.4` - Framework do testów jednostkowych
 - `@vitest/ui@^3.2.4` - UI interfejs do Vitest
 - `@vitest/coverage-v8@^3.2.4` - Raport pokrycia kodu
 
 ### Testing Library (Testy React)
+
 - `@testing-library/react@^16.3.0` - Utilities do testowania komponentów React
 - `@testing-library/jest-dom@^6.9.1` - Custom matchers dla DOM
 - `@testing-library/user-event@^14.6.1` - Symulacja interakcji użytkownika
 
 ### Playwright (Testy E2E)
+
 - `@playwright/test@^1.56.1` - Framework do testów end-to-end
 
 ### Dodatkowe
+
 - `jsdom@^27.0.0` - DOM environment dla Vitest
 
 ## Pliki konfiguracyjne
 
 ### `vitest.config.ts`
+
 - Environment: jsdom (dla React testów)
 - Setup file: `src/__tests__/setup/vitest.setup.ts`
 - Path alias: `@/*` → `./src/*`
@@ -30,6 +35,7 @@ Data: 2025-10-17
 - Test pattern: `src/**/*.{test,spec}.{js,ts,jsx,tsx}` (excludes E2E)
 
 ### `playwright.config.ts`
+
 - Browser: Chromium (Desktop Chrome)
 - Base URL: http://localhost:3000
 - Test directory: `src/__tests__/e2e`
@@ -59,6 +65,7 @@ src/__tests__/
 ## Dostępne skrypty
 
 ### Testy jednostkowe
+
 ```bash
 npm run test              # Uruchom testy
 npm run test:watch       # Watch mode
@@ -67,6 +74,7 @@ npm run test:coverage    # Raport pokrycia
 ```
 
 ### Testy E2E
+
 ```bash
 npm run test:e2e         # Uruchom testy E2E
 npm run test:e2e:ui      # UI interfejs
@@ -76,6 +84,7 @@ npm run test:e2e:debug   # Debug mode
 ## Wstępna konfiguracja
 
 ### ✅ Setup Vitest
+
 - [x] Zainstalowana biblioteka
 - [x] Stworzony `vitest.config.ts`
 - [x] Stworzony `src/__tests__/setup/vitest.setup.ts`
@@ -84,16 +93,19 @@ npm run test:e2e:debug   # Debug mode
 - [x] Testy jednostkowe działają poprawnie
 
 ### ✅ Setup Playwright
+
 - [x] Zainstalowana biblioteka
 - [x] Stworzony `playwright.config.ts`
 - [x] Stworzony `src/__tests__/e2e/pages/BasePage.ts`
 - [x] Dodane skrypty E2E do `package.json`
 
 ### ✅ Struktura katalogów
+
 - [x] Stworzeni katalogi `src/__tests__/{unit,e2e,setup}`
 - [x] Stworzony `src/__tests__/README.md` z dokumentacją
 
 ### ✅ Przykłady
+
 - [x] `src/__tests__/unit/example.test.ts` - Działający test
 - [x] `src/__tests__/e2e/example.spec.ts` - Szablon testu E2E
 
@@ -121,6 +133,7 @@ npm run test:e2e:debug   # Debug mode
 ## Weryfikacja
 
 Konfiguracja została zweryfikowana:
+
 - ✅ `npm run test` - 4 testy przechodzą
 - ✅ Brak błędów konfiguracyjnych
 - ✅ Wszystkie zależności zainstalowane pomyślnie

@@ -3,19 +3,13 @@
     "10x-mvp-tracker": {
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "@przeprogramowani/10x-mvp-tracker"
-      ],
+      "args": ["-y", "@przeprogramowani/10x-mvp-tracker"],
       "env": {}
     },
     "gemini-cli": {
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "gemini-mcp-tool"
-      ],
+      "args": ["-y", "gemini-mcp-tool"],
       "env": {}
     }
   }

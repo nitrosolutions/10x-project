@@ -4,10 +4,12 @@ Na podstawie dostarczonych plików `auth-spec.md` i `prd.md` oraz analizy strukt
 ### 1. Lista Komponentów i Stron
 
 **Layouty (Astro):**
+
 - `Layout.astro` (Modyfikacja): Główny layout aplikacji. Będzie warunkowo renderować nawigację w zależności od stanu zalogowania użytkownika (sesja z `Astro.locals.session`).
 - `AuthLayout.astro` (Nowy): Specjalny layout dla stron formularzy logowania, rejestracji itp., zapewniający spójny, wycentrowany wygląd.
 
 **Strony (Astro):**
+
 - `login.astro`: Strona logowania, renderuje `LoginForm.tsx`.
 - `register.astro`: Strona rejestracji, renderuje `RegisterForm.tsx`.
 - `reset-password.astro`: Strona do inicjowania resetu hasła, renderuje `ResetPasswordForm.tsx`.
@@ -15,6 +17,7 @@ Na podstawie dostarczonych plików `auth-spec.md` i `prd.md` oraz analizy strukt
 - `account.astro`: Strona zarządzania kontem, renderuje `AccountView.tsx`.
 
 **Komponenty (React):**
+
 - `LoginForm.tsx`: Formularz logowania z polami email i hasło.
 - `RegisterForm.tsx`: Formularz rejestracji z walidacją siły hasła.
 - `ResetPasswordForm.tsx`: Formularz do wysyłania prośby o reset hasła.
@@ -23,6 +26,7 @@ Na podstawie dostarczonych plików `auth-spec.md` i `prd.md` oraz analizy strukt
 - `DeleteAccountDialog.tsx`: Modal potwierdzający usunięcie konta.
 
 **Endpointy API (Astro):**
+
 - `POST /api/auth/login`: Logowanie użytkownika.
 - `POST /api/auth/register`: Rejestracja nowego użytkownika.
 - `POST /api/auth/logout`: Wylogowanie użytkownika.
@@ -30,6 +34,7 @@ Na podstawie dostarczonych plików `auth-spec.md` i `prd.md` oraz analizy strukt
 - `POST /api/auth/delete-account`: Usunięcie konta użytkownika.
 
 **Logika serwerowa:**
+
 - `middleware/index.ts`: Przechwytuje każde żądanie, zarządza sesją Supabase i chroni trasy.
 
 ### 2. Główne Strony i Ich Komponenty
@@ -60,6 +65,7 @@ Na podstawie dostarczonych plików `auth-spec.md` i `prd.md` oraz analizy strukt
 </architecture_analysis>
 
 <mermaid_diagram>
+
 ```mermaid
 flowchart TD
     classDef page fill:#E1F5FE,stroke:#0277BD,stroke-width:2px;
@@ -99,7 +105,7 @@ flowchart TD
         API_RESET:::api -- resetPasswordForEmail() --> SB_AUTH;
         API_LOGOUT[POST /api/auth/logout]:::api -- signOut() --> SB_AUTH;
         API_DELETE[POST /api/auth/delete-account]:::api -- deleteUser() --> SB_AUTH;
-        
+
         SB_AUTH[Supabase Auth]:::external;
     end
 
@@ -110,7 +116,7 @@ flowchart TD
         P_DASHBOARD:::page --> L[Layout.astro];
         L:::layout -- Renderuje --> NAV[Navigation.astro];
         NAV -- Link do konta --> P_ACC[account.astro];
-        
+
         P_ACC[account.astro]:::page -- Używa --> L;
         L -- Renderuje --> C_ACC[AccountView.tsx];
         C_ACC[AccountView.tsx]:::component -- Wyloguj --> API_LOGOUT;
@@ -126,4 +132,5 @@ flowchart TD
     end
 
 ```
+
 </mermaid_diagram>

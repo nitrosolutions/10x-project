@@ -1,12 +1,15 @@
 # Receipt Form - Test IDs Documentation
 
 ## Overview
+
 This document provides a comprehensive guide to the `data-test-id` attributes added to the Receipt Form components for testing the scenario:
+
 1. Open new receipt form
 2. Add sample item with all required fields
 3. Save receipt
 
 ## Components Updated
+
 - [ReceiptForm.tsx](src/components/receipts/ReceiptForm.tsx)
 - [ReceiptItemRow.tsx](src/components/receipts/ReceiptItemRow.tsx)
 
@@ -53,19 +56,20 @@ User Journey:
 
 ### Container & Form Structure
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
-| Main container div | `receipt-form-container` | Container for entire form | Top-level element |
-| Form element | `receipt-form` | Form wrapper | Contains all form fields |
+| Element            | Test ID                  | Purpose                   | Notes                    |
+| ------------------ | ------------------------ | ------------------------- | ------------------------ |
+| Main container div | `receipt-form-container` | Container for entire form | Top-level element        |
+| Form element       | `receipt-form`           | Form wrapper              | Contains all form fields |
 
 ### Date Field Section
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
-| Date trigger button | `receipt-date-trigger` | Button to open date picker | Shows formatted date |
-| Date calendar popover | `receipt-date-calendar` | Calendar component | Contains date selection |
+| Element               | Test ID                 | Purpose                    | Notes                   |
+| --------------------- | ----------------------- | -------------------------- | ----------------------- |
+| Date trigger button   | `receipt-date-trigger`  | Button to open date picker | Shows formatted date    |
+| Date calendar popover | `receipt-date-calendar` | Calendar component         | Contains date selection |
 
 **Test Example:**
+
 ```javascript
 // Open date picker
 await page.click('[data-test-id="receipt-date-trigger"]');
@@ -79,29 +83,31 @@ await page.click('button[name="day"]:has-text("15")'); // Select 15th
 
 ### Store Name Field
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
+| Element          | Test ID                    | Purpose              | Notes          |
+| ---------------- | -------------------------- | -------------------- | -------------- |
 | Store name input | `receipt-store-name-input` | Text input for store | Optional field |
 
 **Test Example:**
+
 ```javascript
 // Fill store name
-await page.fill('[data-test-id="receipt-store-name-input"]', 'Biedronka');
+await page.fill('[data-test-id="receipt-store-name-input"]', "Biedronka");
 
 // Verify value
-await expect(page.locator('[data-test-id="receipt-store-name-input"]')).toHaveValue('Biedronka');
+await expect(page.locator('[data-test-id="receipt-store-name-input"]')).toHaveValue("Biedronka");
 ```
 
 ### Items Section
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
-| Items container section | `receipt-items-section` | Section wrapper | Contains items list and add button |
-| Add item button | `receipt-add-item-button` | Button to add new item | Variant: outline |
-| Items list wrapper | `receipt-items-list` | Container for item rows | Visible only when items exist |
-| Item row (dynamic) | `receipt-item-row-{index}` | Individual item container | Example: `receipt-item-row-0`, `receipt-item-row-1` |
+| Element                 | Test ID                    | Purpose                   | Notes                                               |
+| ----------------------- | -------------------------- | ------------------------- | --------------------------------------------------- |
+| Items container section | `receipt-items-section`    | Section wrapper           | Contains items list and add button                  |
+| Add item button         | `receipt-add-item-button`  | Button to add new item    | Variant: outline                                    |
+| Items list wrapper      | `receipt-items-list`       | Container for item rows   | Visible only when items exist                       |
+| Item row (dynamic)      | `receipt-item-row-{index}` | Individual item container | Example: `receipt-item-row-0`, `receipt-item-row-1` |
 
 **Test Example:**
+
 ```javascript
 // Click add item button
 await page.click('[data-test-id="receipt-add-item-button"]');
@@ -115,16 +121,17 @@ await expect(page.locator('[data-test-id="receipt-item-row-0"]')).toBeVisible();
 
 ### Total Section
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
-| Total container | `receipt-total` | Total section wrapper | Shows "Suma:" label |
-| Total amount | `receipt-total-amount` | Amount value | Formatted: "XX.XX zł" |
+| Element         | Test ID                | Purpose               | Notes                 |
+| --------------- | ---------------------- | --------------------- | --------------------- |
+| Total container | `receipt-total`        | Total section wrapper | Shows "Suma:" label   |
+| Total amount    | `receipt-total-amount` | Amount value          | Formatted: "XX.XX zł" |
 
 **Test Example:**
+
 ```javascript
 // Verify total displays
 const totalAmount = page.locator('[data-test-id="receipt-total-amount"]');
-await expect(totalAmount).toContainText('zł');
+await expect(totalAmount).toContainText("zł");
 
 // Check total value
 const totalText = await totalAmount.textContent();
@@ -133,12 +140,13 @@ expect(parseFloat(totalText)).toBe(19.99);
 
 ### Action Buttons
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
-| Cancel button | `receipt-cancel-button` | Redirects to home | Variant: outline |
+| Element       | Test ID                 | Purpose               | Notes                    |
+| ------------- | ----------------------- | --------------------- | ------------------------ |
+| Cancel button | `receipt-cancel-button` | Redirects to home     | Variant: outline         |
 | Submit button | `receipt-submit-button` | Saves/Updates receipt | Disabled if form invalid |
 
 **Test Example:**
+
 ```javascript
 // Verify submit button is disabled initially
 await expect(page.locator('[data-test-id="receipt-submit-button"]')).toBeDisabled();
@@ -158,62 +166,66 @@ await page.click('[data-test-id="receipt-submit-button"]');
 
 ### Item Row Container
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
+| Element          | Test ID                    | Purpose                   | Notes                   |
+| ---------------- | -------------------------- | ------------------------- | ----------------------- |
 | Item row wrapper | `receipt-item-row-{index}` | Container for item fields | Passed from ReceiptForm |
 
 **Note:** `{index}` is replaced with actual index (0, 1, 2, etc.)
 
 ### Product Name Field
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
+| Element            | Test ID                        | Purpose                     | Notes          |
+| ------------------ | ------------------------------ | --------------------------- | -------------- |
 | Product name input | `{item-id}-product-name-input` | Text input for product name | Required field |
 
 **Example:** `receipt-item-row-0-product-name-input`
 
 **Test Example:**
+
 ```javascript
 // Fill product name
-await page.fill('[data-test-id="receipt-item-row-0-product-name-input"]', 'Mleko');
+await page.fill('[data-test-id="receipt-item-row-0-product-name-input"]', "Mleko");
 
 // Verify value
-await expect(page.locator('[data-test-id="receipt-item-row-0-product-name-input"]')).toHaveValue('Mleko');
+await expect(page.locator('[data-test-id="receipt-item-row-0-product-name-input"]')).toHaveValue("Mleko");
 ```
 
 ### Price Field
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
+| Element     | Test ID                 | Purpose                | Notes                 |
+| ----------- | ----------------------- | ---------------------- | --------------------- |
 | Price input | `{item-id}-price-input` | Number input for price | Required field, min 0 |
 
 **Example:** `receipt-item-row-0-price-input`
 
 **Test Example:**
+
 ```javascript
 // Fill price
-await page.fill('[data-test-id="receipt-item-row-0-price-input"]', '19.99');
+await page.fill('[data-test-id="receipt-item-row-0-price-input"]', "19.99");
 
 // Verify value
-await expect(page.locator('[data-test-id="receipt-item-row-0-price-input"]')).toHaveValue('19.99');
+await expect(page.locator('[data-test-id="receipt-item-row-0-price-input"]')).toHaveValue("19.99");
 
 // Verify total updates
-await expect(page.locator('[data-test-id="receipt-total-amount"]')).toContainText('19.99');
+await expect(page.locator('[data-test-id="receipt-total-amount"]')).toContainText("19.99");
 ```
 
 ### Category Select Field
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
-| Category select trigger | `{item-id}-category-select` | Button to open category dropdown | Required field |
-| Category option (dynamic) | `{item-id}-category-option-{cat-id}` | Individual category option | Example: `receipt-item-row-0-category-option-1` |
+| Element                   | Test ID                              | Purpose                          | Notes                                           |
+| ------------------------- | ------------------------------------ | -------------------------------- | ----------------------------------------------- |
+| Category select trigger   | `{item-id}-category-select`          | Button to open category dropdown | Required field                                  |
+| Category option (dynamic) | `{item-id}-category-option-{cat-id}` | Individual category option       | Example: `receipt-item-row-0-category-option-1` |
 
 **Examples:**
+
 - `receipt-item-row-0-category-select`
 - `receipt-item-row-0-category-option-1`
 - `receipt-item-row-0-category-option-2`
 
 **Test Example:**
+
 ```javascript
 // Open category select
 await page.click('[data-test-id="receipt-item-row-0-category-select"]');
@@ -222,18 +234,19 @@ await page.click('[data-test-id="receipt-item-row-0-category-select"]');
 await page.click('[data-test-id="receipt-item-row-0-category-option-2"]');
 
 // Verify selection
-await expect(page.locator('[data-test-id="receipt-item-row-0-category-select"]')).toContainText('Kategoria');
+await expect(page.locator('[data-test-id="receipt-item-row-0-category-select"]')).toContainText("Kategoria");
 ```
 
 ### Delete Button
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
+| Element       | Test ID                   | Purpose           | Notes                            |
+| ------------- | ------------------------- | ----------------- | -------------------------------- |
 | Delete button | `{item-id}-delete-button` | Trash icon button | Only visible if `canRemove=true` |
 
 **Example:** `receipt-item-row-0-delete-button`
 
 **Test Example:**
+
 ```javascript
 // Click delete button
 await page.click('[data-test-id="receipt-item-row-0-delete-button"]');
@@ -244,18 +257,20 @@ await expect(page.locator('[data-test-id="receipt-item-row-0-delete-dialog"]')).
 
 ### Delete Confirmation Dialog
 
-| Element | Test ID | Purpose | Notes |
-|---------|---------|---------|-------|
-| Dialog content | `{item-id}-delete-dialog` | Alert dialog for deletion confirmation | Shows on delete click |
-| Cancel button | `{item-id}-delete-dialog-cancel` | Cancels deletion | Closes dialog |
-| Confirm button | `{item-id}-delete-dialog-confirm` | Confirms deletion | Removes item from list |
+| Element        | Test ID                           | Purpose                                | Notes                  |
+| -------------- | --------------------------------- | -------------------------------------- | ---------------------- |
+| Dialog content | `{item-id}-delete-dialog`         | Alert dialog for deletion confirmation | Shows on delete click  |
+| Cancel button  | `{item-id}-delete-dialog-cancel`  | Cancels deletion                       | Closes dialog          |
+| Confirm button | `{item-id}-delete-dialog-confirm` | Confirms deletion                      | Removes item from list |
 
 **Examples:**
+
 - `receipt-item-row-0-delete-dialog`
 - `receipt-item-row-0-delete-dialog-cancel`
 - `receipt-item-row-0-delete-dialog-confirm`
 
 **Test Example:**
+
 ```javascript
 // Click delete button
 await page.click('[data-test-id="receipt-item-row-0-delete-button"]');
@@ -280,11 +295,11 @@ await expect(page.locator('[data-test-id="receipt-item-row-0"]')).not.toBeVisibl
 ### Main Scenario: Add Receipt with Item
 
 ```javascript
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('should add receipt with item and save successfully', async ({ page }) => {
+test("should add receipt with item and save successfully", async ({ page }) => {
   // Navigate to new receipt page
-  await page.goto('/receipts/new');
+  await page.goto("/receipts/new");
 
   // Verify form loads
   await expect(page.locator('[data-test-id="receipt-form"]')).toBeVisible();
@@ -296,7 +311,7 @@ test('should add receipt with item and save successfully', async ({ page }) => {
   await page.click('button:has-text("15")');
 
   // ✓ Step 2: Fill Store Name (optional)
-  await page.fill('[data-test-id="receipt-store-name-input"]', 'Biedronka');
+  await page.fill('[data-test-id="receipt-store-name-input"]', "Biedronka");
 
   // ✓ Step 3: Add Item
   await page.click('[data-test-id="receipt-add-item-button"]');
@@ -305,16 +320,10 @@ test('should add receipt with item and save successfully', async ({ page }) => {
 
   // ✓ Step 4: Fill Item Details
   // 4a. Product Name
-  await page.fill(
-    '[data-test-id="receipt-item-row-0-product-name-input"]',
-    'Mleko 1L'
-  );
+  await page.fill('[data-test-id="receipt-item-row-0-product-name-input"]', "Mleko 1L");
 
   // 4b. Price
-  await page.fill(
-    '[data-test-id="receipt-item-row-0-price-input"]',
-    '3.99'
-  );
+  await page.fill('[data-test-id="receipt-item-row-0-price-input"]', "3.99");
 
   // 4c. Category
   await page.click('[data-test-id="receipt-item-row-0-category-select"]');
@@ -323,7 +332,7 @@ test('should add receipt with item and save successfully', async ({ page }) => {
 
   // ✓ Step 5: Verify Total
   const totalAmount = await page.locator('[data-test-id="receipt-total-amount"]').textContent();
-  expect(totalAmount).toContain('3.99 zł');
+  expect(totalAmount).toContain("3.99 zł");
 
   // ✓ Step 6: Submit Form
   const submitButton = page.locator('[data-test-id="receipt-submit-button"]');
@@ -339,9 +348,10 @@ test('should add receipt with item and save successfully', async ({ page }) => {
 ### Alternative Scenarios
 
 #### Scenario 2: Delete Item Before Saving
+
 ```javascript
-test('should delete item and update total', async ({ page }) => {
-  await page.goto('/receipts/new');
+test("should delete item and update total", async ({ page }) => {
+  await page.goto("/receipts/new");
 
   // Add two items
   await page.click('[data-test-id="receipt-add-item-button"]');
@@ -364,13 +374,14 @@ test('should delete item and update total', async ({ page }) => {
 ```
 
 #### Scenario 3: Cancel Item Deletion
+
 ```javascript
-test('should cancel item deletion', async ({ page }) => {
-  await page.goto('/receipts/new');
+test("should cancel item deletion", async ({ page }) => {
+  await page.goto("/receipts/new");
 
   // Add item
   await page.click('[data-test-id="receipt-add-item-button"]');
-  await page.fill('[data-test-id="receipt-item-row-0-product-name-input"]', 'Test');
+  await page.fill('[data-test-id="receipt-item-row-0-product-name-input"]', "Test");
 
   // Try to delete but cancel
   await page.click('[data-test-id="receipt-item-row-0-delete-button"]');
@@ -378,19 +389,18 @@ test('should cancel item deletion', async ({ page }) => {
 
   // Verify item still exists
   await expect(page.locator('[data-test-id="receipt-item-row-0"]')).toBeVisible();
-  await expect(
-    page.locator('[data-test-id="receipt-item-row-0-product-name-input"]')
-  ).toHaveValue('Test');
+  await expect(page.locator('[data-test-id="receipt-item-row-0-product-name-input"]')).toHaveValue("Test");
 });
 ```
 
 #### Scenario 4: Cancel Form (without saving)
+
 ```javascript
-test('should cancel receipt form', async ({ page }) => {
-  await page.goto('/receipts/new');
+test("should cancel receipt form", async ({ page }) => {
+  await page.goto("/receipts/new");
 
   // Fill some data
-  await page.fill('[data-test-id="receipt-store-name-input"]', 'Biedronka');
+  await page.fill('[data-test-id="receipt-store-name-input"]', "Biedronka");
 
   // Click cancel
   await page.click('[data-test-id="receipt-cancel-button"]');
@@ -423,6 +433,7 @@ receipt-submit-button               (primary action button)
 ```
 
 ### Naming Rules
+
 1. **Prefix:** Always start with `receipt-`
 2. **Component Level:** Use logical component names (`form`, `date`, `item-row`, etc.)
 3. **Field/Section:** Specify the field (`product-name`, `category`, `total`, etc.)
@@ -435,6 +446,7 @@ receipt-submit-button               (primary action button)
 ## Integration with Testing Frameworks
 
 ### Playwright (E2E)
+
 ```javascript
 // Find element
 const element = page.locator('[data-test-id="receipt-submit-button"]');
@@ -442,31 +454,33 @@ const element = page.locator('[data-test-id="receipt-submit-button"]');
 // Assertions
 await expect(element).toBeVisible();
 await expect(element).toBeEnabled();
-await expect(element).toContainText('Zapisz');
+await expect(element).toContainText("Zapisz");
 ```
 
 ### Vitest + Testing Library (Unit)
-```javascript
-import { render, screen } from '@testing-library/react';
-import ReceiptForm from '@/components/receipts/ReceiptForm';
 
-test('renders receipt form', () => {
+```javascript
+import { render, screen } from "@testing-library/react";
+import ReceiptForm from "@/components/receipts/ReceiptForm";
+
+test("renders receipt form", () => {
   render(<ReceiptForm categories={[]} />);
 
-  const form = screen.getByTestId('receipt-form');
+  const form = screen.getByTestId("receipt-form");
   expect(form).toBeInTheDocument();
 
-  const submitBtn = screen.getByTestId('receipt-submit-button');
+  const submitBtn = screen.getByTestId("receipt-submit-button");
   expect(submitBtn).toBeInTheDocument();
 });
 ```
 
 ### Cypress (Alternative)
+
 ```javascript
-describe('Receipt Form', () => {
-  it('should save receipt', () => {
-    cy.visit('/receipts/new');
-    cy.get('[data-test-id="receipt-form"]').should('be.visible');
+describe("Receipt Form", () => {
+  it("should save receipt", () => {
+    cy.visit("/receipts/new");
+    cy.get('[data-test-id="receipt-form"]').should("be.visible");
     cy.get('[data-test-id="receipt-submit-button"]').click();
   });
 });
@@ -477,17 +491,20 @@ describe('Receipt Form', () => {
 ## Maintenance Notes
 
 ### When Adding New Features
+
 1. Follow the naming convention consistently
 2. Add both parent and child `data-test-id` attributes
 3. Update this documentation
 4. Create corresponding test cases
 
 ### When Modifying Components
+
 1. Update `data-test-id` if HTML structure changes
 2. Ensure backward compatibility with existing tests
 3. Update documentation if test IDs change
 
 ### Common Pitfalls
+
 - ❌ Don't use dynamic values that aren't stable (timestamps, random IDs)
 - ❌ Don't include implementation details in test IDs
 - ❌ Don't duplicate test IDs
@@ -499,17 +516,17 @@ describe('Receipt Form', () => {
 
 ## Quick Reference Table
 
-| Scenario | Test IDs | Dependencies |
-|----------|----------|--------------|
-| Open form | `receipt-form-container`, `receipt-form` | Page load |
-| Select date | `receipt-date-trigger`, `receipt-date-calendar` | Calendar library |
-| Enter store | `receipt-store-name-input` | Form field |
-| Add item | `receipt-add-item-button`, `receipt-items-list` | Form state |
-| Fill item | `receipt-item-row-0-product-name-input`, `.price-input`, `.category-select` | ReceiptItemRow |
-| Delete item | `receipt-item-row-0-delete-button`, `.delete-dialog`, `.delete-dialog-confirm` | AlertDialog |
-| Check total | `receipt-total-amount` | Calculate function |
-| Submit | `receipt-submit-button` | Form validation |
-| Cancel | `receipt-cancel-button` | Router |
+| Scenario    | Test IDs                                                                       | Dependencies       |
+| ----------- | ------------------------------------------------------------------------------ | ------------------ |
+| Open form   | `receipt-form-container`, `receipt-form`                                       | Page load          |
+| Select date | `receipt-date-trigger`, `receipt-date-calendar`                                | Calendar library   |
+| Enter store | `receipt-store-name-input`                                                     | Form field         |
+| Add item    | `receipt-add-item-button`, `receipt-items-list`                                | Form state         |
+| Fill item   | `receipt-item-row-0-product-name-input`, `.price-input`, `.category-select`    | ReceiptItemRow     |
+| Delete item | `receipt-item-row-0-delete-button`, `.delete-dialog`, `.delete-dialog-confirm` | AlertDialog        |
+| Check total | `receipt-total-amount`                                                         | Calculate function |
+| Submit      | `receipt-submit-button`                                                        | Form validation    |
+| Cancel      | `receipt-cancel-button`                                                        | Router             |
 
 ---
 

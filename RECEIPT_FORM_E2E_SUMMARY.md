@@ -36,6 +36,7 @@ src/__tests__/e2e/
 ## 📚 Documentation Files
 
 ### 1. **RECEIPT_FORM_TEST_IDS.md** (Comprehensive Guide)
+
 - Complete reference for all data-testid attributes
 - Test ID naming conventions
 - Playwright integration examples
@@ -43,6 +44,7 @@ src/__tests__/e2e/
 - Maintenance notes and troubleshooting
 
 ### 2. **RECEIPT_FORM_TEST_IDS_MAP.txt** (ASCII Hierarchy)
+
 - Visual ASCII hierarchy of test IDs
 - Component structure map
 - User journey flowchart
@@ -50,6 +52,7 @@ src/__tests__/e2e/
 - Quick reference table
 
 ### 3. **RECEIPT_FORM_POM_GUIDE.md** (POM Documentation)
+
 - POM architecture and design patterns
 - Detailed API documentation for each class
 - Usage examples and best practices
@@ -59,6 +62,7 @@ src/__tests__/e2e/
 - Performance tips
 
 ### 4. **RECEIPT_FORM_POM_STRUCTURE.txt** (POM Architecture)
+
 - Class hierarchy diagram
 - File locations and line counts
 - Method organization by layer
@@ -69,6 +73,7 @@ src/__tests__/e2e/
 - Statistics and summary
 
 ### 5. **RECEIPT_FORM_E2E_SUMMARY.md** (This File)
+
 - Project overview
 - Implementation summary
 - Features and capabilities
@@ -80,9 +85,11 @@ src/__tests__/e2e/
 ## 🔧 Implementation Details
 
 ### BasePage Class (174 lines)
+
 **Location:** `src/__tests__/e2e/pages/BasePage.ts`
 
 Core utility class providing:
+
 - **Navigation:** goto, getTitle, waitForLoadState, screenshot
 - **data-testid methods:** getByTestId, clickByTestId, fillByTestId, etc.
 - **Query methods:** getTextByTestId, isVisibleByTestId, getInputValueByTestId
@@ -96,13 +103,15 @@ Core utility class providing:
 await page.click('.button[type="submit"]');
 
 // Use:
-await receiptForm.clickByTestId('receipt-submit-button');
+await receiptForm.clickByTestId("receipt-submit-button");
 ```
 
 ### ReceiptFormPage Class (380+ lines)
+
 **Location:** `src/__tests__/e2e/pages/ReceiptFormPage.ts`
 
 Main entry point for testing receipt form with:
+
 - **Composition:** ReceiptDateSection + ReceiptItemsSection
 - **Navigation:** goToNewReceipt(), goToEditReceipt(id)
 - **Store Name:** fillStoreName(), getStoreName(), verifyStoreName()
@@ -112,30 +121,35 @@ Main entry point for testing receipt form with:
 - **Workflows:** fillForm(), createReceipt(), createMinimalReceipt()
 
 **Example Usage:**
+
 ```typescript
 const form = new ReceiptFormPage(page);
 await form.goToNewReceipt();
 await form.createReceipt({
-  date: '2024-10-15',
-  storeName: 'Biedronka',
-  items: [{ productName: 'Mleko', price: '3.99', categoryId: 1 }],
+  date: "2024-10-15",
+  storeName: "Biedronka",
+  items: [{ productName: "Mleko", price: "3.99", categoryId: 1 }],
 });
 await form.verifySubmissionSuccess();
 ```
 
 ### ReceiptDateSection Class (100 lines)
+
 **Location:** `src/__tests__/e2e/pages/ReceiptDateSection.ts`
 
 Handles date picker operations:
+
 - **Open/Close:** openDatePicker(), closeDatePicker()
 - **Selection:** selectDay(), selectDate(), selectToday(), selectRelativeDate()
 - **Queries:** isDatePickerVisible(), getDisplayedDate()
 - **Assertions:** verifyDisplayedDate(), verifyDatePickerClosed()
 
 ### ReceiptItemsSection Class (220 lines)
+
 **Location:** `src/__tests__/e2e/pages/ReceiptItemsSection.ts`
 
 Manages collection of items:
+
 - **Add Items:** clickAddItemButton(), addItem(), addItems(count)
 - **Add with Data:** addItemWithData(), addItemsWithData([...])
 - **Item Access:** getItemRow(index): ReceiptItemRowSection
@@ -144,9 +158,11 @@ Manages collection of items:
 - **Cleanup:** deleteAllItems()
 
 ### ReceiptItemRowSection Class (240+ lines)
+
 **Location:** `src/__tests__/e2e/pages/ReceiptItemRowSection.ts`
 
 Individual item handling with dynamic index:
+
 - **Product Name:** fillProductName(), getProductName(), verifyProductName()
 - **Price:** fillPrice(), getPrice(), verifyPrice(), clearPrice()
 - **Category:** openCategorySelect(), selectCategory(), getSelectedCategory()
@@ -164,35 +180,42 @@ Individual item handling with dynamic index:
 ### Test Scenarios (7 groups, 20+ tests)
 
 #### Scenario 1: Add Receipt with Single Item (3 tests)
+
 - ✓ Create receipt with one item successfully [MAIN]
 - ✓ Prevent submission with invalid form
 - ✓ Enable submit when form is valid
 
 #### Scenario 2: Add Receipt with Multiple Items (2 tests)
+
 - ✓ Create receipt with three items
 - ✓ Add items dynamically
 
 #### Scenario 3: Item Deletion (3 tests)
+
 - ✓ Delete item after confirming
 - ✓ Cancel item deletion
 - ✓ Delete multiple items
 
 #### Scenario 4: Date Selection (3 tests)
+
 - ✓ Select date from calendar
 - ✓ Select today
 - ✓ Prevent selecting future dates
 
 #### Scenario 5: Form Navigation (3 tests)
+
 - ✓ Cancel and redirect to home
 - ✓ Show save button text
 - ✓ Show update button text when editing
 
 #### Scenario 6: Form Validation States (3 tests)
+
 - ✓ Show errors for empty required fields
 - ✓ Update validation on field changes
 - ✓ Handle item field validation
 
 #### Scenario 7: Total Calculation (4 tests)
+
 - ✓ Calculate total correctly
 - ✓ Update total when price changes
 - ✓ Handle decimal prices correctly
@@ -203,12 +226,14 @@ Individual item handling with dynamic index:
 ## 🚀 Quick Start
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 # Playwright and test dependencies already configured
 ```
 
 ### 2. Start Development Server
+
 ```bash
 npm run dev
 # Available at http://localhost:3000
@@ -217,26 +242,31 @@ npm run dev
 ### 3. Run E2E Tests
 
 #### Run all tests
+
 ```bash
 npm run test:e2e
 ```
 
 #### Run specific test file
+
 ```bash
 npm run test:e2e receipt-form
 ```
 
 #### Run with UI mode (interactive)
+
 ```bash
 npx playwright test receipt-form.spec.ts --ui
 ```
 
 #### Debug specific test
+
 ```bash
 npx playwright test receipt-form.spec.ts -g "should create receipt" --debug
 ```
 
 #### View test report
+
 ```bash
 npx playwright show-report
 ```
@@ -244,10 +274,10 @@ npx playwright show-report
 ### 4. Write Your Own Test
 
 ```typescript
-import { test } from '@playwright/test';
-import { ReceiptFormPage } from './pages/ReceiptFormPage';
+import { test } from "@playwright/test";
+import { ReceiptFormPage } from "./pages/ReceiptFormPage";
 
-test('my custom test', async ({ page }) => {
+test("my custom test", async ({ page }) => {
   // Arrange
   const receiptForm = new ReceiptFormPage(page);
   await receiptForm.goToNewReceipt();
@@ -255,7 +285,7 @@ test('my custom test', async ({ page }) => {
 
   // Act
   await receiptForm.selectToday();
-  await receiptForm.addItemWithData('Test Product', '10.00', 1);
+  await receiptForm.addItemWithData("Test Product", "10.00", 1);
 
   // Assert
   await receiptForm.verifyFormValid();
@@ -271,6 +301,7 @@ test('my custom test', async ({ page }) => {
 ### Page Object Model (POM)
 
 **Benefits:**
+
 - ✓ Single source of truth for UI selectors
 - ✓ Reusable methods across tests
 - ✓ Easy maintenance (UI changes = one update)
@@ -293,9 +324,10 @@ ReceiptFormPage (main)
 ### data-testid Only
 
 **Pattern:** All interactions use `data-testid` attributes
+
 ```typescript
 // ✓ Resilient to UI changes
-await receiptForm.clickByTestId('receipt-submit-button');
+await receiptForm.clickByTestId("receipt-submit-button");
 
 // ✗ Fragile - breaks if UI changes
 await page.click('button:has-text("Zapisz")');
@@ -304,14 +336,14 @@ await page.click('button:has-text("Zapisz")');
 ### Test Structure (AAA Pattern)
 
 ```typescript
-test('', async () => {
+test("", async () => {
   // Arrange - Setup
   const form = new ReceiptFormPage(page);
   await form.goToNewReceipt();
 
   // Act - User actions
   await form.selectToday();
-  await form.fillStoreName('Store');
+  await form.fillStoreName("Store");
 
   // Assert - Verify outcomes
   await form.verifyFormValid();
@@ -353,6 +385,7 @@ test('', async () => {
 ## 🔗 Data-TestID Mapping
 
 ### Form Level
+
 - `receipt-form-container` → Main container
 - `receipt-form` → Form element
 - `receipt-store-name-input` → Store name field
@@ -360,15 +393,18 @@ test('', async () => {
 - `receipt-total-amount` → Total amount display
 
 ### Date Section
+
 - `receipt-date-trigger` → Date picker button
 - `receipt-date-calendar` → Calendar popover
 
 ### Items Section
+
 - `receipt-items-section` → Items container
 - `receipt-add-item-button` → Add item button
 - `receipt-items-list` → Items list
 
 ### Item Row (per item)
+
 - `receipt-item-row-{index}` → Item container
 - `receipt-item-row-{index}-product-name-input` → Product field
 - `receipt-item-row-{index}-price-input` → Price field
@@ -378,6 +414,7 @@ test('', async () => {
 - `receipt-item-row-{index}-delete-dialog-confirm` → Confirm deletion
 
 ### Action Buttons
+
 - `receipt-cancel-button` → Cancel button
 - `receipt-submit-button` → Submit button
 
@@ -386,6 +423,7 @@ test('', async () => {
 ## 📈 Statistics
 
 ### Code Metrics
+
 - **POM Classes:** 5 main classes
 - **Public Methods:** 94+
 - **Test Cases:** 20+
@@ -393,6 +431,7 @@ test('', async () => {
 - **Test Assertions:** 100+
 
 ### File Breakdown
+
 - BasePage.ts: 174 lines
 - ReceiptFormPage.ts: 380 lines
 - ReceiptDateSection.ts: 100 lines
@@ -405,27 +444,35 @@ test('', async () => {
 ## 🐛 Troubleshooting
 
 ### Locator Not Found
+
 ```
 Error: locator.click: Target page, context or browser has been closed
 ```
+
 **Solution:** Ensure page is navigated and form is loaded:
+
 ```typescript
 await receiptForm.goToNewReceipt();
 await receiptForm.waitForForm();
 ```
 
 ### Timeout Waiting
+
 ```
 Error: Timeout
 ```
+
 **Solution:** Use explicit waits:
+
 ```typescript
 await receiptForm.waitForItemsList();
 await receiptForm.getItemsSection().waitForItemRow();
 ```
 
 ### Test Data Issues
+
 **Solution:** Create fresh page object per test:
+
 ```typescript
 test.beforeEach(async ({ page }) => {
   receiptForm = new ReceiptFormPage(page);
@@ -437,11 +484,13 @@ test.beforeEach(async ({ page }) => {
 ## 🔄 Extending Tests
 
 ### Add New Test
+
 1. Create method in appropriate POM class
 2. Add test case in `receipt-form.spec.ts`
 3. Ensure data-testid exists in component
 
 ### Add New Section
+
 1. Create new file: `src/__tests__/e2e/pages/NewSection.ts`
 2. Extend BasePage
 3. Implement methods
@@ -465,25 +514,25 @@ test.beforeEach(async ({ page }) => {
 ### Scenario: "Add Receipt with Item and Save"
 
 ```typescript
-test('should successfully create receipt with one item', async ({ page }) => {
+test("should successfully create receipt with one item", async ({ page }) => {
   // ✓ Step 1: Open new receipt form
   const receiptForm = new ReceiptFormPage(page);
   await receiptForm.goToNewReceipt();
   await receiptForm.waitForForm();
 
   // ✓ Step 2: Add sample item with all required fields
-  await receiptForm.selectDate('2024-10-15');  // Date (required)
-  await receiptForm.fillStoreName('Biedronka'); // Store (optional)
+  await receiptForm.selectDate("2024-10-15"); // Date (required)
+  await receiptForm.fillStoreName("Biedronka"); // Store (optional)
 
   await receiptForm.clickAddItemButton();
   const item = receiptForm.getItemsSection().getItemRow(0);
-  await item.fillProductName('Mleko 1L');       // Product (required)
-  await item.fillPrice('19.99');                // Price (required)
-  await item.selectCategory(1);                 // Category (required)
+  await item.fillProductName("Mleko 1L"); // Product (required)
+  await item.fillPrice("19.99"); // Price (required)
+  await item.selectCategory(1); // Category (required)
 
   // ✓ Step 3: Verify and save receipt
   await receiptForm.verifyFormValid();
-  await receiptForm.verifyTotalAmount('19.99');
+  await receiptForm.verifyTotalAmount("19.99");
   await receiptForm.submitForm();
   await receiptForm.verifySubmissionSuccess();
 });
@@ -504,6 +553,7 @@ test('should successfully create receipt with one item', async ({ page }) => {
 ## 📞 Support & Questions
 
 For questions about:
+
 - **Test IDs:** See [RECEIPT_FORM_TEST_IDS.md](RECEIPT_FORM_TEST_IDS.md)
 - **POM Pattern:** See [RECEIPT_FORM_POM_GUIDE.md](RECEIPT_FORM_POM_GUIDE.md)
 - **Architecture:** See [RECEIPT_FORM_POM_STRUCTURE.txt](RECEIPT_FORM_POM_STRUCTURE.txt)
@@ -514,6 +564,7 @@ For questions about:
 ## ✨ Summary
 
 This implementation provides:
+
 - ✅ Complete E2E test coverage for Receipt Form
 - ✅ Professional POM implementation following best practices
 - ✅ 94+ reusable test methods
@@ -524,6 +575,7 @@ This implementation provides:
 - ✅ Production-ready code
 
 **Next Steps:**
+
 1. Run `npm run test:e2e` to execute tests
 2. Review [RECEIPT_FORM_POM_GUIDE.md](RECEIPT_FORM_POM_GUIDE.md) for detailed API
 3. Add more scenarios as needed

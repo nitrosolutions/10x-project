@@ -23,23 +23,28 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ## 🎯 Wymogi Biznesowe Testowane
 
 ### 1. **Pobieranie paragonów za określony miesiąc**
+
 - Funkcja musi pobierać TYLKO paragony z danego miesiąca
 - Format wejścia: `YYYY-MM`
 - Zakres dat: od `YYYY-MM-01` do początku następnego miesiąca (exclusive)
 
 ### 2. **Sortowanie wyników**
+
 - Wyniki mają być posortowane malejąco po `purchase_date`
 - Najnowsze paragony najpierw
 
 ### 3. **Bezpieczeństwo RLS**
+
 - Zapytanie MUSI filtrować po `user_id`
 - Użytkownik widzi TYLKO swoje paragony
 
 ### 4. **Obsługa błędów**
+
 - Błędy z Supabase rzucane jako Error
 - Komunikat o błędzie zawiera szczegóły
 
 ### 5. **Zwracane dane**
+
 - Format: `ReceiptListDto[]` (bez items, bez user_id)
 - Kolumny: `id, purchase_date, store_name, total_amount`
 
@@ -48,6 +53,7 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ## 📊 Struktura Testów (9 kategorii)
 
 ### Sekcja 1: Obliczanie startDate (3 testy)
+
 **Wymóg:** Pierwszy dzień miesiąca w formacie `YYYY-MM-01`
 
 ```typescript
@@ -61,6 +67,7 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ---
 
 ### Sekcja 2: Obliczanie nextMonthDate (5 testów)
+
 **Wymóg:** Pierwszy dzień następnego miesiąca (exclusive range)
 
 ```typescript
@@ -76,6 +83,7 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ---
 
 ### Sekcja 3: Edge Case'y Dat (2 testy)
+
 **Wymóg:** Konsystentne obsługiwanie wszystkich miesięcy i lat
 
 ```typescript
@@ -88,6 +96,7 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ---
 
 ### Sekcja 4: Bezpieczeństwo i Parametry Query (4 testy)
+
 **Wymóg:** Prawidłowy setup Supabase query
 
 ```typescript
@@ -102,6 +111,7 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ---
 
 ### Sekcja 5: Obsługa i Transformacja Danych (5 testów)
+
 **Wymóg:** Zwracać dane w poprawnym formacie
 
 ```typescript
@@ -117,6 +127,7 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ---
 
 ### Sekcja 6: Obsługa Błędów Supabase (5 testów)
+
 **Wymóg:** Prawidłowa obsługa błędów
 
 ```typescript
@@ -132,6 +143,7 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ---
 
 ### Sekcja 7: Integracja - Pełny Łańcuch (2 testy)
+
 **Wymóg:** Kompletne zapytanie wbudowane prawidłowo
 
 ```typescript
@@ -144,6 +156,7 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ---
 
 ### Sekcja 8: Weryfikacja Typów Danych (2 testy)
+
 **Wymóg:** Poprawne typy zwracanych pól
 
 ```typescript
@@ -156,6 +169,7 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ---
 
 ### Sekcja 9: Wydajność i Skala (2 testy)
+
 **Wymóg:** Obsługa różnych rozmiarów danych
 
 ```typescript
@@ -170,21 +184,24 @@ Suite testów dla `receiptService.getReceiptsForMonth()` zawiera **30 testów** 
 ## 🔍 Kluczowe Edge Case'y
 
 ### 1. **Przejście Roku: Grudzień → Styczeń**
+
 ```typescript
-getReceiptsForMonth(supabase, userId, '2024-12')
+getReceiptsForMonth(supabase, userId, "2024-12");
 // startDate: 2024-12-01
 // nextDate: 2025-01-01 ← EDGE CASE
 // Problem: Łatwo można zacodować '2024-01-01' zamiast '2025-01-01'
 ```
 
 ### 2. **Wiodące Zera w Miesiącach**
+
 ```typescript
 // Miesiące mają MIEĆ wiodące zera
-'2025-03' // dobrze
-'2025-3'  // źle
+"2025-03"; // dobrze
+"2025-3"; // źle
 ```
 
 ### 3. **Filtrowanie po User ID**
+
 ```typescript
 // MUSI być zawsze!
 .eq("user_id", userId)
@@ -192,48 +209,53 @@ getReceiptsForMonth(supabase, userId, '2024-12')
 ```
 
 ### 4. **Sortowanie Malejące**
+
 ```typescript
 // Najnowsze paragony NAJPIERW
 .order("purchase_date", { ascending: false })
 ```
 
 ### 5. **Obsługa Null**
+
 ```typescript
 // Gdy store_name brak
-store_name: null // ✅ obsługujemy
+store_name: null; // ✅ obsługujemy
 
 // Gdy data zwrotu = null
-data as ReceiptListDto[] // Zwraca null, jest rzutowany
+data as ReceiptListDto[]; // Zwraca null, jest rzutowany
 ```
 
 ---
 
 ## 📈 Metryki Testów
 
-| Metrika | Wartość |
-|---------|---------|
-| **Liczba testów** | 30 |
-| **Kategorie** | 9 |
-| **Linie pokryte** | ~45 z ~45 linii (100%) |
-| **Czasu wykonania** | < 100ms |
-| **Mock strategii** | Supabase chain fluent interface |
+| Metrika             | Wartość                         |
+| ------------------- | ------------------------------- |
+| **Liczba testów**   | 30                              |
+| **Kategorie**       | 9                               |
+| **Linie pokryte**   | ~45 z ~45 linii (100%)          |
+| **Czasu wykonania** | < 100ms                         |
+| **Mock strategii**  | Supabase chain fluent interface |
 
 ---
 
 ## 🛠️ Mocking Strategy
 
 ### Supabase Client Mock
+
 ```typescript
-mockSupabase.from('receipts')
-  .select('...')
-  .eq('user_id', userId)
-  .gte('purchase_date', startDate)
-  .lt('purchase_date', nextDate)
-  .order('purchase_date', { ascending: false })
-  .then({ data, error })
+mockSupabase
+  .from("receipts")
+  .select("...")
+  .eq("user_id", userId)
+  .gte("purchase_date", startDate)
+  .lt("purchase_date", nextDate)
+  .order("purchase_date", { ascending: false })
+  .then({ data, error });
 ```
 
 **Zalety:**
+
 - ✅ Pełny fluent interface
 - ✅ Łatwe do testowania każdego kroku
 - ✅ Realistyczne scenariusze
@@ -244,21 +266,25 @@ mockSupabase.from('receipts')
 ## 🚀 Uruchamianie Testów
 
 ### Cały test suite
+
 ```bash
 npm run test -- src/__tests__/unit/receiptService.getReceiptsForMonth.test.ts
 ```
 
 ### Konkretna sekcja
+
 ```bash
 npm run test -- src/__tests__/unit/receiptService.getReceiptsForMonth.test.ts -t "Edge case"
 ```
 
 ### Watch mode
+
 ```bash
 npm run test:watch -- src/__tests__/unit/receiptService.getReceiptsForMonth.test.ts
 ```
 
 ### Z pokryciem
+
 ```bash
 npm run test:coverage
 ```
@@ -293,13 +319,13 @@ npm run test:coverage
 
 Po `getReceiptsForMonth()`, następne na liście:
 
-| Funkcja | LOC | Priorytet | Powód |
-|---------|-----|----------|-------|
-| `getReceiptById()` | ~51 | ⭐⭐⭐ | Podobna logika dat + error handling |
-| `createReceipt()` | ~112 | ⭐⭐⭐ | Multi-step transaction |
-| `updateReceipt()` | ~124 | ⭐⭐⭐ | Delete-insert pattern |
-| `deleteReceipt()` | ~40 | ⭐⭐ | Prostsze, ale ważne |
-| `getMonthlyStats()` | ~108 | ⭐⭐⭐ | Matematyka finansowa |
+| Funkcja             | LOC  | Priorytet | Powód                               |
+| ------------------- | ---- | --------- | ----------------------------------- |
+| `getReceiptById()`  | ~51  | ⭐⭐⭐    | Podobna logika dat + error handling |
+| `createReceipt()`   | ~112 | ⭐⭐⭐    | Multi-step transaction              |
+| `updateReceipt()`   | ~124 | ⭐⭐⭐    | Delete-insert pattern               |
+| `deleteReceipt()`   | ~40  | ⭐⭐      | Prostsze, ale ważne                 |
+| `getMonthlyStats()` | ~108 | ⭐⭐⭐    | Matematyka finansowa                |
 
 ---
 

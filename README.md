@@ -147,6 +147,7 @@ This project is configured for automated deployment to Vercel via GitHub Actions
 1. **Create a Vercel account** at [vercel.com](https://vercel.com/)
 
 2. **Install Vercel CLI** (optional, for local testing)
+
    ```bash
    npm install -g vercel
    ```
@@ -154,6 +155,7 @@ This project is configured for automated deployment to Vercel via GitHub Actions
 3. **Get your Vercel credentials**
 
    Run locally to link your project:
+
    ```bash
    vercel link
    ```

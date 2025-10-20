@@ -7,6 +7,7 @@ This guide documents the Page Object Model implementation for testing the Receip
 **Location:** `src/__tests__/e2e/pages/`
 
 **Main Components:**
+
 - `BasePage.ts` - Base class with common methods and data-testid helpers
 - `ReceiptFormPage.ts` - Main receipt form page object
 - `ReceiptDateSection.ts` - Date picker section
@@ -92,7 +93,7 @@ async waitForNavigation();
 await page.click('.receipt-form button[type="submit"]');
 
 // New way (using data-testid)
-await receiptForm.clickByTestId('receipt-submit-button');
+await receiptForm.clickByTestId("receipt-submit-button");
 ```
 
 ---
@@ -214,7 +215,7 @@ async takeFormScreenshot(name: string);
 ### Example Usage
 
 ```typescript
-test('should create receipt', async ({ page }) => {
+test("should create receipt", async ({ page }) => {
   const receiptForm = new ReceiptFormPage(page);
 
   // Navigate and wait
@@ -223,12 +224,12 @@ test('should create receipt', async ({ page }) => {
 
   // Fill form
   await receiptForm.selectToday();
-  await receiptForm.fillStoreName('Biedronka');
-  await receiptForm.addItemWithData('Mleko', '3.99', 1);
+  await receiptForm.fillStoreName("Biedronka");
+  await receiptForm.addItemWithData("Mleko", "3.99", 1);
 
   // Verify
   await receiptForm.verifyFormValid();
-  await receiptForm.verifyTotalAmount('3.99');
+  await receiptForm.verifyTotalAmount("3.99");
 
   // Submit
   await receiptForm.submitForm();
@@ -271,14 +272,14 @@ async verifyDisplayedDate(dateText: string);
 const dateSection = receiptForm.getDateSection();
 
 // Select specific date
-await dateSection.selectDate('2024-10-15');
+await dateSection.selectDate("2024-10-15");
 
 // Select relative to today
-await dateSection.selectRelativeDate(-1);  // Yesterday
+await dateSection.selectRelativeDate(-1); // Yesterday
 
 // Verify displayed
 const date = await dateSection.getDisplayedDate();
-expect(date).toContain('15');
+expect(date).toContain("15");
 ```
 
 ---
@@ -327,9 +328,9 @@ const itemsSection = receiptForm.getItemsSection();
 
 // Add multiple items at once
 const items = [
-  { productName: 'Mleko', price: '3.99', categoryId: 1 },
-  { productName: 'Chleb', price: '2.50', categoryId: 1 },
-  { productName: 'Ser', price: '12.99', categoryId: 2 },
+  { productName: "Mleko", price: "3.99", categoryId: 1 },
+  { productName: "Chleb", price: "2.50", categoryId: 1 },
+  { productName: "Ser", price: "12.99", categoryId: 2 },
 ];
 await itemsSection.addItemsWithData(items);
 
@@ -339,7 +340,7 @@ expect(count).toBe(3);
 
 // Get specific item
 const item0 = itemsSection.getItemRow(0);
-await item0.fillProductName('New Name');
+await item0.fillProductName("New Name");
 
 // Get all data
 const allData = await itemsSection.getAllItemsData();
@@ -415,11 +416,11 @@ async getItemData(): Object;
 const item0 = itemsSection.getItemRow(0);
 
 // Fill all fields
-await item0.fillItemComplete('Mleko 1L', '19.99', 1);
+await item0.fillItemComplete("Mleko 1L", "19.99", 1);
 
 // Verify values
-await item0.verifyProductName('Mleko 1L');
-await item0.verifyPrice('19.99');
+await item0.verifyProductName("Mleko 1L");
+await item0.verifyPrice("19.99");
 
 // Delete with confirmation
 await item0.deleteItem();
@@ -439,7 +440,7 @@ const data = await item0.getItemData();
 ### Test Structure (Arrange, Act, Assert)
 
 ```typescript
-test('should create receipt with item', async ({ page }) => {
+test("should create receipt with item", async ({ page }) => {
   // Arrange - Create page object and navigate
   const receiptForm = new ReceiptFormPage(page);
   await receiptForm.goToNewReceipt();
@@ -447,12 +448,12 @@ test('should create receipt with item', async ({ page }) => {
 
   // Act - Perform user actions
   await receiptForm.selectToday();
-  await receiptForm.fillStoreName('Biedronka');
-  await receiptForm.addItemWithData('Mleko', '3.99', 1);
+  await receiptForm.fillStoreName("Biedronka");
+  await receiptForm.addItemWithData("Mleko", "3.99", 1);
 
   // Assert - Verify expected outcomes
   await receiptForm.verifyFormValid();
-  await receiptForm.verifyTotalAmount('3.99');
+  await receiptForm.verifyTotalAmount("3.99");
 
   // Act - Continue with more actions
   await receiptForm.submitForm();
@@ -469,29 +470,33 @@ test('should create receipt with item', async ({ page }) => {
 ```typescript
 // ✓ Good - Uses high-level methods
 await receiptForm.createReceipt({
-  date: '2024-10-15',
-  storeName: 'Biedronka',
-  items: [{ productName: 'Mleko', price: '3.99', categoryId: 1 }],
+  date: "2024-10-15",
+  storeName: "Biedronka",
+  items: [{ productName: "Mleko", price: "3.99", categoryId: 1 }],
 });
 
 // ✗ Avoid - Direct page interaction
 await page.click('[data-testid="receipt-date-trigger"]');
-await page.fill('[data-testid="receipt-store-name-input"]', 'Biedronka');
+await page.fill('[data-testid="receipt-store-name-input"]', "Biedronka");
 ```
 
 #### 2. Test Business Logic, Not Implementation
 
 ```typescript
 // ✓ Good - Tests the user workflow
-test('should create receipt and redirect', async ({ page }) => {
+test("should create receipt and redirect", async ({ page }) => {
   const form = new ReceiptFormPage(page);
   await form.goToNewReceipt();
-  await form.createReceipt({ items: [/*...*/] });
+  await form.createReceipt({
+    items: [
+      /*...*/
+    ],
+  });
   await form.verifySubmissionSuccess();
 });
 
 // ✗ Avoid - Tests internal implementation
-test('should set form state', async ({ page }) => {
+test("should set form state", async ({ page }) => {
   // Testing React state instead of user behavior
 });
 ```
@@ -501,7 +506,7 @@ test('should set form state', async ({ page }) => {
 ```typescript
 // ✓ Good - Use sub-sections
 const dateSection = receiptForm.getDateSection();
-await dateSection.selectDate('2024-10-15');
+await dateSection.selectDate("2024-10-15");
 
 // Rather than spreading all methods in main object
 ```
@@ -523,11 +528,11 @@ await receiptForm.fillItem(...);
 
 ```typescript
 // ✓ Good - Resilient to UI changes
-await receiptForm.clickByTestId('receipt-submit-button');
+await receiptForm.clickByTestId("receipt-submit-button");
 
 // ✗ Avoid - Brittle selectors
 await page.click('button:has-text("Zapisz")');
-await page.click('.form-actions button:last-child');
+await page.click(".form-actions button:last-child");
 ```
 
 ---
@@ -539,35 +544,42 @@ await page.click('.form-actions button:last-child');
 The test suite includes 7 main scenario groups with 20+ individual tests:
 
 **Scenario 1: Add Receipt with Single Item**
+
 - ✓ Create receipt with one item successfully
 - ✓ Prevent submission with invalid form
 - ✓ Enable submit when form becomes valid
 
 **Scenario 2: Add Receipt with Multiple Items**
+
 - ✓ Create receipt with three items
 - ✓ Add items dynamically
 
 **Scenario 3: Item Deletion**
+
 - ✓ Delete item after confirming
 - ✓ Cancel item deletion
 - ✓ Delete multiple items
 
 **Scenario 4: Date Selection**
+
 - ✓ Select date from calendar
 - ✓ Select today
 - ✓ Prevent selecting future dates
 
 **Scenario 5: Form Navigation**
+
 - ✓ Cancel and redirect to home
 - ✓ Show save button text
 - ✓ Show update button text when editing
 
 **Scenario 6: Form Validation States**
+
 - ✓ Show errors for empty fields
 - ✓ Update validation on field changes
 - ✓ Handle item field validation
 
 **Scenario 7: Total Calculation**
+
 - ✓ Calculate total correctly
 - ✓ Update total when price changes
 - ✓ Handle decimal prices
@@ -620,7 +632,7 @@ npx playwright show-report
 ### Step 1: Import Page Object
 
 ```typescript
-import { ReceiptFormPage } from './pages/ReceiptFormPage';
+import { ReceiptFormPage } from "./pages/ReceiptFormPage";
 ```
 
 ### Step 2: Create Instance
@@ -636,17 +648,19 @@ test.beforeEach(async ({ page }) => {
 ### Step 3: Use Methods Instead of Direct selectors
 
 **Before:**
+
 ```typescript
 await page.click('[data-testid="receipt-add-item-button"]');
-await page.fill('[data-testid="receipt-item-row-0-product-name-input"]', 'Mleko');
+await page.fill('[data-testid="receipt-item-row-0-product-name-input"]', "Mleko");
 await page.click('[data-testid="receipt-submit-button"]');
 ```
 
 **After:**
+
 ```typescript
 await receiptForm.clickAddItemButton();
 const item = receiptForm.getItemsSection().getItemRow(0);
-await item.fillProductName('Mleko');
+await item.fillProductName("Mleko");
 await receiptForm.submitForm();
 ```
 
@@ -668,7 +682,7 @@ export class NewSection extends BasePage {
   }
 
   async someMethod() {
-    await this.clickByTestId('test-id');
+    await this.clickByTestId("test-id");
   }
 }
 ```
@@ -701,6 +715,7 @@ Error: locator.click: Target page, context or browser has been closed
 ```
 
 **Solution:** Ensure page is navigated and form is loaded:
+
 ```typescript
 await receiptForm.goToNewReceipt();
 await receiptForm.waitForForm();
@@ -713,6 +728,7 @@ Error: Target page, context or browser has been closed
 ```
 
 **Solution:** Use explicit waits:
+
 ```typescript
 await receiptForm.waitForItemsList();
 await receiptForm.getItemsSection().waitForItemRow();
@@ -721,6 +737,7 @@ await receiptForm.getItemsSection().waitForItemRow();
 ### Test Data Inconsistency
 
 **Solution:** Use fresh page object instance per test:
+
 ```typescript
 test.beforeEach(async ({ page }) => {
   receiptForm = new ReceiptFormPage(page);
@@ -760,6 +777,7 @@ test.beforeEach(async ({ page }) => {
 ## Questions & Support
 
 For questions about the POM pattern or specific tests, refer to:
+
 1. Individual class documentation (comments in source files)
 2. Test examples in `receipt-form.spec.ts`
 3. Playwright documentation: https://playwright.dev/docs/pom

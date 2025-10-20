@@ -30,6 +30,7 @@ npm run preview
 Aplikacja będzie dostępna na `http://localhost:4321` (lub inny port).
 
 **Teraz:**
+
 1. Otwórz Chrome/Edge
 2. Przejdź do strony dodawania paragonu
 3. Rozpocznij skanowanie (wybierz zdjęcie)
@@ -46,6 +47,7 @@ vercel --prod
 Aplikacja będzie dostępna na HTTPS (np. `https://10x-project.vercel.app`).
 
 **Vercel automatycznie:**
+
 - Używa HTTPS
 - Rejestruje Service Worker
 - Spełnia wszystkie kryteria PWA
@@ -77,6 +79,7 @@ Aplikacja loguje informacje o PWA:
 ```
 
 Jeśli widzisz:
+
 - `[PWA] beforeinstallprompt event fired!` - ✅ Wszystko OK
 - Brak tego loga - ❌ Service Worker nie działa lub kryteria nie są spełnione
 
@@ -85,12 +88,14 @@ Jeśli widzisz:
 Chrome nie pokazuje promptu instalacji jeśli aplikacja **jest już zainstalowana**.
 
 **Jak sprawdzić:**
+
 1. Otwórz `chrome://apps` w Chrome
 2. Szukaj "PortfelIO"
 3. Jeśli jest zainstalowana - odinstaluj ją
 4. Odśwież stronę
 
 **Lub** sprawdź Chrome menu:
+
 - Chrome → Więcej narzędzi → Zainstalowane aplikacje PWA
 
 ### Sprawdź Application w DevTools
@@ -107,11 +112,13 @@ Chrome nie pokazuje promptu instalacji jeśli aplikacja **jest już zainstalowan
 ### Desktop Chrome/Edge (Windows/Mac/Linux)
 
 **Wymagania:**
+
 - Chrome 90+ lub Edge 90+
 - Service Worker zarejestrowany
 - Manifest poprawnie skonfigurowany
 
 **Oczekiwane zachowanie:**
+
 1. Przycisk instalacji pojawia się podczas skanowania
 2. Kliknięcie pokazuje natywny prompt Chrome
 3. Po instalacji - ikona w menu aplikacji Windows/Mac
@@ -119,26 +126,31 @@ Chrome nie pokazuje promptu instalacji jeśli aplikacja **jest już zainstalowan
 ### Android Chrome
 
 **Wymagania:**
+
 - Chrome 90+ na Androidzie
 - Service Worker zarejestrowany
 - Manifest z ikonami
 
 **Oczekiwane zachowanie:**
+
 1. Przycisk instalacji pojawia się podczas skanowania
 2. Kliknięcie pokazuje natywny prompt Android
 3. Po instalacji - ikona na ekranie głównym
 
 **Testowanie:**
+
 - Użyj Chrome Remote Debugging
 - Lub deploy na Vercel i testuj na prawdziwym urządzeniu
 
 ### iOS Safari
 
 **Wymagania:**
+
 - Safari 16.4+ na iOS
 - Manifest poprawnie skonfigurowany
 
 **Oczekiwane zachowanie:**
+
 1. Przycisk instalacji pojawia się podczas skanowania
 2. Kliknięcie pokazuje **modal z instrukcjami**
 3. Użytkownik wykonuje ręczne kroki
@@ -151,11 +163,13 @@ Chrome nie pokazuje promptu instalacji jeśli aplikacja **jest już zainstalowan
 ### Problem: Przycisk się nie pokazuje w Chrome Desktop
 
 **Przyczyny:**
+
 1. ❌ Tryb deweloperski (`npm run dev`) - Service Worker nie działa
 2. ❌ Aplikacja już zainstalowana - Chrome nie pokazuje promptu
 3. ❌ Przeglądarka nie wspiera PWA (np. Firefox)
 
 **Rozwiązania:**
+
 1. ✅ Użyj `npm run build && npm run preview`
 2. ✅ Odinstaluj aplikację z `chrome://apps`
 3. ✅ Użyj Chrome lub Edge
@@ -163,17 +177,21 @@ Chrome nie pokazuje promptu instalacji jeśli aplikacja **jest już zainstalowan
 ### Problem: Service Worker 404
 
 **Przyczyna:**
+
 - vite-plugin-pwa nie generuje SW w trybie dev
 
 **Rozwiązanie:**
+
 - Testuj tylko w build mode (`npm run preview`)
 
 ### Problem: Manifest 404
 
 **Przyczyna:**
+
 - Problem z konfiguracją vite-plugin-pwa
 
 **Rozwiązanie:**
+
 - Sprawdź czy `http://localhost:3000/manifest.webmanifest` zwraca JSON
 - Jeśli 404 - sprawdź `astro.config.mjs`
 

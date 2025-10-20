@@ -237,6 +237,7 @@ Service Worker i manifest będą automatycznie wygenerowane podczas buildu.
 ## Zgodność z PRD
 
 Implementacja spełnia wymagania z dokumentów:
+
 - ✅ **README.md** - Sekcja PWA Features
 - ✅ **.ai/prd.md** - Sekcja 3.7 (Progresywna Aplikacja Webowa)
 
@@ -275,6 +276,7 @@ Service Worker automatycznie aktualizuje się po każdym deploymencie. Użytkown
 ### Debugging
 
 W razie problemów:
+
 1. Sprawdź konsolę przeglądarki
 2. Sprawdź zakładkę Application > Manifest w DevTools
 3. Sprawdź zakładkę Application > Service Workers
@@ -283,6 +285,7 @@ W razie problemów:
 ## Kolejne kroki (opcjonalne)
 
 Post-MVP rozszerzenia mogą obejmować:
+
 - Push notifications
 - Offline mode z synchronizacją
 - Background sync dla dodawania paragonów
