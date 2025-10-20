@@ -1,12 +1,9 @@
 name: Run Unit Tests
-description: Setup project and run unit tests with Vitest
+description: Run unit tests with Vitest (requires prior setup)
 
 runs:
   using: composite
   steps:
-    - name: Setup Node.js project
-      uses: ./.github/actions/setup-node-project
-
     - name: Run unit tests
       shell: bash
       run: npm run test

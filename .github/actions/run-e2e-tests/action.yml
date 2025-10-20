@@ -1,5 +1,5 @@
 name: Run E2E Tests
-description: Setup project, install Playwright, and run E2E tests
+description: Install Playwright and run E2E tests (requires prior setup)
 
 inputs:
   supabase-url:
@@ -24,9 +24,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup Node.js project
-      uses: ./.github/actions/setup-node-project
-
     - name: Install Playwright browsers
       shell: bash
       run: npx playwright install --with-deps chromium
