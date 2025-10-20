@@ -1,7 +1,10 @@
 name: Deploy to Vercel
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Test & Build Master"]
+    types:
+      - completed
     branches:
       - master
   workflow_dispatch:
@@ -14,6 +17,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to Vercel Production
+    # Uruchom tylko gdy poprzedni workflow zakończył się sukcesem
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,5 +38,6 @@ jobs:
       - name: Deployment Summary
         run: |
           echo "✅ Deployment to Vercel Production completed successfully!"
-          echo "🚀 Project deployed from branch: ${{ github.ref_name }}"
-          echo "📦 Commit: ${{ github.sha }}"
+          echo "🚀 Project deployed from branch: master"
+          echo "📦 Commit: ${{ github.event.workflow_run.head_sha }}"
+          echo "🔗 Triggered by workflow: ${{ github.event.workflow_run.name }}"

@@ -19,5 +19,8 @@
 
 # CI/CD i Hosting:
 
-- Github Actions do tworzenia pipeline’ów CI/CD
-- Azure Static Web Apps do hostowania aplikacji
+- Github Actions do tworzenia pipeline'ów CI/CD:
+  - **Pull Request Checks** - automatyczna walidacja PR (linting, unit tests, e2e tests z coverage)
+  - **Master Branch Validation** - testy i build po merge do master
+  - **Vercel Deployment** - automatyczny deploy do produkcji po pushu do master
+- Vercel do hostowania aplikacji (serverless deployment platform)

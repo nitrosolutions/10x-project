@@ -64,7 +64,10 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 ### DevOps & Hosting
 
 - **[Vercel](https://vercel.com/)** - Serverless deployment platform
-- **[GitHub Actions](https://github.com/features/actions)** - CI/CD pipelines for automated deployments
+- **[GitHub Actions](https://github.com/features/actions)** - CI/CD pipelines:
+  - **Pull Request Checks** ([pull-request.yml](.github/workflows/pull-request.yml)) - Automated PR validation with linting, unit tests, and e2e tests with coverage reports
+  - **Master Branch Validation** ([master.yml](.github/workflows/master.yml)) - Post-merge testing and production build verification
+  - **Vercel Deployment** ([vercel-deploy.yml](.github/workflows/vercel-deploy.yml)) - Automatic production deployment on master branch push
 
 ## 🚀 Getting Started
 
@@ -138,9 +141,28 @@ PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by
 
 This project uses **Husky** and **lint-staged** to automatically lint and format code before commits.
 
-## 🚀 Deployment
+## 🚀 Deployment & CI/CD
 
-This project is configured for automated deployment to Vercel via GitHub Actions.
+This project uses GitHub Actions for continuous integration and deployment with three automated workflows:
+
+### CI/CD Workflows
+
+1. **Pull Request Checks** ([.github/workflows/pull-request.yml](.github/workflows/pull-request.yml))
+   - Triggers on PRs to `master` branch
+   - Runs in parallel: linting, unit tests (with coverage), e2e tests (with coverage)
+   - Uploads coverage artifacts (retained for 7 days)
+   - Posts success comment on PR with check results
+
+2. **Master Branch Validation** ([.github/workflows/master.yml](.github/workflows/master.yml))
+   - Triggers on push to `master` branch
+   - Runs unit tests and e2e tests in parallel
+   - Builds production bundle after tests pass
+   - Ensures master branch always has a working build
+
+3. **Vercel Deployment** ([.github/workflows/vercel-deploy.yml](.github/workflows/vercel-deploy.yml))
+   - Triggers on push to `master` branch
+   - Deploys to Vercel production environment
+   - Can be manually triggered via `workflow_dispatch`
 
 ### Setting Up Vercel Deployment
 
@@ -178,7 +200,13 @@ This project is configured for automated deployment to Vercel via GitHub Actions
    **Required Environment Variables:**
    - `SUPABASE_URL` - Your Supabase project URL
    - `SUPABASE_KEY` - Your Supabase anonymous/public key
+   - `SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key (for e2e tests)
    - `GEMINI_API_KEY` - Your Gemini API key (for AI receipt analysis)
+
+   **Required E2E Test Credentials:**
+   - `E2E_USERNAME_ID` - Test user ID for e2e tests
+   - `E2E_USERNAME` - Test user email for e2e tests
+   - `E2E_PASSWORD` - Test user password for e2e tests
 
 5. **Trigger Deployment**
 

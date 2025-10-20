@@ -1,0 +1,44 @@
+name: Run E2E Tests
+description: Setup project, install Playwright, and run E2E tests
+
+inputs:
+  supabase-url:
+    description: Supabase URL
+    required: true
+  supabase-key:
+    description: Supabase Key
+    required: true
+  supabase-service-role-key:
+    description: Supabase Service Role Key
+    required: true
+  e2e-username-id:
+    description: E2E test user ID
+    required: true
+  e2e-username:
+    description: E2E test username
+    required: true
+  e2e-password:
+    description: E2E test password
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js project
+      uses: ./.github/actions/setup-node-project
+
+    - name: Install Playwright browsers
+      shell: bash
+      run: npx playwright install --with-deps chromium
+
+    - name: Run E2E tests
+      shell: bash
+      run: npm run test:e2e
+      env:
+        CI: true
+        SUPABASE_URL: ${{ inputs.supabase-url }}
+        SUPABASE_KEY: ${{ inputs.supabase-key }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ inputs.supabase-service-role-key }}
+        E2E_USERNAME_ID: ${{ inputs.e2e-username-id }}
+        E2E_USERNAME: ${{ inputs.e2e-username }}
+        E2E_PASSWORD: ${{ inputs.e2e-password }}
