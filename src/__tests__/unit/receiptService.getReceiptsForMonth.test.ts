@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Unit tests dla receiptService.getReceiptsForMonth()
  *
@@ -18,8 +19,7 @@
  * - Błędy Supabase
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { SupabaseClient } from "@/db/supabase.client";
+import { describe, it, expect, vi } from "vitest";
 import { getReceiptsForMonth } from "@/lib/services/receiptService";
 
 /**
@@ -86,7 +86,7 @@ describe("receiptService.getReceiptsForMonth()", () => {
       const fromCall = mockSupabase.from("receipts");
       const selectCall = fromCall.select(expect.any(String));
       const eqCall = selectCall.eq("user_id", MOCK_USER_ID);
-      const gteCall = eqCall.gte("purchase_date", expect.any(String));
+      eqCall.gte("purchase_date", expect.any(String));
 
       // Odczytanie argumentu z gte()
       const gteArgs = (eqCall.gte as any).mock.calls[0];

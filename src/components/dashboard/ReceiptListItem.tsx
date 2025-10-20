@@ -29,7 +29,7 @@ export function ReceiptListItem({ receipt, onDelete }: ReceiptListItemProps) {
     try {
       await onDelete(receipt.id);
       setIsDeleteDialogOpen(false);
-    } catch (error) {
+    } catch {
       // Błąd jest już obsłużony w useDashboard
       // Nie zamykamy dialogu, aby użytkownik widział komunikat o błędzie
       setIsDeleteDialogOpen(false);

@@ -1,4 +1,3 @@
-import { Page } from "@playwright/test";
 import { BasePage } from "./BasePage";
 import { ReceiptItemRowSection } from "./ReceiptItemRowSection";
 
@@ -16,10 +15,6 @@ export class ReceiptItemsSection extends BasePage {
   private readonly ITEMS_SECTION = "receipt-items-section";
   private readonly ADD_ITEM_BUTTON = "receipt-add-item-button";
   private readonly ITEMS_LIST = "receipt-items-list";
-
-  constructor(page: Page) {
-    super(page);
-  }
 
   /**
    * Verify items section is visible
@@ -182,8 +177,7 @@ export class ReceiptItemsSection extends BasePage {
   ) {
     const addedItems: ReceiptItemRowSection[] = [];
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+    for (const item of items) {
       const itemIndex = await this.countItems();
       await this.clickAddItemButton();
 

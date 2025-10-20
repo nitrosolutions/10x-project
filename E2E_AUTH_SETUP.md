@@ -84,9 +84,9 @@ AFTER ALL TESTS (Global Teardown)
 
 ### Key Files
 
-- **[src/**tests**/e2e/global-setup.ts](src/__tests__/e2e/global-setup.ts)** - Global setup (login once)
-- **[src/**tests**/e2e/global-teardown.ts](src/__tests__/e2e/global-teardown.ts)** - Global teardown (cleanup test data)
-- **[src/**tests**/e2e/pages/LoginPage.ts](src/__tests__/e2e/pages/LoginPage.ts)** - Login page POM
+- **[src/**tests**/e2e/global-setup.ts](src/**tests**/e2e/global-setup.ts)** - Global setup (login once)
+- **[src/**tests**/e2e/global-teardown.ts](src/**tests**/e2e/global-teardown.ts)** - Global teardown (cleanup test data)
+- **[src/**tests**/e2e/pages/LoginPage.ts](src/**tests**/e2e/pages/LoginPage.ts)** - Login page POM
 - **[.env.test](.env.test)** - Test credentials (git-ignored)
 - **[playwright.config.ts](playwright.config.ts)** - Playwright configuration with globalSetup and globalTeardown
 

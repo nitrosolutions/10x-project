@@ -11,7 +11,7 @@ export const passwordSchema = z
   .regex(/[A-Z]/, "Hasło musi zawierać co najmniej jedną dużą literę")
   .regex(/[a-z]/, "Hasło musi zawierać co najmniej jedną małą literę")
   .regex(/[0-9]/, "Hasło musi zawierać co najmniej jedną cyfrę")
-  .regex(/[!@#$%^&*()_+\-=\[\]{}|;:'",.<>?/\\]/, "Hasło musi zawierać co najmniej jeden znak specjalny");
+  .regex(/[!@#$%^&*()_+\-=[\]{}|;:'",.<>?/\\]/, "Hasło musi zawierać co najmniej jeden znak specjalny");
 
 // Schema dla logowania
 export const loginSchema = z.object({

@@ -1,4 +1,3 @@
-import { Page } from "@playwright/test";
 import { BasePage } from "./BasePage";
 
 /**
@@ -6,10 +5,6 @@ import { BasePage } from "./BasePage";
  * Handles user authentication interactions
  */
 export class LoginPage extends BasePage {
-  constructor(page: Page) {
-    super(page);
-  }
-
   // Locators
   private get emailInput() {
     return this.page.getByTestId("login-email-input");
