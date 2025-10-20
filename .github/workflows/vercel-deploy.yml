@@ -17,8 +17,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to Vercel Production
-    # Uruchom tylko gdy poprzedni workflow zakończył się sukcesem
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Uruchom gdy: ręcznie wywołane LUB poprzedni workflow zakończył się sukcesem
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
