@@ -39,7 +39,7 @@ export default function ResetPasswordForm() {
 
       setIsSuccess(true);
       toast.success("Email został wysłany");
-    } catch (error) {
+    } catch {
       toast.error("Nie udało się wysłać emaila. Spróbuj ponownie.");
     } finally {
       setIsLoading(false);

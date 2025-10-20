@@ -58,7 +58,7 @@ test.describe("Receipt Form - User Scenarios", () => {
      * 2. Add sample item with all required fields ✓
      * 3. Save receipt ✓
      */
-    test("should successfully create receipt with one item", async ({ page }) => {
+    test("should successfully create receipt with one item", async () => {
       // Arrange
       const storeName = "Biedronka";
       const productName = "Mleko 1L";

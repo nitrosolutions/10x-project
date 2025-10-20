@@ -1,4 +1,3 @@
-import { Page } from "@playwright/test";
 import { BasePage } from "./BasePage";
 
 /**
@@ -13,10 +12,6 @@ export class ReceiptDateSection extends BasePage {
   // Test ID constants
   private readonly DATE_TRIGGER = "receipt-date-trigger";
   private readonly DATE_CALENDAR = "receipt-date-calendar";
-
-  constructor(page: Page) {
-    super(page);
-  }
 
   /**
    * Open the date picker

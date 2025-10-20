@@ -75,6 +75,7 @@ export default function ReceiptForm({ categories, initialData, receiptId }: Rece
   const isEditMode = !!initialData && !!receiptId;
 
   const form = useForm<ReceiptFormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(receiptFormSchema) as any,
     mode: "onChange",
     defaultValues: {

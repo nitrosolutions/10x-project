@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Unit tests dla receiptService.getReceiptById()
  *
@@ -12,7 +13,6 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import type { SupabaseClient } from "@/db/supabase.client";
 import { getReceiptById } from "@/lib/services/receiptService";
 
 // Mock data

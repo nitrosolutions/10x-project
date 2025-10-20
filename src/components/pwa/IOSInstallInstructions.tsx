@@ -22,7 +22,7 @@ export function IOSInstallInstructions({ open, onOpenChange }: IOSInstallInstruc
               <Share className="h-5 w-5" />
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold mb-1">1. Naciśnij przycisk "Udostępnij"</h4>
+              <h4 className="font-semibold mb-1">1. Naciśnij przycisk &quot;Udostępnij&quot;</h4>
               <p className="text-sm text-muted-foreground">
                 Znajdziesz go na pasku narzędzi Safari (ikona kwadratu ze strzałką w górę)
               </p>
@@ -35,9 +35,9 @@ export function IOSInstallInstructions({ open, onOpenChange }: IOSInstallInstruc
               <Plus className="h-5 w-5" />
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold mb-1">2. Wybierz "Dodaj do ekranu początkowego"</h4>
+              <h4 className="font-semibold mb-1">2. Wybierz &quot;Dodaj do ekranu początkowego&quot;</h4>
               <p className="text-sm text-muted-foreground">
-                Przewiń w dół w menu i znajdź opcję "Dodaj do ekranu początkowego"
+                Przewiń w dół w menu i znajdź opcję &quot;Dodaj do ekranu początkowego&quot;
               </p>
             </div>
           </div>
@@ -50,7 +50,7 @@ export function IOSInstallInstructions({ open, onOpenChange }: IOSInstallInstruc
             <div className="flex-1">
               <h4 className="font-semibold mb-1">3. Potwierdź dodanie</h4>
               <p className="text-sm text-muted-foreground">
-                Naciśnij "Dodaj" w prawym górnym rogu. Ikona PortfelIO pojawi się na ekranie głównym!
+                Naciśnij &quot;Dodaj&quot; w prawym górnym rogu. Ikona PortfelIO pojawi się na ekranie głównym!
               </p>
             </div>
           </div>

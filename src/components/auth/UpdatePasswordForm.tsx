@@ -44,7 +44,7 @@ export default function UpdatePasswordForm() {
         throw new Error(errorData.error || "Nie udało się zaktualizować hasła");
       }
 
-      const result = await response.json();
+      await response.json();
 
       toast.success("Hasło zostało zmienione pomyślnie");
       window.location.href = "/login";

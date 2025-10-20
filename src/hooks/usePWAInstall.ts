@@ -42,6 +42,7 @@ export function usePWAInstall() {
       const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
 
       // Dla iOS Safari
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const isIOSStandalone = (window.navigator as any).standalone === true;
 
       const installed = isStandalone || isIOSStandalone;
