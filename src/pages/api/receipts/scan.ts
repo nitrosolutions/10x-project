@@ -134,7 +134,7 @@ export async function POST(context: APIContext): Promise<Response> {
     // Krok 6: Przygotowanie promptu dla Gemini
     const categoriesList = categories.map((cat) => `${cat.id}: ${cat.name}`).join(", ");
 
-    const prompt = `Jesteś specjalistą od rozpoznawania polskich paragonów fiskalnych.
+    const prompt = `Jesteś specjalistą od rozpoznawania polskich paragonów fiskalnych i faktur VAT.
 
 KRYTYCZNE: Odpowiedź MUSI być TYLKO czystym JSON. ZAKAZ dodawania tekstu przed, po lub wokół JSON.
 Odpowiedź MUSI zaczynać się od { i kończyć na }. ZAKAZ używania markdown, nagłówków, wyjaśnień.
@@ -144,35 +144,63 @@ ${categoriesList}
 
 ZASADY EKSTRAKCJI:
 1. purchase_date: Data w formacie YYYY-MM-DD (np. "2025-01-15")
-2. store_name: Nazwa sklepu lub null jeśli kompletnie nieczytelna
-3. items: Tablica produktów, każdy z:
-   - name: Nazwa produktu (string) - KRYTYCZNE: ZAWSZE wypełnij, nigdy nie zwracaj null. Nawet jeśli tekst jest trudno czytelny, wpisz swoje NAJLEPSZE przybliżenie/interpretację
-   - price: Cena jako liczba (np. 12.99, nie "12.99 zł")
+2. store_name: Nazwa sklepu/firmy lub null jeśli kompletnie nieczytelna
+3. items: Tablica produktów/pozycji, każdy z:
+   - name: Nazwa produktu/usługi (string) - KRYTYCZNE: ZAWSZE wypełnij, nigdy nie zwracaj null. Nawet jeśli tekst jest trudno czytelny, wpisz swoje NAJLEPSZE przybliżenie/interpretację
+   - price: CAŁKOWITA KWOTA ZA POZYCJĘ jako liczba (np. 12.99, nie "12.99 zł")
+     * Dla PARAGONÓW: kwota za produkt (już zawiera ilość jeśli występuje)
+     * Dla FAKTUR: SUMARYCZNA kwota pozycji (ilość × cena jednostkowa), NIE cena jednostkowa!
+     * UWAGA: Jeśli pod pozycją jest ZNIŻKA/RABAT (kwota ujemna), uwzględnij ją w cenie pozycji (odejmij od kwoty)
    - category_id: ID z listy kategorii powyżej (liczba całkowita)
-4. total: Suma całkowita jako liczba
+4. total: Suma całkowita jako liczba (kwota końcowa do zapłaty)
 
 WAŻNE INSTRUKCJE:
-- Zwróć WSZYSTKIE produkty ze paragonu - nie pomijaj żadnych
+- Zwróć WSZYSTKIE produkty z paragonu/faktury - nie pomijaj żadnych
 - Każdy produkt MUSI mieć wypełnioną nazwę (name)
 - Jeśli nazwa jest niejasna, częściowo nieczytelna lub rozmyta - wpisz ZAWSZE swoje najlepsze przybliżenie
 - Akceptowalne są interpretacje/szacowania - lepiej przybliżona nazwa niż brak
 - Jeśli widzisz fragment tekstu - napisz co widzisz + [interpretacja] jeśli potrzebna
 
-PRZYKŁAD POPRAWNEJ ODPOWIEDZI (z trudno czytelnym produktem):
+OBSŁUGA FAKTUR VAT:
+- Na fakturze często są kolumny: nazwa, ilość, cena jedn., wartość (lub kwota)
+- DO POLA "price" wpisz WARTOŚĆ/KWOTĘ pozycji (ilość × cena jedn.), NIE cenę jednostkową
+- Przykład: "Usługa serwisowa | 3 szt. | 100 zł/szt. | 300 zł" → price: 300 (nie 100!)
+
+OBSŁUGA ZNIŻEK/RABATÓW:
+- Zniżki często pojawiają się jako osobne linie z kwotą ujemną (np. "-5.00", "RABAT -10%")
+- Jeśli zniżka dotyczy konkretnej pozycji (jest tuż pod nią), odejmij ją od ceny tej pozycji
+- Przykład: "Kawa 15.00" a pod spodem "Rabat -3.00" → price: 12.00 (15.00 - 3.00)
+- Jeśli zniżka dotyczy całego paragonu, uwzględnij ją w total, ale nie w cenach pozycji
+
+PRZYKŁAD 1 - Paragon ze zniżką:
 {
   "purchase_date": "2025-01-15",
   "store_name": "Biedronka",
   "items": [
     {"name": "Mleko 2%", "price": 4.59, "category_id": 1},
-    {"name": "Masło [tekst rozmyty - interpretacja]", "price": 8.99, "category_id": 1},
+    {"name": "Masło", "price": 6.99, "category_id": 1},
     {"name": "Chleb pszenny", "price": 3.99, "category_id": 1}
   ],
-  "total": 17.57
+  "total": 15.57
 }
 
-PAMIĘTAJ: Zwróć TYLKO JSON bez żadnego innego tekstu!
+PRZYKŁAD 2 - Faktura VAT:
+{
+  "purchase_date": "2025-01-20",
+  "store_name": "Firma ABC Sp. z o.o.",
+  "items": [
+    {"name": "Usługa konsultingowa", "price": 1500.00, "category_id": 5},
+    {"name": "Materiały biurowe", "price": 250.00, "category_id": 3}
+  ],
+  "total": 1750.00
+}
 
-Przeanalizuj ten paragon fiskalny i wyciągnij wszystkie dane zgodnie z powyższymi instrukcjami:`;
+PAMIĘTAJ:
+- Dla faktur: price = sumaryczna kwota pozycji (ilość × cena jedn.)
+- Dla zniżek: odejmij rabat od ceny pozycji
+- Zwróć TYLKO JSON bez żadnego innego tekstu!
+
+Przeanalizuj ten dokument (paragon lub fakturę) i wyciągnij wszystkie dane zgodnie z powyższymi instrukcjami:`;
 
     // Krok 7: Wywołanie Gemini API z obrazem
     const geminiService = new GeminiService();
