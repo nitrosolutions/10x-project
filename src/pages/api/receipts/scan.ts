@@ -178,7 +178,7 @@ PRZYKŁAD 1 - Paragon ze zniżką:
   "store_name": "Biedronka",
   "items": [
     {"name": "Mleko 2%", "price": 4.59, "category_id": 1},
-    {"name": "Masło (ze zniżką)", "price": 6.99, "category_id": 1},
+    {"name": "Masło", "price": 6.99, "category_id": 1},
     {"name": "Chleb pszenny", "price": 3.99, "category_id": 1}
   ],
   "total": 15.57
