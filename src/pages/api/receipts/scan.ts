@@ -150,12 +150,18 @@ ZASADY EKSTRAKCJI:
    - price: CAŁKOWITA KWOTA ZA POZYCJĘ jako liczba (np. 12.99, nie "12.99 zł")
      * Dla PARAGONÓW: kwota za produkt (już zawiera ilość jeśli występuje)
      * Dla FAKTUR: SUMARYCZNA kwota pozycji (ilość × cena jednostkowa), NIE cena jednostkowa!
-     * UWAGA: Jeśli pod pozycją jest ZNIŻKA/RABAT (kwota ujemna), uwzględnij ją w cenie pozycji (odejmij od kwoty)
+     * OBSŁUGA ZNIŻEK: Jeśli pod pozycją jest linia z UJEMNĄ KWOTĄ (ze znakiem minus), to jest ZNIŻKA/RABAT na poprzedni produkt
+     * Ujemne kwoty mogą mieć opis ("Rabat", "UPUST", "Promocja") LUB być samą liczbą ujemną ("-5.00")
+     * Jeśli linia zawiera słowo kluczowe rabatu AND zawiera nazwę produktu z linii wyżej, to na pewno rabat na ten produkt
+     * ZAWSZE odejmij ujemną kwotę od ceny produktu powyżej (nie dodawaj jako osobny item)
+     * KRYTYCZNE: NIGDY nie dodawaj zniżki/rabatu jako osobnego item w tablicy items!
+     * KRYTYCZNE: Nie duplikuj produktów - jeśli widzisz tę samą nazwę z rabatem, to ONE item, nie dwa!
    - category_id: ID z listy kategorii powyżej (liczba całkowita)
 4. total: Suma całkowita jako liczba (kwota końcowa do zapłaty)
 
 WAŻNE INSTRUKCJE:
 - Zwróć WSZYSTKIE produkty z paragonu/faktury - nie pomijaj żadnych
+- KRYTYCZNE: Zachowaj ORYGINALNĄ KOLEJNOŚĆ produktów z paragonu - zwracaj items w dokładnie tej samej kolejności, w jakiej pojawiają się na dokumentu
 - Każdy produkt MUSI mieć wypełnioną nazwę (name)
 - Jeśli nazwa jest niejasna, częściowo nieczytelna lub rozmyta - wpisz ZAWSZE swoje najlepsze przybliżenie
 - Akceptowalne są interpretacje/szacowania - lepiej przybliżona nazwa niż brak
@@ -166,13 +172,73 @@ OBSŁUGA FAKTUR VAT:
 - DO POLA "price" wpisz WARTOŚĆ/KWOTĘ pozycji (ilość × cena jedn.), NIE cenę jednostkową
 - Przykład: "Usługa serwisowa | 3 szt. | 100 zł/szt. | 300 zł" → price: 300 (nie 100!)
 
-OBSŁUGA ZNIŻEK/RABATÓW:
-- Zniżki często pojawiają się jako osobne linie z kwotą ujemną (np. "-5.00", "RABAT -10%")
-- Jeśli zniżka dotyczy konkretnej pozycji (jest tuż pod nią), odejmij ją od ceny tej pozycji
-- Przykład: "Kawa 15.00" a pod spodem "Rabat -3.00" → price: 12.00 (15.00 - 3.00)
-- Jeśli zniżka dotyczy całego paragonu, uwzględnij ją w total, ale nie w cenach pozycji
+OBSŁUGA ZNIŻEK/RABATÓW - BARDZO WAŻNE:
+- Zniżki/rabaty NIE są produktami i NIGDY nie powinny być dodawane jako osobne items
+- KLUCZOWE: Szukaj UJEMNYCH KWOT (ze znakiem minus) - to zawsze zniżka/rabat, niezależnie czy zawiera słowo "rabat"
+- Rozpoznawaj SŁOWA KLUCZOWE rabatów: "Rabat", "RABAT", "UPUST", "Promocja", "Discount", "-", nawet jeśli są samotne
+- Zniżka może być oznaczona jako: "Rabat -3.00", "-3.00", "Promocja -10%", "UPUST -8.28", lub samo "-5.00" bez dodatkowego opisu
+- KRYTYCZNE: Jeśli linia zawiera słowo rabatu i pojawia się tuż pod produktem, sprawdź czy zawiera tę SAMĄ NAZWĘ produktu - to jest rabat na ten produkt
+- ZAWSZE gdy widzisz ujemną kwotę pod produktem, odejmij ją od ceny tego produktu
+- Przykład 1: "Kawa 15.00" + "Rabat -3.00" → price: 12.00
+- Przykład 2: "Kawa 15.00" + "-3.00" → price: 12.00 (nawet bez słowa "rabat"!)
+- Przykład 3: "Chipsy 8.29" + "UPUST Chipsy -8.28" → price: 0.01 (to JEDEN produkt, nie dwa!)
+- Zniżka ma być UWZGLĘDNIONA w cenie produktu, ale NIGDY nie powinna być osobnym itemem
 
-PRZYKŁAD 1 - Paragon ze zniżką:
+PRZYKŁAD 1 - Paragon z rabatem (ze słowem "Rabat"):
+Paragon zawiera:
+  Kawa 15.00
+  Rabat -3.00
+  Mleko 8.00
+
+POWINNO BYĆ W JSON:
+{
+  "purchase_date": "2025-01-15",
+  "store_name": "Cafe Shop",
+  "items": [
+    {"name": "Kawa", "price": 12.00, "category_id": 1},
+    {"name": "Mleko", "price": 8.00, "category_id": 1}
+  ],
+  "total": 20.00
+}
+
+PRZYKŁAD 1B - Paragon z rabatem (TYLKO ujemna kwota, bez słowa "rabat"):
+Paragon zawiera:
+  Herbata 10.00
+  -2.00
+  Chleb 5.00
+
+POWINNO BYĆ W JSON (ujemna kwota -2.00 to zniżka na Herbatę!):
+{
+  "purchase_date": "2025-01-15",
+  "store_name": "Cafe Shop",
+  "items": [
+    {"name": "Herbata", "price": 8.00, "category_id": 1},
+    {"name": "Chleb", "price": 5.00, "category_id": 1}
+  ],
+  "total": 13.00
+}
+
+PRZYKŁAD 1C - Paragon z rabatem (UPUST ze SAMĄ NAZWĄ produktu - to JEDEN item!):
+Paragon zawiera (w tej kolejności):
+  1. L.Chipsy papryka 130g    8.29
+  2. UPUST L.Chipsy papryka   -8.28
+  3. Mleko 2L               5.00
+
+POWINNO BYĆ W JSON:
+- Linia z "UPUST Chipsy" to rabat na Chipsy, nie oddzielny produkt!
+- Zachowuj ORYGINALNĄ KOLEJNOŚĆ: Chipsy są pierwsze na paragonie → Chipsy pierwsze w items
+- Obliczenie ceny: 8.29 - 8.28 = 0.01
+{
+  "purchase_date": "2025-01-15",
+  "store_name": "Supermarket",
+  "items": [
+    {"name": "L.Chipsy papryka 130g", "price": 0.01, "category_id": 1},
+    {"name": "Mleko 2L", "price": 5.00, "category_id": 1}
+  ],
+  "total": 5.01
+}
+
+PRZYKŁAD 2 - Paragon ze zniżką:
 {
   "purchase_date": "2025-01-15",
   "store_name": "Biedronka",
@@ -184,7 +250,7 @@ PRZYKŁAD 1 - Paragon ze zniżką:
   "total": 15.57
 }
 
-PRZYKŁAD 2 - Faktura VAT:
+PRZYKŁAD 3 - Faktura VAT:
 {
   "purchase_date": "2025-01-20",
   "store_name": "Firma ABC Sp. z o.o.",
@@ -196,8 +262,12 @@ PRZYKŁAD 2 - Faktura VAT:
 }
 
 PAMIĘTAJ:
+- KOLEJNOŚĆ: Items w JSON MUSZĄ być w tej samej kolejności co na paragonie/fakturze (od góry do dołu)
 - Dla faktur: price = sumaryczna kwota pozycji (ilość × cena jedn.)
-- Dla zniżek: odejmij rabat od ceny pozycji
+- Dla zniżek: ZAWSZE odejmij od ceny produktu, NIGDY nie dodawaj jako osobny item
+- DEDUPLICACJA: Jeśli widzisz tę samą nazwę produktu 2x (raz jako produkt, raz w linii rabatu), to JEDEN item z obliczoną ceną
+  * Rozpoznaj wzorce: "Produkt 10.00" + "UPUST/Rabat Produkt -5.00" = {"name": "Produkt", "price": 5.00}
+  * Pozycja rabatu w linie pomiędzy innymi produktami - pozycja rabatu zostaje "ukryta" a cena została obliczona dla produktu
 - Zwróć TYLKO JSON bez żadnego innego tekstu!
 
 Przeanalizuj ten dokument (paragon lub fakturę) i wyciągnij wszystkie dane zgodnie z powyższymi instrukcjami:`;
