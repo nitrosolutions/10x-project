@@ -59,23 +59,39 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         const img = new Image();
         img.src = e.target?.result as string;
         img.onload = () => {
-          // Maksymalna szerokość/wysokość dla OCR (wystarczy 1920px)
-          const MAX_WIDTH = 1920;
-          const MAX_HEIGHT = 1920;
+          // Maksymalna szerokość/wysokość dla OCR
+          // 3200px to dobry balans - wystarczająco duże dla OCR, ale zmniejsza ogromne zdjęcia
+          const MAX_WIDTH = 3200;
+          const MAX_HEIGHT = 3200;
           let width = img.width;
           let height = img.height;
+          let needsResize = false;
 
           // Oblicz nowe wymiary zachowując proporcje
           if (width > height) {
             if (width > MAX_WIDTH) {
               height = Math.round((height * MAX_WIDTH) / width);
               width = MAX_WIDTH;
+              needsResize = true;
             }
           } else {
             if (height > MAX_HEIGHT) {
               width = Math.round((width * MAX_HEIGHT) / height);
               height = MAX_HEIGHT;
+              needsResize = true;
             }
+          }
+
+          // Jeśli obraz jest już mały i plik nie jest za duży, nie kompresuj
+          // Oszczędza jakość dla małych zdjęć z dobrej jakości
+          if (!needsResize && file.size < 2 * 1024 * 1024) {
+            // eslint-disable-next-line no-console
+            console.log("[ReceiptScanner] Image compression skipped - already optimal size", {
+              dimensions: `${img.width}x${img.height}`,
+              sizeKB: Math.round(file.size / 1024),
+            });
+            resolve(file);
+            return;
           }
 
           // Utwórz canvas do kompresji
@@ -118,7 +134,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               resolve(compressedFile);
             },
             "image/jpeg",
-            0.85 // Jakość JPEG 85% - dobry balans między jakością a rozmiarem
+            0.92 // Jakość JPEG 92% - wysoka jakość dla OCR przy zachowaniu kompresji
           );
         };
         img.onerror = () => reject(new Error("Nie udało się załadować obrazu"));
