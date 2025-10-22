@@ -187,21 +187,29 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     setProgress("Przygotowuję obraz...");
 
     try {
-      // KLUCZOWE dla mobile: Kompresuj obraz przed wysłaniem
-      // Zdjęcia z aparatu mobilnego mogą mieć 5-10MB, co przekracza limit Vercel (4.5MB)
-      setProgress("Optymalizuję obraz...");
+      // TYMCZASOWO WYŁĄCZONA KOMPRESJA - testowanie czy oryginalny obraz działa lepiej dla OCR
+      // Kompresja powoduje problemy z odczytywaniem cen przez AI
+      setProgress("Przygotowuję obraz...");
       let fileToUpload = file;
 
+      // eslint-disable-next-line no-console
+      console.log("[ReceiptScanner] Using original image (compression disabled for testing)", {
+        dimensions: "original",
+        sizeKB: Math.round(file.size / 1024),
+        note: "Testing if compression affects OCR accuracy",
+      });
+
+      /* KOMPRESJA WYŁĄCZONA - odkomentuj poniżej jeśli chcesz ją przywrócić
       try {
         fileToUpload = await compressImage(file);
       } catch (compressionError) {
         // eslint-disable-next-line no-console
         console.warn("[ReceiptScanner] Image compression failed, using original file:", compressionError);
-        // Jeśli kompresja się nie powiedzie, użyj oryginalnego pliku
         fileToUpload = file;
       }
+      */
 
-      // Konwersja obrazu (skompresowanego lub oryginalnego) na base64
+      // Konwersja obrazu (oryginalnego) na base64
       const base64Image = await fileToBase64(fileToUpload);
 
       setProgress("Analizuję paragon...");
