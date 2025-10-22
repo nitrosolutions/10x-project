@@ -174,17 +174,26 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
       // KLUCZOWE dla mobile: Kompresuj obraz przed wysłaniem
       // Zdjęcia z aparatu mobilnego mogą mieć 5-10MB, co przekracza limit Vercel (4.5MB)
       setProgress("Optymalizuję obraz...");
-      const compressedFile = await compressImage(file);
+      let fileToUpload = file;
 
-      // Konwersja skompresowanego obrazu na base64
-      const base64Image = await fileToBase64(compressedFile);
+      try {
+        fileToUpload = await compressImage(file);
+      } catch (compressionError) {
+        // eslint-disable-next-line no-console
+        console.warn("[ReceiptScanner] Image compression failed, using original file:", compressionError);
+        // Jeśli kompresja się nie powiedzie, użyj oryginalnego pliku
+        fileToUpload = file;
+      }
+
+      // Konwersja obrazu (skompresowanego lub oryginalnego) na base64
+      const base64Image = await fileToBase64(fileToUpload);
 
       setProgress("Analizuję paragon...");
 
       // eslint-disable-next-line no-console
       console.log("[ReceiptScanner] Starting scan request", {
         imageSize: base64Image.length,
-        mimeType: compressedFile.type,
+        mimeType: fileToUpload.type,
         estimatedSizeKB: Math.round((base64Image.length * 3) / 4 / 1024),
       });
 
@@ -203,7 +212,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
           },
           body: JSON.stringify({
             image: base64Image,
-            mimeType: compressedFile.type,
+            mimeType: fileToUpload.type,
           }),
           signal: controller.signal,
         });
@@ -325,9 +334,26 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Receipt scanning error:", error);
+
+      // Pokaż szczegółowy błąd dla debugowania mobile
+      const errorDetails =
+        error instanceof Error
+          ? `${error.name}: ${error.message}${error.stack ? "\n" + error.stack.substring(0, 200) : ""}`
+          : String(error);
+
       toast.error("Błąd skanowania", {
         description: error instanceof Error ? error.message : "Spróbuj ponownie lub dodaj paragon ręcznie",
+        duration: 10000, // Dłużej na mobile żeby zdążyć przeczytać
       });
+
+      // Dodatkowy toast ze szczegółami technicznymi (tylko dla debugowania)
+      if (process.env.NODE_ENV === "development" || window.location.hostname === "localhost") {
+        toast.info("Szczegóły techniczne", {
+          description: errorDetails.substring(0, 150),
+          duration: 15000,
+        });
+      }
+
       setIsScanning(false);
       setProgress("");
     }
