@@ -51,6 +51,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
   };
 
   // Funkcja pomocnicza do kompresji obrazu (szczególnie ważne dla mobile)
+  // STRATEGIA: Zachowaj ORYGINALNY ROZMIAR (pełna rozdzielczość dla OCR), zmniejsz tylko jakość JPEG
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -59,42 +60,12 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         const img = new Image();
         img.src = e.target?.result as string;
         img.onload = () => {
-          // Maksymalna szerokość/wysokość dla OCR
-          // 3200px to dobry balans - wystarczająco duże dla OCR, ale zmniejsza ogromne zdjęcia
-          const MAX_WIDTH = 3200;
-          const MAX_HEIGHT = 3200;
-          let width = img.width;
-          let height = img.height;
-          let needsResize = false;
+          // Zachowaj ORYGINALNY rozmiar obrazu - nie zmieniaj rozdzielczości!
+          // AI potrzebuje pełnej rozdzielczości do dokładnego odczytu cen
+          const width = img.width;
+          const height = img.height;
 
-          // Oblicz nowe wymiary zachowując proporcje
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height = Math.round((height * MAX_WIDTH) / width);
-              width = MAX_WIDTH;
-              needsResize = true;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width = Math.round((width * MAX_HEIGHT) / height);
-              height = MAX_HEIGHT;
-              needsResize = true;
-            }
-          }
-
-          // Jeśli obraz jest już mały i plik nie jest za duży, nie kompresuj
-          // Oszczędza jakość dla małych zdjęć z dobrej jakości
-          if (!needsResize && file.size < 2 * 1024 * 1024) {
-            // eslint-disable-next-line no-console
-            console.log("[ReceiptScanner] Image compression skipped - already optimal size", {
-              dimensions: `${img.width}x${img.height}`,
-              sizeKB: Math.round(file.size / 1024),
-            });
-            resolve(file);
-            return;
-          }
-
-          // Utwórz canvas do kompresji
+          // Utwórz canvas z ORYGINALNYM rozmiarem
           const canvas = document.createElement("canvas");
           canvas.width = width;
           canvas.height = height;
@@ -105,10 +76,10 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
             return;
           }
 
-          // Rysuj obraz na canvas
+          // Rysuj obraz na canvas w oryginalnym rozmiarze
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Konwertuj canvas do blob z kompresją
+          // Konwertuj do JPEG z jakością 95% - zmniejsza rozmiar, zachowuje jakość
           canvas.toBlob(
             (blob) => {
               if (!blob) {
@@ -123,18 +94,18 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               });
 
               // eslint-disable-next-line no-console
-              console.log("[ReceiptScanner] Image compression", {
+              console.log("[ReceiptScanner] Image compression (quality only, no resize)", {
                 originalSize: Math.round(file.size / 1024),
                 compressedSize: Math.round(compressedFile.size / 1024),
-                originalDimensions: `${img.width}x${img.height}`,
-                compressedDimensions: `${width}x${height}`,
+                dimensions: `${width}x${height}`,
+                quality: "95%",
                 compressionRatio: Math.round((compressedFile.size / file.size) * 100),
               });
 
               resolve(compressedFile);
             },
             "image/jpeg",
-            0.92 // Jakość JPEG 92% - wysoka jakość dla OCR przy zachowaniu kompresji
+            0.95 // Jakość JPEG 95% - minimalna kompresja, zachowuje wszystkie szczegóły dla OCR
           );
         };
         img.onerror = () => reject(new Error("Nie udało się załadować obrazu"));
@@ -187,29 +158,21 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     setProgress("Przygotowuję obraz...");
 
     try {
-      // TYMCZASOWO WYŁĄCZONA KOMPRESJA - testowanie czy oryginalny obraz działa lepiej dla OCR
-      // Kompresja powoduje problemy z odczytywaniem cen przez AI
-      setProgress("Przygotowuję obraz...");
+      // Kompresja obrazu - zachowuje ORYGINALNY rozmiar, tylko zmniejsza jakość do 95%
+      // To zachowuje pełną rozdzielczość dla AI (dokładny odczyt cen) przy zmniejszeniu rozmiaru pliku
+      setProgress("Optymalizuję obraz...");
       let fileToUpload = file;
 
-      // eslint-disable-next-line no-console
-      console.log("[ReceiptScanner] Using original image (compression disabled for testing)", {
-        dimensions: "original",
-        sizeKB: Math.round(file.size / 1024),
-        note: "Testing if compression affects OCR accuracy",
-      });
-
-      /* KOMPRESJA WYŁĄCZONA - odkomentuj poniżej jeśli chcesz ją przywrócić
       try {
         fileToUpload = await compressImage(file);
       } catch (compressionError) {
         // eslint-disable-next-line no-console
         console.warn("[ReceiptScanner] Image compression failed, using original file:", compressionError);
+        // Jeśli kompresja się nie powiedzie, użyj oryginalnego pliku
         fileToUpload = file;
       }
-      */
 
-      // Konwersja obrazu (oryginalnego) na base64
+      // Konwersja obrazu (skompresowanego lub oryginalnego) na base64
       const base64Image = await fileToBase64(fileToUpload);
 
       setProgress("Analizuję paragon...");
