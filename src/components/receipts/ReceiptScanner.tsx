@@ -99,6 +99,13 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
 
       setProgress("Analizuję paragon...");
 
+      // eslint-disable-next-line no-console
+      console.log("[ReceiptScanner] Starting scan request", {
+        imageSize: base64Image.length,
+        mimeType: file.type,
+        estimatedSizeKB: Math.round((base64Image.length * 3) / 4 / 1024),
+      });
+
       // Timeout dla zapytania (60s - dłuższe dla urządzeń mobilnych)
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 60000);
@@ -121,7 +128,29 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
 
         clearTimeout(timeout);
 
+        // eslint-disable-next-line no-console
+        console.log("[ReceiptScanner] Received response", {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: response.headers.get("content-type"),
+          ok: response.ok,
+        });
+
         if (!response.ok) {
+          // Specjalna obsługa błędów autoryzacji - natychmiastowe przekierowanie
+          if (response.status === 401 || response.status === 403) {
+            toast.error("Sesja wygasła", {
+              description: "Zaloguj się ponownie, aby kontynuować",
+            });
+            setIsScanning(false);
+            setProgress("");
+            // Przekieruj do logowania po 1 sekundzie
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 1000);
+            return;
+          }
+
           let errorMessage = "Nie udało się przetworzyć paragonu";
 
           try {
@@ -143,8 +172,6 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               // Dopasuj komunikat błędu do statusu HTTP
               if (response.status === 413) {
                 errorMessage = "Plik jest za duży. Spróbuj zmniejszyć rozdzielczość zdjęcia.";
-              } else if (response.status === 401 || response.status === 403) {
-                errorMessage = "Brak autoryzacji. Zaloguj się ponownie.";
               } else if (response.status === 500) {
                 errorMessage = "Błąd serwera. Spróbuj ponownie za chwilę.";
               } else if (response.status === 502 || response.status === 503 || response.status === 504) {
@@ -190,6 +217,13 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         }
 
         // Błąd sieciowy lub inny nieoczekiwany błąd
+        // eslint-disable-next-line no-console
+        console.error("[ReceiptScanner] Unexpected fetch error:", {
+          error: fetchError,
+          message: fetchError instanceof Error ? fetchError.message : String(fetchError),
+          name: fetchError instanceof Error ? fetchError.name : "Unknown",
+          stack: fetchError instanceof Error ? fetchError.stack : undefined,
+        });
         throw new Error("Nie można połączyć się z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.");
       }
 
