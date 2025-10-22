@@ -50,6 +50,83 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     }
   };
 
+  // Funkcja pomocnicza do kompresji obrazu (szczególnie ważne dla mobile)
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target?.result as string;
+        img.onload = () => {
+          // Maksymalna szerokość/wysokość dla OCR (wystarczy 1920px)
+          const MAX_WIDTH = 1920;
+          const MAX_HEIGHT = 1920;
+          let width = img.width;
+          let height = img.height;
+
+          // Oblicz nowe wymiary zachowując proporcje
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          // Utwórz canvas do kompresji
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) {
+            reject(new Error("Nie udało się utworzyć kontekstu canvas"));
+            return;
+          }
+
+          // Rysuj obraz na canvas
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Konwertuj canvas do blob z kompresją
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(new Error("Nie udało się skompresować obrazu"));
+                return;
+              }
+
+              // Utwórz nowy File z skompresowanego blob
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+
+              // eslint-disable-next-line no-console
+              console.log("[ReceiptScanner] Image compression", {
+                originalSize: Math.round(file.size / 1024),
+                compressedSize: Math.round(compressedFile.size / 1024),
+                originalDimensions: `${img.width}x${img.height}`,
+                compressedDimensions: `${width}x${height}`,
+                compressionRatio: Math.round((compressedFile.size / file.size) * 100),
+              });
+
+              resolve(compressedFile);
+            },
+            "image/jpeg",
+            0.85 // Jakość JPEG 85% - dobry balans między jakością a rozmiarem
+          );
+        };
+        img.onerror = () => reject(new Error("Nie udało się załadować obrazu"));
+      };
+      reader.onerror = () => reject(new Error("Nie udało się odczytać pliku"));
+    });
+  };
+
   // Funkcja pomocnicza do konwersji pliku na base64
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -94,15 +171,20 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     setProgress("Przygotowuję obraz...");
 
     try {
-      // Konwersja obrazu na base64
-      const base64Image = await fileToBase64(file);
+      // KLUCZOWE dla mobile: Kompresuj obraz przed wysłaniem
+      // Zdjęcia z aparatu mobilnego mogą mieć 5-10MB, co przekracza limit Vercel (4.5MB)
+      setProgress("Optymalizuję obraz...");
+      const compressedFile = await compressImage(file);
+
+      // Konwersja skompresowanego obrazu na base64
+      const base64Image = await fileToBase64(compressedFile);
 
       setProgress("Analizuję paragon...");
 
       // eslint-disable-next-line no-console
       console.log("[ReceiptScanner] Starting scan request", {
         imageSize: base64Image.length,
-        mimeType: file.type,
+        mimeType: compressedFile.type,
         estimatedSizeKB: Math.round((base64Image.length * 3) / 4 / 1024),
       });
 
@@ -121,7 +203,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
           },
           body: JSON.stringify({
             image: base64Image,
-            mimeType: file.type,
+            mimeType: compressedFile.type,
           }),
           signal: controller.signal,
         });
