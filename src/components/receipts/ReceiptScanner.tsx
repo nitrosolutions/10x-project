@@ -50,6 +50,83 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     }
   };
 
+  // Funkcja pomocnicza do kompresji obrazu (szczególnie ważne dla mobile)
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target?.result as string;
+        img.onload = () => {
+          // Maksymalna szerokość/wysokość dla OCR (wystarczy 1920px)
+          const MAX_WIDTH = 1920;
+          const MAX_HEIGHT = 1920;
+          let width = img.width;
+          let height = img.height;
+
+          // Oblicz nowe wymiary zachowując proporcje
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          // Utwórz canvas do kompresji
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) {
+            reject(new Error("Nie udało się utworzyć kontekstu canvas"));
+            return;
+          }
+
+          // Rysuj obraz na canvas
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Konwertuj canvas do blob z kompresją
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(new Error("Nie udało się skompresować obrazu"));
+                return;
+              }
+
+              // Utwórz nowy File z skompresowanego blob
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+
+              // eslint-disable-next-line no-console
+              console.log("[ReceiptScanner] Image compression", {
+                originalSize: Math.round(file.size / 1024),
+                compressedSize: Math.round(compressedFile.size / 1024),
+                originalDimensions: `${img.width}x${img.height}`,
+                compressedDimensions: `${width}x${height}`,
+                compressionRatio: Math.round((compressedFile.size / file.size) * 100),
+              });
+
+              resolve(compressedFile);
+            },
+            "image/jpeg",
+            0.85 // Jakość JPEG 85% - dobry balans między jakością a rozmiarem
+          );
+        };
+        img.onerror = () => reject(new Error("Nie udało się załadować obrazu"));
+      };
+      reader.onerror = () => reject(new Error("Nie udało się odczytać pliku"));
+    });
+  };
+
   // Funkcja pomocnicza do konwersji pliku na base64
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -94,10 +171,31 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     setProgress("Przygotowuję obraz...");
 
     try {
-      // Konwersja obrazu na base64
-      const base64Image = await fileToBase64(file);
+      // KLUCZOWE dla mobile: Kompresuj obraz przed wysłaniem
+      // Zdjęcia z aparatu mobilnego mogą mieć 5-10MB, co przekracza limit Vercel (4.5MB)
+      setProgress("Optymalizuję obraz...");
+      let fileToUpload = file;
+
+      try {
+        fileToUpload = await compressImage(file);
+      } catch (compressionError) {
+        // eslint-disable-next-line no-console
+        console.warn("[ReceiptScanner] Image compression failed, using original file:", compressionError);
+        // Jeśli kompresja się nie powiedzie, użyj oryginalnego pliku
+        fileToUpload = file;
+      }
+
+      // Konwersja obrazu (skompresowanego lub oryginalnego) na base64
+      const base64Image = await fileToBase64(fileToUpload);
 
       setProgress("Analizuję paragon...");
+
+      // eslint-disable-next-line no-console
+      console.log("[ReceiptScanner] Starting scan request", {
+        imageSize: base64Image.length,
+        mimeType: fileToUpload.type,
+        estimatedSizeKB: Math.round((base64Image.length * 3) / 4 / 1024),
+      });
 
       // Timeout dla zapytania (60s - dłuższe dla urządzeń mobilnych)
       const controller = new AbortController();
@@ -114,14 +212,36 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
           },
           body: JSON.stringify({
             image: base64Image,
-            mimeType: file.type,
+            mimeType: fileToUpload.type,
           }),
           signal: controller.signal,
         });
 
         clearTimeout(timeout);
 
+        // eslint-disable-next-line no-console
+        console.log("[ReceiptScanner] Received response", {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: response.headers.get("content-type"),
+          ok: response.ok,
+        });
+
         if (!response.ok) {
+          // Specjalna obsługa błędów autoryzacji - natychmiastowe przekierowanie
+          if (response.status === 401 || response.status === 403) {
+            toast.error("Sesja wygasła", {
+              description: "Zaloguj się ponownie, aby kontynuować",
+            });
+            setIsScanning(false);
+            setProgress("");
+            // Przekieruj do logowania po 1 sekundzie
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 1000);
+            return;
+          }
+
           let errorMessage = "Nie udało się przetworzyć paragonu";
 
           try {
@@ -143,8 +263,6 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               // Dopasuj komunikat błędu do statusu HTTP
               if (response.status === 413) {
                 errorMessage = "Plik jest za duży. Spróbuj zmniejszyć rozdzielczość zdjęcia.";
-              } else if (response.status === 401 || response.status === 403) {
-                errorMessage = "Brak autoryzacji. Zaloguj się ponownie.";
               } else if (response.status === 500) {
                 errorMessage = "Błąd serwera. Spróbuj ponownie za chwilę.";
               } else if (response.status === 502 || response.status === 503 || response.status === 504) {
@@ -190,6 +308,13 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         }
 
         // Błąd sieciowy lub inny nieoczekiwany błąd
+        // eslint-disable-next-line no-console
+        console.error("[ReceiptScanner] Unexpected fetch error:", {
+          error: fetchError,
+          message: fetchError instanceof Error ? fetchError.message : String(fetchError),
+          name: fetchError instanceof Error ? fetchError.name : "Unknown",
+          stack: fetchError instanceof Error ? fetchError.stack : undefined,
+        });
         throw new Error("Nie można połączyć się z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.");
       }
 
@@ -209,9 +334,26 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Receipt scanning error:", error);
+
+      // Pokaż szczegółowy błąd dla debugowania mobile
+      const errorDetails =
+        error instanceof Error
+          ? `${error.name}: ${error.message}${error.stack ? "\n" + error.stack.substring(0, 200) : ""}`
+          : String(error);
+
       toast.error("Błąd skanowania", {
         description: error instanceof Error ? error.message : "Spróbuj ponownie lub dodaj paragon ręcznie",
+        duration: 10000, // Dłużej na mobile żeby zdążyć przeczytać
       });
+
+      // Dodatkowy toast ze szczegółami technicznymi (tylko dla debugowania)
+      if (process.env.NODE_ENV === "development" || window.location.hostname === "localhost") {
+        toast.info("Szczegóły techniczne", {
+          description: errorDetails.substring(0, 150),
+          duration: 15000,
+        });
+      }
+
       setIsScanning(false);
       setProgress("");
     }
