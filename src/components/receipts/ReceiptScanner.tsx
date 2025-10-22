@@ -50,8 +50,8 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     }
   };
 
-  // Funkcja pomocnicza do kompresji obrazu (szczególnie ważne dla mobile)
-  // STRATEGIA: Zachowaj ORYGINALNY ROZMIAR (pełna rozdzielczość dla OCR), zmniejsz tylko jakość JPEG
+  // Funkcja pomocnicza do kompresji obrazu z adaptacyjną jakością
+  // STRATEGIA: Zachowaj pełną rozdzielczość, automatycznie dobierz jakość aby zmieścić się w limicie Vercel
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -59,13 +59,11 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
       reader.onload = (e) => {
         const img = new Image();
         img.src = e.target?.result as string;
-        img.onload = () => {
-          // Zachowaj ORYGINALNY rozmiar obrazu - nie zmieniaj rozdzielczości!
-          // AI potrzebuje pełnej rozdzielczości do dokładnego odczytu cen
+        img.onload = async () => {
+          // Zachowaj ORYGINALNY rozmiar obrazu
           const width = img.width;
           const height = img.height;
 
-          // Utwórz canvas z ORYGINALNYM rozmiarem
           const canvas = document.createElement("canvas");
           canvas.width = width;
           canvas.height = height;
@@ -76,10 +74,53 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
             return;
           }
 
-          // Rysuj obraz na canvas w oryginalnym rozmiarze
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Konwertuj do JPEG z jakością 95% - zmniejsza rozmiar, zachowuje jakość
+          // Limit: 3MB dla pliku (po base64 będzie ~4MB, bezpieczne < 4.5MB Vercel limit)
+          const TARGET_SIZE_BYTES = 3 * 1024 * 1024;
+
+          // Próbuj różne jakości: 95%, 90%, 85%, 80%, 75%, 70%
+          const qualityLevels = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7];
+
+          for (const quality of qualityLevels) {
+            const blob = await new Promise<Blob | null>((res) => {
+              canvas.toBlob(res, "image/jpeg", quality);
+            });
+
+            if (!blob) continue;
+
+            // Jeśli mieści się w limicie, użyj tego
+            if (blob.size <= TARGET_SIZE_BYTES) {
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+
+              resolve(compressedFile);
+              return;
+            }
+          }
+
+          // Jeśli nawet z 70% za duże, spróbuj resize + kompresja
+          const MAX_DIMENSION = 3200;
+          let newWidth = width;
+          let newHeight = height;
+
+          if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+            if (width > height) {
+              newHeight = Math.round((height * MAX_DIMENSION) / width);
+              newWidth = MAX_DIMENSION;
+            } else {
+              newWidth = Math.round((width * MAX_DIMENSION) / height);
+              newHeight = MAX_DIMENSION;
+            }
+          }
+
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+          ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+          // Spróbuj z resize i 85% jakością
           canvas.toBlob(
             (blob) => {
               if (!blob) {
@@ -87,25 +128,15 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
                 return;
               }
 
-              // Utwórz nowy File z skompresowanego blob
               const compressedFile = new File([blob], file.name, {
                 type: "image/jpeg",
                 lastModified: Date.now(),
               });
 
-              // eslint-disable-next-line no-console
-              console.log("[ReceiptScanner] Image compression (quality only, no resize)", {
-                originalSize: Math.round(file.size / 1024),
-                compressedSize: Math.round(compressedFile.size / 1024),
-                dimensions: `${width}x${height}`,
-                quality: "95%",
-                compressionRatio: Math.round((compressedFile.size / file.size) * 100),
-              });
-
               resolve(compressedFile);
             },
             "image/jpeg",
-            0.95 // Jakość JPEG 95% - minimalna kompresja, zachowuje wszystkie szczegóły dla OCR
+            0.85
           );
         };
         img.onerror = () => reject(new Error("Nie udało się załadować obrazu"));
@@ -177,13 +208,6 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
 
       setProgress("Analizuję paragon...");
 
-      // eslint-disable-next-line no-console
-      console.log("[ReceiptScanner] Starting scan request", {
-        imageSize: base64Image.length,
-        mimeType: fileToUpload.type,
-        estimatedSizeKB: Math.round((base64Image.length * 3) / 4 / 1024),
-      });
-
       // Timeout dla zapytania (60s - dłuższe dla urządzeń mobilnych)
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 60000);
@@ -205,14 +229,6 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         });
 
         clearTimeout(timeout);
-
-        // eslint-disable-next-line no-console
-        console.log("[ReceiptScanner] Received response", {
-          status: response.status,
-          statusText: response.statusText,
-          contentType: response.headers.get("content-type"),
-          ok: response.ok,
-        });
 
         if (!response.ok) {
           // Specjalna obsługa błędów autoryzacji - natychmiastowe przekierowanie
@@ -322,24 +338,9 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
       // eslint-disable-next-line no-console
       console.error("Receipt scanning error:", error);
 
-      // Pokaż szczegółowy błąd dla debugowania mobile
-      const errorDetails =
-        error instanceof Error
-          ? `${error.name}: ${error.message}${error.stack ? "\n" + error.stack.substring(0, 200) : ""}`
-          : String(error);
-
       toast.error("Błąd skanowania", {
         description: error instanceof Error ? error.message : "Spróbuj ponownie lub dodaj paragon ręcznie",
-        duration: 10000, // Dłużej na mobile żeby zdążyć przeczytać
       });
-
-      // Dodatkowy toast ze szczegółami technicznymi (tylko dla debugowania)
-      if (process.env.NODE_ENV === "development" || window.location.hostname === "localhost") {
-        toast.info("Szczegóły techniczne", {
-          description: errorDetails.substring(0, 150),
-          duration: 15000,
-        });
-      }
 
       setIsScanning(false);
       setProgress("");
