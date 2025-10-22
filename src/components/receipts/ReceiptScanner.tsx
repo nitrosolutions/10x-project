@@ -101,12 +101,14 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
             }
           }
 
-          // Jeśli nawet z 70% za duże, spróbuj resize + kompresja
-          const MAX_DIMENSION = 3200;
+          // Jeśli nawet z 70% za duże i obraz jest BARDZO duży (>4096px), spróbuj resize
+          const MAX_DIMENSION = 4096;
           let newWidth = width;
           let newHeight = height;
+          let needsResize = false;
 
           if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+            needsResize = true;
             if (width > height) {
               newHeight = Math.round((height * MAX_DIMENSION) / width);
               newWidth = MAX_DIMENSION;
@@ -114,13 +116,13 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               newWidth = Math.round((width * MAX_DIMENSION) / height);
               newHeight = MAX_DIMENSION;
             }
+
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            ctx.drawImage(img, 0, 0, newWidth, newHeight);
           }
 
-          canvas.width = newWidth;
-          canvas.height = newHeight;
-          ctx.drawImage(img, 0, 0, newWidth, newHeight);
-
-          // Spróbuj z resize i 85% jakością
+          // Ostatnia próba z niską jakością (resize jeśli było potrzebne)
           canvas.toBlob(
             (blob) => {
               if (!blob) {
@@ -136,7 +138,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               resolve(compressedFile);
             },
             "image/jpeg",
-            0.85
+            needsResize ? 0.85 : 0.65 // Jeśli resize, użyj 85%, jeśli nie - użyj 65%
           );
         };
         img.onerror = () => reject(new Error("Nie udało się załadować obrazu"));
