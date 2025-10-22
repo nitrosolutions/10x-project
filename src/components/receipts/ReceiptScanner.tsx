@@ -51,7 +51,9 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
   };
 
   // Funkcja pomocnicza do kompresji obrazu z adaptacyjną jakością
-  // STRATEGIA: Zachowaj pełną rozdzielczość, automatycznie dobierz jakość aby zmieścić się w limicie Vercel
+  // STRATEGIA:
+  // 1. ZAWSZE resize do max 4096x4096 (jeśli większy)
+  // 2. Następnie obniżaj jakość od 95% w dół, aż zmieści się w limicie
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -60,10 +62,23 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         const img = new Image();
         img.src = e.target?.result as string;
         img.onload = async () => {
-          // Zachowaj ORYGINALNY rozmiar obrazu
-          const width = img.width;
-          const height = img.height;
+          // KROK 1: Resize do max 4096x4096 (ZAWSZE jako pierwszy krok)
+          const MAX_DIMENSION = 4096;
+          let width = img.width;
+          let height = img.height;
 
+          // Oblicz nowe wymiary jeśli przekracza 4096px
+          if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIMENSION) / width);
+              width = MAX_DIMENSION;
+            } else {
+              width = Math.round((width * MAX_DIMENSION) / height);
+              height = MAX_DIMENSION;
+            }
+          }
+
+          // Utwórz canvas z (potencjalnie zresizowanym) obrazem
           const canvas = document.createElement("canvas");
           canvas.width = width;
           canvas.height = height;
@@ -74,12 +89,12 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
             return;
           }
 
+          // Narysuj obraz na canvas (z resize jeśli było potrzebne)
           ctx.drawImage(img, 0, 0, width, height);
 
+          // KROK 2: Próbuj różne jakości JPEG, zacznij od 95%
           // Limit: 3MB dla pliku (po base64 będzie ~4MB, bezpieczne < 4.5MB Vercel limit)
           const TARGET_SIZE_BYTES = 3 * 1024 * 1024;
-
-          // Próbuj różne jakości: 95%, 90%, 85%, 80%, 75%, 70%
           const qualityLevels = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7];
 
           for (const quality of qualityLevels) {
@@ -101,28 +116,8 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
             }
           }
 
-          // Jeśli nawet z 70% za duże i obraz jest BARDZO duży (>4096px), spróbuj resize
-          const MAX_DIMENSION = 4096;
-          let newWidth = width;
-          let newHeight = height;
-          let needsResize = false;
-
-          if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-            needsResize = true;
-            if (width > height) {
-              newHeight = Math.round((height * MAX_DIMENSION) / width);
-              newWidth = MAX_DIMENSION;
-            } else {
-              newWidth = Math.round((width * MAX_DIMENSION) / height);
-              newHeight = MAX_DIMENSION;
-            }
-
-            canvas.width = newWidth;
-            canvas.height = newHeight;
-            ctx.drawImage(img, 0, 0, newWidth, newHeight);
-          }
-
-          // Ostatnia próba z niską jakością (resize jeśli było potrzebne)
+          // Jeśli nawet 70% nie wystarczy, użyj 70% i tyle
+          // (lepsze to niż odrzucić zdjęcie)
           canvas.toBlob(
             (blob) => {
               if (!blob) {
@@ -138,7 +133,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               resolve(compressedFile);
             },
             "image/jpeg",
-            needsResize ? 0.85 : 0.65 // Jeśli resize, użyj 85%, jeśli nie - użyj 65%
+            0.7
           );
         };
         img.onerror = () => reject(new Error("Nie udało się załadować obrazu"));
