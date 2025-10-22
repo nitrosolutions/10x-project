@@ -19,6 +19,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
 
   // Obsługa instalacji PWA
   const handleInstallPWA = async () => {
+    // eslint-disable-next-line no-console
     console.log("[PWA] Install button clicked. Platform:", platform, "Supports native:", supportsNativePrompt);
 
     // Dla iOS Safari - pokaż instrukcje
@@ -98,24 +99,99 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
 
       setProgress("Analizuję paragon...");
 
-      // Wysłanie zapytania do API
-      const response = await fetch("/api/receipts/scan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          image: base64Image,
-          mimeType: file.type,
-        }),
-      });
+      // Timeout dla zapytania (60s - dłuższe dla urządzeń mobilnych)
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60000);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details?.[0] || errorData.error || "Nie udało się przetworzyć paragonu");
+      let scannedData;
+
+      try {
+        // Wysłanie zapytania do API
+        const response = await fetch("/api/receipts/scan", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image: base64Image,
+            mimeType: file.type,
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+          let errorMessage = "Nie udało się przetworzyć paragonu";
+
+          try {
+            // Sprawdź Content-Type przed parsowaniem JSON
+            const contentType = response.headers.get("content-type");
+            if (contentType?.includes("application/json")) {
+              const errorData = await response.json();
+              errorMessage = errorData.details?.[0] || errorData.error || errorMessage;
+            } else {
+              // Odpowiedź nie jest JSON - prawdopodobnie błąd serwera/proxy
+              const textBody = await response.text();
+              // eslint-disable-next-line no-console
+              console.error("[ReceiptScanner] Non-JSON error response:", {
+                status: response.status,
+                contentType,
+                body: textBody.substring(0, 200),
+              });
+
+              // Dopasuj komunikat błędu do statusu HTTP
+              if (response.status === 413) {
+                errorMessage = "Plik jest za duży. Spróbuj zmniejszyć rozdzielczość zdjęcia.";
+              } else if (response.status === 401 || response.status === 403) {
+                errorMessage = "Brak autoryzacji. Zaloguj się ponownie.";
+              } else if (response.status === 500) {
+                errorMessage = "Błąd serwera. Spróbuj ponownie za chwilę.";
+              } else if (response.status === 502 || response.status === 503 || response.status === 504) {
+                errorMessage = "Serwer jest chwilowo niedostępny. Sprawdź połączenie i spróbuj ponownie.";
+              } else {
+                errorMessage = `Błąd serwera (${response.status}). Spróbuj ponownie.`;
+              }
+            }
+          } catch (parseError) {
+            // eslint-disable-next-line no-console
+            console.error("[ReceiptScanner] Error parsing error response:", parseError);
+            // Użyj domyślnego komunikatu błędu
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        // Sprawdź Content-Type dla udanej odpowiedzi
+        const contentType = response.headers.get("content-type");
+        if (!contentType?.includes("application/json")) {
+          // eslint-disable-next-line no-console
+          console.error("[ReceiptScanner] Success response is not JSON:", contentType);
+          throw new Error("Otrzymano nieprawidłową odpowiedź z serwera. Spróbuj ponownie.");
+        }
+
+        scannedData = await response.json();
+      } catch (fetchError) {
+        clearTimeout(timeout);
+
+        // Obsługa błędów fetch i timeout
+        if (fetchError instanceof Error) {
+          if (fetchError.name === "AbortError") {
+            throw new Error("Skanowanie trwało zbyt długo. Sprawdź połączenie internetowe i spróbuj ponownie.");
+          }
+          // Jeśli to już jest nasz sformatowany błąd, rzuć go dalej
+          if (
+            fetchError.message.startsWith("Nie udało się") ||
+            fetchError.message.includes("Błąd serwera") ||
+            fetchError.message.includes("Otrzymano nieprawidłową")
+          ) {
+            throw fetchError;
+          }
+        }
+
+        // Błąd sieciowy lub inny nieoczekiwany błąd
+        throw new Error("Nie można połączyć się z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.");
       }
-
-      const scannedData = await response.json();
 
       setProgress("Przekierowuję do edycji...");
 
@@ -131,6 +207,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
       );
       window.location.href = "/receipts/new?mode=scan";
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Receipt scanning error:", error);
       toast.error("Błąd skanowania", {
         description: error instanceof Error ? error.message : "Spróbuj ponownie lub dodaj paragon ręcznie",
