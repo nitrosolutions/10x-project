@@ -15,17 +15,12 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const { isInstallable, promptInstall, platform, supportsNativePrompt } =
-    usePWAInstall();
+  const { isInstallable, promptInstall, platform, supportsNativePrompt } = usePWAInstall();
 
   // Obsługa instalacji PWA
   const handleInstallPWA = async () => {
-    console.log(
-      "[PWA] Install button clicked. Platform:",
-      platform,
-      "Supports native:",
-      supportsNativePrompt,
-    );
+    // eslint-disable-next-line no-console
+    console.log("[PWA] Install button clicked. Platform:", platform, "Supports native:", supportsNativePrompt);
 
     // Dla iOS Safari - pokaż instrukcje
     if (platform === "ios" && !supportsNativePrompt) {
@@ -71,9 +66,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
   };
 
   // Obsługa wyboru pliku (aparat lub galeria)
-  const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (!file) {
@@ -136,11 +129,11 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
             const contentType = response.headers.get("content-type");
             if (contentType?.includes("application/json")) {
               const errorData = await response.json();
-              errorMessage =
-                errorData.details?.[0] || errorData.error || errorMessage;
+              errorMessage = errorData.details?.[0] || errorData.error || errorMessage;
             } else {
               // Odpowiedź nie jest JSON - prawdopodobnie błąd serwera/proxy
               const textBody = await response.text();
+              // eslint-disable-next-line no-console
               console.error("[ReceiptScanner] Non-JSON error response:", {
                 status: response.status,
                 contentType,
@@ -149,28 +142,20 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
 
               // Dopasuj komunikat błędu do statusu HTTP
               if (response.status === 413) {
-                errorMessage =
-                  "Plik jest za duży. Spróbuj zmniejszyć rozdzielczość zdjęcia.";
+                errorMessage = "Plik jest za duży. Spróbuj zmniejszyć rozdzielczość zdjęcia.";
               } else if (response.status === 401 || response.status === 403) {
                 errorMessage = "Brak autoryzacji. Zaloguj się ponownie.";
               } else if (response.status === 500) {
                 errorMessage = "Błąd serwera. Spróbuj ponownie za chwilę.";
-              } else if (
-                response.status === 502 ||
-                response.status === 503 ||
-                response.status === 504
-              ) {
-                errorMessage =
-                  "Serwer jest chwilowo niedostępny. Sprawdź połączenie i spróbuj ponownie.";
+              } else if (response.status === 502 || response.status === 503 || response.status === 504) {
+                errorMessage = "Serwer jest chwilowo niedostępny. Sprawdź połączenie i spróbuj ponownie.";
               } else {
                 errorMessage = `Błąd serwera (${response.status}). Spróbuj ponownie.`;
               }
             }
           } catch (parseError) {
-            console.error(
-              "[ReceiptScanner] Error parsing error response:",
-              parseError,
-            );
+            // eslint-disable-next-line no-console
+            console.error("[ReceiptScanner] Error parsing error response:", parseError);
             // Użyj domyślnego komunikatu błędu
           }
 
@@ -180,13 +165,9 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         // Sprawdź Content-Type dla udanej odpowiedzi
         const contentType = response.headers.get("content-type");
         if (!contentType?.includes("application/json")) {
-          console.error(
-            "[ReceiptScanner] Success response is not JSON:",
-            contentType,
-          );
-          throw new Error(
-            "Otrzymano nieprawidłową odpowiedź z serwera. Spróbuj ponownie.",
-          );
+          // eslint-disable-next-line no-console
+          console.error("[ReceiptScanner] Success response is not JSON:", contentType);
+          throw new Error("Otrzymano nieprawidłową odpowiedź z serwera. Spróbuj ponownie.");
         }
 
         scannedData = await response.json();
@@ -196,9 +177,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         // Obsługa błędów fetch i timeout
         if (fetchError instanceof Error) {
           if (fetchError.name === "AbortError") {
-            throw new Error(
-              "Skanowanie trwało zbyt długo. Sprawdź połączenie internetowe i spróbuj ponownie.",
-            );
+            throw new Error("Skanowanie trwało zbyt długo. Sprawdź połączenie internetowe i spróbuj ponownie.");
           }
           // Jeśli to już jest nasz sformatowany błąd, rzuć go dalej
           if (
@@ -211,9 +190,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         }
 
         // Błąd sieciowy lub inny nieoczekiwany błąd
-        throw new Error(
-          "Nie można połączyć się z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.",
-        );
+        throw new Error("Nie można połączyć się z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.");
       }
 
       setProgress("Przekierowuję do edycji...");
@@ -226,16 +203,14 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         JSON.stringify({
           ...scannedData,
           source: "scan",
-        }),
+        })
       );
       window.location.href = "/receipts/new?mode=scan";
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Receipt scanning error:", error);
       toast.error("Błąd skanowania", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "Spróbuj ponownie lub dodaj paragon ręcznie",
+        description: error instanceof Error ? error.message : "Spróbuj ponownie lub dodaj paragon ręcznie",
       });
       setIsScanning(false);
       setProgress("");
@@ -263,9 +238,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
         <div className="flex flex-col items-center justify-center py-12 space-y-6">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
           <p className="text-lg font-medium">{progress}</p>
-          <p className="text-sm text-muted-foreground">
-            Proszę czekać, to może potrwać do minuty...
-          </p>
+          <p className="text-sm text-muted-foreground">Proszę czekać, to może potrwać do minuty...</p>
 
           {/* Przycisk instalacji PWA - widoczny tylko podczas skanowania */}
           {isInstallable && (
@@ -290,12 +263,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
           {/* Przyciski wyboru metody skanowania */}
           <div className="grid gap-4">
             {hasCamera && (
-              <Button
-                onClick={handleCameraClick}
-                size="lg"
-                className="h-24 text-lg"
-                variant="default"
-              >
+              <Button onClick={handleCameraClick} size="lg" className="h-24 text-lg" variant="default">
                 <Camera className="mr-2 h-6 w-6" />
                 Zrób zdjęcie aparatem
               </Button>
@@ -348,10 +316,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
       )}
 
       {/* Dialog z instrukcjami instalacji dla iOS */}
-      <IOSInstallInstructions
-        open={showIOSInstructions}
-        onOpenChange={setShowIOSInstructions}
-      />
+      <IOSInstallInstructions open={showIOSInstructions} onOpenChange={setShowIOSInstructions} />
     </div>
   );
 }
