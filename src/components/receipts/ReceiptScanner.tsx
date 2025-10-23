@@ -50,113 +50,6 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     }
   };
 
-  // Funkcja pomocnicza do kompresji obrazu z adaptacyjną jakością
-  // STRATEGIA:
-  // 1. ZAWSZE resize do max 4096x4096 (jeśli większy)
-  // 2. Następnie obniżaj jakość od 95% w dół, aż zmieści się w limicie
-  const compressImage = (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (e) => {
-        const img = new Image();
-        img.src = e.target?.result as string;
-        img.onload = async () => {
-          // KROK 1: Resize do max 4096x4096 (ZAWSZE jako pierwszy krok)
-          const MAX_DIMENSION = 4096;
-          let width = img.width;
-          let height = img.height;
-
-          // Oblicz nowe wymiary jeśli przekracza 4096px
-          if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-            if (width > height) {
-              height = Math.round((height * MAX_DIMENSION) / width);
-              width = MAX_DIMENSION;
-            } else {
-              width = Math.round((width * MAX_DIMENSION) / height);
-              height = MAX_DIMENSION;
-            }
-          }
-
-          // Utwórz canvas z (potencjalnie zresizowanym) obrazem
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-
-          if (!ctx) {
-            reject(new Error("Nie udało się utworzyć kontekstu canvas"));
-            return;
-          }
-
-          // Narysuj obraz na canvas (z resize jeśli było potrzebne)
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // KROK 2: Próbuj różne jakości JPEG, zacznij od 95%
-          // Limit: 3MB dla pliku (po base64 będzie ~4MB, bezpieczne < 4.5MB Vercel limit)
-          const TARGET_SIZE_BYTES = 3 * 1024 * 1024;
-          const qualityLevels = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7];
-
-          for (const quality of qualityLevels) {
-            const blob = await new Promise<Blob | null>((res) => {
-              canvas.toBlob(res, "image/jpeg", quality);
-            });
-
-            if (!blob) continue;
-
-            // Jeśli mieści się w limicie, użyj tego
-            if (blob.size <= TARGET_SIZE_BYTES) {
-              const compressedFile = new File([blob], file.name, {
-                type: "image/jpeg",
-                lastModified: Date.now(),
-              });
-
-              resolve(compressedFile);
-              return;
-            }
-          }
-
-          // Jeśli nawet 70% nie wystarczy, użyj 70% i tyle
-          // (lepsze to niż odrzucić zdjęcie)
-          canvas.toBlob(
-            (blob) => {
-              if (!blob) {
-                reject(new Error("Nie udało się skompresować obrazu"));
-                return;
-              }
-
-              const compressedFile = new File([blob], file.name, {
-                type: "image/jpeg",
-                lastModified: Date.now(),
-              });
-
-              resolve(compressedFile);
-            },
-            "image/jpeg",
-            0.7
-          );
-        };
-        img.onerror = () => reject(new Error("Nie udało się załadować obrazu"));
-      };
-      reader.onerror = () => reject(new Error("Nie udało się odczytać pliku"));
-    });
-  };
-
-  // Funkcja pomocnicza do konwersji pliku na base64
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const result = reader.result as string;
-        // Usuń prefix "data:image/xxx;base64,"
-        const base64 = result.split(",")[1];
-        resolve(base64);
-      };
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   // Obsługa wyboru pliku (aparat lub galeria)
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -173,55 +66,26 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
       return;
     }
 
-    // Walidacja rozmiaru (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Plik jest za duży", {
-        description: "Maksymalny rozmiar pliku to 10MB",
-      });
-      return;
-    }
-
     // Rozpocznij skanowanie
     setIsScanning(true);
-    setProgress("Przygotowuję obraz...");
+    setProgress("Wysyłam obraz do analizy...");
 
     try {
-      // Kompresja obrazu - zachowuje ORYGINALNY rozmiar, tylko zmniejsza jakość do 95%
-      // To zachowuje pełną rozdzielczość dla AI (dokładny odczyt cen) przy zmniejszeniu rozmiaru pliku
-      setProgress("Optymalizuję obraz...");
-      let fileToUpload = file;
-
-      try {
-        fileToUpload = await compressImage(file);
-      } catch (compressionError) {
-        // eslint-disable-next-line no-console
-        console.warn("[ReceiptScanner] Image compression failed, using original file:", compressionError);
-        // Jeśli kompresja się nie powiedzie, użyj oryginalnego pliku
-        fileToUpload = file;
-      }
-
-      // Konwersja obrazu (skompresowanego lub oryginalnego) na base64
-      const base64Image = await fileToBase64(fileToUpload);
-
-      setProgress("Analizuję paragon...");
-
-      // Timeout dla zapytania (60s - dłuższe dla urządzeń mobilnych)
+      // Timeout dla zapytania (90s - dłuższe dla dużych plików)
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 60000);
+      const timeout = setTimeout(() => controller.abort(), 90000);
 
       let scannedData;
 
       try {
+        // FormData z oryginalnym plikiem (bez kompresji)
+        const formData = new FormData();
+        formData.append("file", file);
+
         // Wysłanie zapytania do API
         const response = await fetch("/api/receipts/scan", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            image: base64Image,
-            mimeType: fileToUpload.type,
-          }),
+          body: formData,
           signal: controller.signal,
         });
 
@@ -261,9 +125,7 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               });
 
               // Dopasuj komunikat błędu do statusu HTTP
-              if (response.status === 413) {
-                errorMessage = "Plik jest za duży. Spróbuj zmniejszyć rozdzielczość zdjęcia.";
-              } else if (response.status === 500) {
+              if (response.status === 500) {
                 errorMessage = "Błąd serwera. Spróbuj ponownie za chwilę.";
               } else if (response.status === 502 || response.status === 503 || response.status === 504) {
                 errorMessage = "Serwer jest chwilowo niedostępny. Sprawdź połączenie i spróbuj ponownie.";
@@ -344,20 +206,6 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
     }
   };
 
-  // Obsługa kliknięcia przycisku aparatu
-  const handleCameraClick = () => {
-    if (cameraInputRef.current) {
-      cameraInputRef.current.click();
-    }
-  };
-
-  // Obsługa kliknięcia przycisku galerii
-  const handleGalleryClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Loader podczas skanowania */}
@@ -390,14 +238,19 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
           {/* Przyciski wyboru metody skanowania */}
           <div className="grid gap-4">
             {hasCamera && (
-              <Button onClick={handleCameraClick} size="lg" className="h-24 text-lg" variant="default">
+              <Button
+                onClick={() => cameraInputRef.current?.click()}
+                size="lg"
+                className="h-24 text-lg"
+                variant="default"
+              >
                 <Camera className="mr-2 h-6 w-6" />
                 Zrób zdjęcie aparatem
               </Button>
             )}
 
             <Button
-              onClick={handleGalleryClick}
+              onClick={() => fileInputRef.current?.click()}
               size="lg"
               className="h-24 text-lg"
               variant={hasCamera ? "outline" : "default"}
@@ -436,7 +289,8 @@ export default function ReceiptScanner({ hasCamera }: ReceiptScannerProps) {
               <li>Zrób zdjęcie w dobrym oświetleniu</li>
               <li>Upewnij się, że cały paragon jest widoczny</li>
               <li>Unikaj cieni i odbić światła</li>
-              <li>Obsługiwane formaty: JPEG, PNG (max 10MB)</li>
+              <li>Obsługiwane formaty: JPEG, PNG (max 20MB)</li>
+              <li>Wysoka rozdzielczość to lepsza dokładność OCR</li>
             </ul>
           </div>
         </>
