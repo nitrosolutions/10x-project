@@ -22,13 +22,15 @@ export const ReceiptScanResponseSchema = z.object({
 export type ReceiptScanResponse = z.infer<typeof ReceiptScanResponseSchema>;
 
 /**
- * Schema dla request body do endpointu /api/receipts/scan
+ * UWAGA: Request body dla /api/receipts/scan to FormData (multipart/form-data), nie JSON.
+ *
+ * Format request:
+ * - Content-Type: multipart/form-data
+ * - Body: FormData z polem "file" (File object)
+ *
+ * Plik jest uploadowany bezpośrednio do Gemini Files API (limit 2GB, storage 48h).
+ * Walidacja typu pliku (image/jpeg, image/png) wykonywana jest w endpoincie.
+ *
+ * Schema powyżej (ReceiptScanResponseSchema) jest używana tylko dla walidacji
+ * odpowiedzi z Gemini AI, nie dla request body.
  */
-export const ScanReceiptRequestSchema = z.object({
-  image: z.string().min(1, "Obraz nie może być pusty"),
-  mimeType: z.enum(["image/jpeg", "image/png"], {
-    errorMap: () => ({ message: "Niewspierany format pliku (tylko JPEG, PNG)" }),
-  }),
-});
-
-export type ScanReceiptRequest = z.infer<typeof ScanReceiptRequestSchema>;

@@ -2,13 +2,10 @@
 /* API endpoint for scanning receipts using Gemini AI */
 
 import type { APIContext } from "astro";
-import { ScanReceiptRequestSchema, ReceiptScanResponseSchema } from "@/lib/schemas/receipt-scan.schema";
+import { ReceiptScanResponseSchema } from "@/lib/schemas/receipt-scan.schema";
 import { GeminiService } from "@/lib/services/geminiService";
 
 export const prerender = false;
-
-// Maksymalny rozmiar obrazu w bajtach (10MB)
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
 /**
  * POST /api/receipts/scan
@@ -16,12 +13,11 @@ const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
  * Analizuje obraz paragonu za pomocą Gemini AI
  *
  * @requires Authentication - Użytkownik musi być zalogowany
- * @body ScanReceiptRequest - Obraz w base64 i typ MIME
+ * @body FormData - Plik obrazu (multipart/form-data)
  * @returns 200 OK - Rozpoznane dane paragonu (ReceiptScanResponse)
  * @returns 400 Bad Request - Błędy walidacji danych wejściowych
  * @returns 401 Unauthorized - Brak autoryzacji
- * @returns 413 Payload Too Large - Obraz przekracza 10MB
- * @returns 500 Internal Server Error - Błąd serwera lub AI
+ * @returns 500 Internal Server Error - Błąd serwera, uploadu lub AI
  */
 export async function POST(context: APIContext): Promise<Response> {
   try {
@@ -42,15 +38,17 @@ export async function POST(context: APIContext): Promise<Response> {
       );
     }
 
-    // Krok 2: Parsowanie request body
-    let requestBody;
+    // Krok 2: Parsowanie FormData z pliku
+    let formData: FormData;
     try {
-      requestBody = await context.request.json();
-    } catch {
+      formData = await context.request.formData();
+    } catch (parseError) {
+      // eslint-disable-next-line no-console
+      console.error("[POST /api/receipts/scan] FormData parsing error:", parseError);
       return new Response(
         JSON.stringify({
           error: "Validation error",
-          details: ["Invalid JSON format in request body"],
+          details: ["Invalid FormData format in request body"],
         }),
         {
           status: 400,
@@ -61,19 +59,14 @@ export async function POST(context: APIContext): Promise<Response> {
       );
     }
 
-    // Krok 3: Walidacja danych wejściowych z użyciem Zod schema
-    const validationResult = ScanReceiptRequestSchema.safeParse(requestBody);
+    // Krok 3: Walidacja pliku
+    const file = formData.get("file") as File | null;
 
-    if (!validationResult.success) {
-      const errorDetails = validationResult.error.errors.map((err) => {
-        const path = err.path.join(".");
-        return path ? `${path}: ${err.message}` : err.message;
-      });
-
+    if (!file) {
       return new Response(
         JSON.stringify({
           error: "Validation error",
-          details: errorDetails,
+          details: ["Brak pliku w żądaniu"],
         }),
         {
           status: 400,
@@ -84,21 +77,15 @@ export async function POST(context: APIContext): Promise<Response> {
       );
     }
 
-    const { image, mimeType } = validationResult.data;
-
-    // Krok 4: Sprawdzenie rozmiaru obrazu (base64 -> bajty)
-    // Base64 zwiększa rozmiar o ~33%, więc obliczamy rzeczywisty rozmiar
-    const base64Length = image.length;
-    const estimatedSizeBytes = (base64Length * 3) / 4;
-
-    if (estimatedSizeBytes > MAX_IMAGE_SIZE) {
+    // Walidacja typu pliku
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
       return new Response(
         JSON.stringify({
-          error: "Payload Too Large",
-          details: ["Plik jest za duży (max 10MB)"],
+          error: "Validation error",
+          details: ["Niewspierany format pliku (tylko JPEG, PNG)"],
         }),
         {
-          status: 413,
+          status: 400,
           headers: {
             "Content-Type": "application/json",
           },
@@ -106,7 +93,14 @@ export async function POST(context: APIContext): Promise<Response> {
       );
     }
 
-    // Krok 5: Pobranie kategorii z bazy danych
+    // eslint-disable-next-line no-console
+    console.log("[POST /api/receipts/scan] File received:", {
+      name: file.name,
+      type: file.type,
+      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+    });
+
+    // Krok 4: Pobranie kategorii z bazy danych
     const supabase = context.locals.supabase;
     const { data: categories, error: categoriesError } = await supabase
       .from("categories")
@@ -121,6 +115,69 @@ export async function POST(context: APIContext): Promise<Response> {
         JSON.stringify({
           error: "Internal server error",
           details: ["Nie udało się pobrać kategorii"],
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    // Krok 5: Upload pliku do Gemini Files API z retry logic
+    const geminiService = new GeminiService();
+
+    let uploadedFile: { uri: string; mimeType: string };
+    const MAX_RETRIES = 2;
+    let lastError: Error | unknown;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        // eslint-disable-next-line no-console
+        console.log(`[POST /api/receipts/scan] File upload attempt ${attempt + 1}/${MAX_RETRIES + 1}`);
+
+        // Konwertuj File na Buffer dla Node.js
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        // Upload do Gemini Files API
+        uploadedFile = await geminiService.uploadFile(buffer, file.type, file.name);
+
+        // eslint-disable-next-line no-console
+        console.log("[POST /api/receipts/scan] File uploaded successfully:", {
+          uri: uploadedFile.uri,
+          mimeType: uploadedFile.mimeType,
+        });
+
+        break; // Sukces - wyjdź z pętli retry
+      } catch (error) {
+        lastError = error;
+        // eslint-disable-next-line no-console
+        console.error(`[POST /api/receipts/scan] File upload attempt ${attempt + 1} failed:`, error);
+
+        if (attempt < MAX_RETRIES) {
+          // Exponential backoff: 1s, 2s
+          const delayMs = 1000 * Math.pow(2, attempt);
+          // eslint-disable-next-line no-console
+          console.log(`[POST /api/receipts/scan] Retrying in ${delayMs}ms...`);
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+      }
+    }
+
+    if (!uploadedFile) {
+      // eslint-disable-next-line no-console
+      console.error("[POST /api/receipts/scan] File upload failed after all retries:", lastError);
+
+      return new Response(
+        JSON.stringify({
+          error: "File Upload Error",
+          details: [
+            lastError instanceof Error
+              ? `Nie udało się przesłać pliku do serwera AI: ${lastError.message}`
+              : "Nie udało się przesłać pliku do serwera AI. Spróbuj ponownie.",
+          ],
         }),
         {
           status: 500,
@@ -272,23 +329,24 @@ PAMIĘTAJ:
 
 Przeanalizuj ten dokument (paragon lub fakturę) i wyciągnij wszystkie dane zgodnie z powyższymi instrukcjami:`;
 
-    // Krok 7: Wywołanie Gemini API z obrazem
-    const geminiService = new GeminiService();
-
+    // Krok 7: Wywołanie Gemini API z uploadowanym plikiem
     let geminiResponse;
     try {
-      // Przygotowanie zawartości multimodal (obraz + tekst)
+      // Przygotowanie zawartości multimodal (fileUri + tekst)
       const contents = [
         {
-          inlineData: {
-            data: image,
-            mimeType,
+          fileData: {
+            fileUri: uploadedFile.uri,
+            mimeType: uploadedFile.mimeType,
           },
         },
         {
           text: prompt,
         },
       ];
+
+      // eslint-disable-next-line no-console
+      console.log("[POST /api/receipts/scan] Calling Gemini API with file URI");
 
       geminiResponse = await geminiService.generateContent(contents, {
         temperature: 0.1, // Niska temperatura dla precyzji
@@ -408,7 +466,11 @@ Przeanalizuj ten dokument (paragon lub fakturę) i wyciągnij wszystkie dane zgo
       );
     }
 
-    // Krok 10: Zwrócenie odpowiedzi 200 OK z rozpoznanymi danymi
+    // Krok 10: Logowanie pomyślnej odpowiedzi z AI (dla debugowania cenami)
+    // eslint-disable-next-line no-console
+    console.log("[POST /api/receipts/scan] AI Response (full JSON):", JSON.stringify(scanValidation.data, null, 2));
+
+    // Krok 11: Zwrócenie odpowiedzi 200 OK z rozpoznanymi danymi
     return new Response(JSON.stringify(scanValidation.data), {
       status: 200,
       headers: {
