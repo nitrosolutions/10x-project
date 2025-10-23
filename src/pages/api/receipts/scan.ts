@@ -128,7 +128,7 @@ export async function POST(context: APIContext): Promise<Response> {
     // Krok 5: Upload pliku do Gemini Files API z retry logic
     const geminiService = new GeminiService();
 
-    let uploadedFile: { uri: string; mimeType: string };
+    let uploadedFile: { uri: string; mimeType: string } | undefined;
     const MAX_RETRIES = 2;
     let lastError: Error | unknown;
 
@@ -199,115 +199,146 @@ Odpowiedź MUSI zaczynać się od { i kończyć na }. ZAKAZ używania markdown, 
 DOSTĘPNE KATEGORIE (id: nazwa):
 ${categoriesList}
 
+════════════════════════════════════════════════════════════════════════════════
+⚠️  ALGORYTM PARSOWANIA - WYKONAJ KROK PO KROKU ⚠️
+════════════════════════════════════════════════════════════════════════════════
+
+KROK 1: IDENTYFIKACJA LINII
+Przejrzyj paragon od góry do dołu i dla KAŻDEJ linii zdecyduj:
+
+  ✅ CZY TO PRODUKT?
+     - Linia zawiera nazwę + cenę dodatnią
+     - NIE zaczyna się od słów: "OPUST", "RABAT", "UPUST", "PROMOCJA", "ZNIŻKA"
+     - Cena jest po prawej stronie (dodatnia liczba)
+     → DODAJ DO LISTY PRODUKTÓW
+
+  ❌ CZY TO ZNIŻKA/RABAT?
+     - Linia zawiera ujemną kwotę (ze znakiem minus: -5.00, -8.28, -21.98)
+     - LUB zaczyna się od: "OPUST", "RABAT", "UPUST", "PROMOCJA", "ZNIŻKA"
+     - LUB zawiera słowo "OPUST"/"RABAT" + nazwę produktu
+     → TO NIE JEST PRODUKT! TO ZNIŻKA!
+     → NIE DODAWAJ DO items!
+     → Zapamiętaj jako zniżkę do produktu powyżej
+
+KROK 2: DOPASOWANIE ZNIŻEK DO PRODUKTÓW
+Dla każdej znalezionej zniżki:
+  1. Sprawdź czy nazwa zniżki zawiera nazwę produktu (np. "OPUST L.Chipsy" → produkt "L.Chipsy")
+  2. Jeśli TAK: znajdź ten produkt na liście i ODEJMIJ wartość zniżki
+  3. Jeśli NIE ma nazwy: przypisz zniżkę do OSTATNIEGO produktu powyżej
+
+KROK 3: WERYFIKACJA PRZED ZWRÓCENIEM JSON
+Sprawdź listę items:
+  ✅ Żaden item NIE ma w nazwie słów: "OPUST", "RABAT", "UPUST", "PROMOCJA"
+  ✅ Żaden item NIE ma ujemnej ceny
+  ✅ Żaden produkt nie występuje 2 razy z podobną nazwą
+  ✅ Kolejność items == kolejność produktów na paragonie (ignorując linie zniżek)
+
+════════════════════════════════════════════════════════════════════════════════
+
 ZASADY EKSTRAKCJI:
 1. purchase_date: Data w formacie YYYY-MM-DD (np. "2025-01-15")
 2. store_name: Nazwa sklepu/firmy lub null jeśli kompletnie nieczytelna
-3. items: Tablica produktów/pozycji, każdy z:
-   - name: Nazwa produktu/usługi (string) - KRYTYCZNE: ZAWSZE wypełnij, nigdy nie zwracaj null. Nawet jeśli tekst jest trudno czytelny, wpisz swoje NAJLEPSZE przybliżenie/interpretację
-   - price: CAŁKOWITA KWOTA ZA POZYCJĘ jako liczba (np. 12.99, nie "12.99 zł")
-     * Dla PARAGONÓW: kwota za produkt (już zawiera ilość jeśli występuje)
-     * Dla FAKTUR: SUMARYCZNA kwota pozycji (ilość × cena jednostkowa), NIE cena jednostkowa!
-     * OBSŁUGA ZNIŻEK: Jeśli pod pozycją jest linia z UJEMNĄ KWOTĄ (ze znakiem minus), to jest ZNIŻKA/RABAT na poprzedni produkt
-     * Ujemne kwoty mogą mieć opis ("Rabat", "UPUST", "Promocja") LUB być samą liczbą ujemną ("-5.00")
-     * Jeśli linia zawiera słowo kluczowe rabatu AND zawiera nazwę produktu z linii wyżej, to na pewno rabat na ten produkt
-     * ZAWSZE odejmij ujemną kwotę od ceny produktu powyżej (nie dodawaj jako osobny item)
-     * KRYTYCZNE: NIGDY nie dodawaj zniżki/rabatu jako osobnego item w tablicy items!
-     * KRYTYCZNE: Nie duplikuj produktów - jeśli widzisz tę samą nazwę z rabatem, to ONE item, nie dwa!
+3. items: Tablica TYLKO produktów (BEZ linii zniżek), każdy z:
+   - name: Nazwa produktu/usługi (string)
+     * KRYTYCZNE: ZAWSZE wypełnij, nigdy nie zwracaj null
+     * Nawet jeśli tekst jest trudno czytelny, wpisz swoje NAJLEPSZE przybliżenie
+     * ZAKAZ nazw zawierających: "OPUST", "RABAT", "UPUST", "PROMOCJA", "ZNIŻKA"
+
+   - price: KOŃCOWA CENA po odjęciu zniżki (liczba dodatnia lub 0.01)
+     * KRYTYCZNE: Ceny ZAWSZE z PEŁNĄ precyzją (grosze/centy)!
+     * Format: 3.59 (nie 3!), 15.00 (nie 15!), 0.01 (nie 0!)
+     * ZAKAZ zaokrąglania lub pomijania części dziesiętnej!
+     * Na paragonach LIDL format to: "nazwa  |  ilość xCENA_JEDN  SUMA"
+       Przykład: "Mleko 3,2% PET  F  1 x3,59  3,59C" → price: 3.59 (ostatnia liczba)
+     * Dla PARAGONÓW: kwota za produkt (już zawiera ilość) - liczba po prawej stronie
+     * Dla FAKTUR: SUMARYCZNA kwota pozycji (ilość × cena jednostkowa)
+     * Jeśli produkt ma zniżkę: cena_początkowa - wartość_zniżki
+     * Przykład: Produkt 21.99 + OPUST -21.98 = price: 0.01
+
    - category_id: ID z listy kategorii powyżej (liczba całkowita)
-4. total: Suma całkowita jako liczba (kwota końcowa do zapłaty)
 
-WAŻNE INSTRUKCJE:
-- Zwróć WSZYSTKIE produkty z paragonu/faktury - nie pomijaj żadnych
-- KRYTYCZNE: Zachowaj ORYGINALNĄ KOLEJNOŚĆ produktów z paragonu - zwracaj items w dokładnie tej samej kolejności, w jakiej pojawiają się na dokumentu
-- Każdy produkt MUSI mieć wypełnioną nazwę (name)
-- Jeśli nazwa jest niejasna, częściowo nieczytelna lub rozmyta - wpisz ZAWSZE swoje najlepsze przybliżenie
-- Akceptowalne są interpretacje/szacowania - lepiej przybliżona nazwa niż brak
-- Jeśli widzisz fragment tekstu - napisz co widzisz + [interpretacja] jeśli potrzebna
+4. total: Suma całkowita jako liczba (kwota końcowa do zapłaty z paragonu)
 
-OBSŁUGA FAKTUR VAT:
-- Na fakturze często są kolumny: nazwa, ilość, cena jedn., wartość (lub kwota)
-- DO POLA "price" wpisz WARTOŚĆ/KWOTĘ pozycji (ilość × cena jedn.), NIE cenę jednostkową
-- Przykład: "Usługa serwisowa | 3 szt. | 100 zł/szt. | 300 zł" → price: 300 (nie 100!)
+════════════════════════════════════════════════════════════════════════════════
+🚫 ABSOLUTNY ZAKAZ - PRZECZYTAJ 3 RAZY 🚫
+════════════════════════════════════════════════════════════════════════════════
 
-OBSŁUGA ZNIŻEK/RABATÓW - BARDZO WAŻNE:
-- Zniżki/rabaty NIE są produktami i NIGDY nie powinny być dodawane jako osobne items
-- KLUCZOWE: Szukaj UJEMNYCH KWOT (ze znakiem minus) - to zawsze zniżka/rabat, niezależnie czy zawiera słowo "rabat"
-- Rozpoznawaj SŁOWA KLUCZOWE rabatów: "Rabat", "RABAT", "UPUST", "Promocja", "Discount", "-", nawet jeśli są samotne
-- Zniżka może być oznaczona jako: "Rabat -3.00", "-3.00", "Promocja -10%", "UPUST -8.28", lub samo "-5.00" bez dodatkowego opisu
-- KRYTYCZNE: Jeśli linia zawiera słowo rabatu i pojawia się tuż pod produktem, sprawdź czy zawiera tę SAMĄ NAZWĘ produktu - to jest rabat na ten produkt
-- ZAWSZE gdy widzisz ujemną kwotę pod produktem, odejmij ją od ceny tego produktu
-- Przykład 1: "Kawa 15.00" + "Rabat -3.00" → price: 12.00
-- Przykład 2: "Kawa 15.00" + "-3.00" → price: 12.00 (nawet bez słowa "rabat"!)
-- Przykład 3: "Chipsy 8.29" + "UPUST Chipsy -8.28" → price: 0.01 (to JEDEN produkt, nie dwa!)
-- Zniżka ma być UWZGLĘDNIONA w cenie produktu, ale NIGDY nie powinna być osobnym itemem
+NIGDY, PRZENIGDY nie dodawaj do tablicy items:
+  ❌ Linii z nazwą zawierającą "OPUST", "RABAT", "UPUST", "PROMOCJA", "ZNIŻKA"
+  ❌ Linii z ujemną ceną
+  ❌ Linii z samą ujemną kwotą (np. "-5.00")
+  ❌ Duplikatów produktów (jeśli produkt pojawia się 2x z rabatem → to JEDEN item)
 
-PRZYKŁAD 1 - Paragon z rabatem (ze słowem "Rabat"):
-Paragon zawiera:
-  Kawa 15.00
-  Rabat -3.00
-  Mleko 8.00
+Jeśli widzisz:
+  Chipsy 8.29
+  OPUST Chipsy -8.28
 
-POWINNO BYĆ W JSON:
+To items zawiera TYLKO:
+  [{"name": "Chipsy", "price": 0.01, "category_id": X}]
+
+NIE:
+  [{"name": "Chipsy", "price": 8.29, ...}, {"name": "OPUST Chipsy", "price": -8.28, ...}] ← ❌ ŹLE!
+
+════════════════════════════════════════════════════════════════════════════════
+📋 PRZYKŁADY LIDL (NAJWAŻNIEJSZE) 📋
+════════════════════════════════════════════════════════════════════════════════
+
+PRZYKŁAD A - LIDL Format "OPUST [nazwa produktu]":
+Paragon LIDL zawiera:
+  MMMAX Czekolada 1        1 x21.99  21.99
+  OPUST MMMAX Czekolada 1             -21.98
+  D.Actimel trusk.         1 x21.99  21.99
+  OPUST D.Actimel trusk.              -5.00
+  Kabanosy Exclus. 90g     2 x6.79   13.58
+  OPUST Kabanosy Exclus.              -1.40
+
+JSON OUTPUT (3 produkty, 0 linii OPUST):
 {
   "purchase_date": "2025-01-15",
-  "store_name": "Cafe Shop",
+  "store_name": "LIDL",
   "items": [
-    {"name": "Kawa", "price": 12.00, "category_id": 1},
-    {"name": "Mleko", "price": 8.00, "category_id": 1}
+    {"name": "MMMAX Czekolada 1", "price": 0.01, "category_id": 1},
+    {"name": "D.Actimel trusk.", "price": 16.99, "category_id": 1},
+    {"name": "Kabanosy Exclus. 90g", "price": 12.18, "category_id": 1}
   ],
-  "total": 20.00
+  "total": 29.18
 }
 
-PRZYKŁAD 1B - Paragon z rabatem (TYLKO ujemna kwota, bez słowa "rabat"):
-Paragon zawiera:
-  Herbata 10.00
-  -2.00
-  Chleb 5.00
+PRZYKŁAD B - LIDL Format z "OPUST" w nazwie:
+Paragon LIDL zawiera:
+  L.Chipsy papryka130g     1 x8.29   8.29
+  OPUST L.Chipsy papryka130g         -8.28
+  Chusteczki uni. 2-w.     5 x3.00   15.00
 
-POWINNO BYĆ W JSON (ujemna kwota -2.00 to zniżka na Herbatę!):
+JSON OUTPUT (2 produkty, 0 linii OPUST):
 {
   "purchase_date": "2025-01-15",
-  "store_name": "Cafe Shop",
+  "store_name": "LIDL",
   "items": [
-    {"name": "Herbata", "price": 8.00, "category_id": 1},
-    {"name": "Chleb", "price": 5.00, "category_id": 1}
+    {"name": "L.Chipsy papryka130g", "price": 0.01, "category_id": 1},
+    {"name": "Chusteczki uni. 2-w.", "price": 15.00, "category_id": 1}
+  ],
+  "total": 15.01
+}
+
+PRZYKŁAD C - Rabat bez słowa "OPUST" (tylko ujemna kwota):
+Paragon zawiera:
+  Herbata Lipton           10.00
+  -2.00
+  Chleb pszenny            5.00
+
+JSON OUTPUT (ujemna kwota -2.00 to zniżka na Herbatę):
+{
+  "purchase_date": "2025-01-15",
+  "store_name": "Sklep",
+  "items": [
+    {"name": "Herbata Lipton", "price": 8.00, "category_id": 1},
+    {"name": "Chleb pszenny", "price": 5.00, "category_id": 1}
   ],
   "total": 13.00
 }
 
-PRZYKŁAD 1C - Paragon z rabatem (UPUST ze SAMĄ NAZWĄ produktu - to JEDEN item!):
-Paragon zawiera (w tej kolejności):
-  1. L.Chipsy papryka 130g    8.29
-  2. UPUST L.Chipsy papryka   -8.28
-  3. Mleko 2L               5.00
-
-POWINNO BYĆ W JSON:
-- Linia z "UPUST Chipsy" to rabat na Chipsy, nie oddzielny produkt!
-- Zachowuj ORYGINALNĄ KOLEJNOŚĆ: Chipsy są pierwsze na paragonie → Chipsy pierwsze w items
-- Obliczenie ceny: 8.29 - 8.28 = 0.01
-{
-  "purchase_date": "2025-01-15",
-  "store_name": "Supermarket",
-  "items": [
-    {"name": "L.Chipsy papryka 130g", "price": 0.01, "category_id": 1},
-    {"name": "Mleko 2L", "price": 5.00, "category_id": 1}
-  ],
-  "total": 5.01
-}
-
-PRZYKŁAD 2 - Paragon ze zniżką:
-{
-  "purchase_date": "2025-01-15",
-  "store_name": "Biedronka",
-  "items": [
-    {"name": "Mleko 2%", "price": 4.59, "category_id": 1},
-    {"name": "Masło", "price": 6.99, "category_id": 1},
-    {"name": "Chleb pszenny", "price": 3.99, "category_id": 1}
-  ],
-  "total": 15.57
-}
-
-PRZYKŁAD 3 - Faktura VAT:
+PRZYKŁAD D - Faktura VAT (bez zniżek):
 {
   "purchase_date": "2025-01-20",
   "store_name": "Firma ABC Sp. z o.o.",
@@ -318,16 +349,21 @@ PRZYKŁAD 3 - Faktura VAT:
   "total": 1750.00
 }
 
-PAMIĘTAJ:
-- KOLEJNOŚĆ: Items w JSON MUSZĄ być w tej samej kolejności co na paragonie/fakturze (od góry do dołu)
-- Dla faktur: price = sumaryczna kwota pozycji (ilość × cena jedn.)
-- Dla zniżek: ZAWSZE odejmij od ceny produktu, NIGDY nie dodawaj jako osobny item
-- DEDUPLICACJA: Jeśli widzisz tę samą nazwę produktu 2x (raz jako produkt, raz w linii rabatu), to JEDEN item z obliczoną ceną
-  * Rozpoznaj wzorce: "Produkt 10.00" + "UPUST/Rabat Produkt -5.00" = {"name": "Produkt", "price": 5.00}
-  * Pozycja rabatu w linie pomiędzy innymi produktami - pozycja rabatu zostaje "ukryta" a cena została obliczona dla produktu
-- Zwróć TYLKO JSON bez żadnego innego tekstu!
+════════════════════════════════════════════════════════════════════════════════
+✅ CHECKLIST PRZED ZWRÓCENIEM JSON ✅
+════════════════════════════════════════════════════════════════════════════════
 
-Przeanalizuj ten dokument (paragon lub fakturę) i wyciągnij wszystkie dane zgodnie z powyższymi instrukcjami:`;
+Przed wysłaniem odpowiedzi sprawdź:
+  ☑ Czy ŻADEN item nie ma w nazwie słów: OPUST, RABAT, UPUST, PROMOCJA?
+  ☑ Czy ŻADEN item nie ma ujemnej ceny?
+  ☑ Czy items zawiera tylko produkty (nie linie zniżek)?
+  ☑ Czy ceny produktów są PO odjęciu zniżek?
+  ☑ Czy kolejność items odpowiada kolejności produktów na paragonie?
+  ☑ Czy suma prices == total z paragonu?
+
+════════════════════════════════════════════════════════════════════════════════
+
+Przeanalizuj ten dokument KROK PO KROKU zgodnie z algorytmem powyżej i zwróć TYLKO JSON:`;
 
     // Krok 7: Wywołanie Gemini API z uploadowanym plikiem
     let geminiResponse;
