@@ -166,7 +166,7 @@ export async function POST(context: APIContext): Promise<Response> {
       }
     }
 
-    if (!uploadedFile!) {
+    if (!uploadedFile) {
       // eslint-disable-next-line no-console
       console.error("[POST /api/receipts/scan] File upload failed after all retries:", lastError);
 
