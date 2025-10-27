@@ -58,8 +58,15 @@ export default defineConfig({
           ],
         },
         workbox: {
-          globPatterns: ["**/*.{js,css,html,svg,png,ico,txt,woff2}"],
+          // Precache tylko statyczne assety - bez HTML (które się renderują dynamicznie server-side)
+          globPatterns: ["**/*.{js,css,svg,png,ico,txt,woff2}"],
+
+          // Wyłączenie fallback navigation - każdy request musi być świeży
+          navigateFallback: null,
+          navigateFallbackDenylist: [/^\/api\//, /^\/receipts\//],
+
           runtimeCaching: [
+            // Google Fonts - cache first (zewnętrzny zasób, rzadko się zmienia)
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: "CacheFirst",
@@ -72,6 +79,22 @@ export default defineConfig({
                 cacheableResponse: {
                   statuses: [0, 200],
                 },
+              },
+            },
+            // HTML navigation requests - zawsze świeże, nigdy nie cache'ować
+            {
+              urlPattern: ({ request }) => request.mode === "navigate",
+              handler: "NetworkOnly",
+              options: {
+                cacheName: "pages-cache",
+              },
+            },
+            // API endpoints - zawsze świeże, nigdy nie cache'ować
+            {
+              urlPattern: /^https?:\/\/.*\/api\/.*/i,
+              handler: "NetworkOnly",
+              options: {
+                cacheName: "api-cache",
               },
             },
           ],
