@@ -2,7 +2,7 @@
 
 ## 1. Przegląd produktu
 
-PortfelIO to progresywna aplikacja webowa (PWA) do automatycznego śledzenia i kategoryzacji wydatków domowych poprzez skanowanie paragonów fiskalnych. Aplikacja wykorzystuje technologię rozpoznawania obrazu AI (OpenAI GPT-4 Vision/GPT-4o) do automatycznego odczytywania i kategoryzowania pozycji z polskich paragonów fiskalnych, eliminując potrzebę ręcznego wprowadzania danych.
+PortfelIO to progresywna aplikacja webowa (PWA) do automatycznego śledzenia i kategoryzacji wydatków domowych poprzez skanowanie paragonów fiskalnych. Aplikacja wykorzystuje technologię rozpoznawania obrazu AI (Google Gemini) do automatycznego odczytywania i kategoryzowania pozycji z polskich paragonów fiskalnych, eliminując potrzebę ręcznego wprowadzania danych.
 
 Główne możliwości produktu:
 
@@ -18,11 +18,12 @@ Stack technologiczny:
 - Frontend: Astro 5 + React 19 + TypeScript 5
 - Styling: Tailwind CSS 4 + Shadcn/ui
 - Backend: Supabase (PostgreSQL + Authentication)
-- AI: OpenAI GPT-4 Vision/GPT-4o (zalecany: Azure OpenAI dla zgodności z RODO)
-- Hosting: Azure Static Web Apps
+- AI: Google Gemini API
+- Hosting: Vercel
 - PWA: Service Worker + Web App Manifest
 
 Model biznesowy: Aplikacja całkowicie darmowa (MVP)
+Licencja: MIT (open source)
 
 ## 2. Problem użytkownika
 
@@ -160,7 +161,7 @@ Kryteria akceptacji:
 
 ### 3.4 Analiza paragonów przez AI
 
-Wymóg: Automatyczne rozpoznawanie danych z polskich paragonów fiskalnych za pomocą OpenAI GPT-4 Vision
+Wymóg: Automatyczne rozpoznawanie danych z polskich paragonów fiskalnych za pomocą Google Gemini
 
 Rozpoznawane elementy:
 
@@ -173,11 +174,10 @@ Rozpoznawane elementy:
 
 Szczegóły implementacji:
 
-- Provider: OpenAI GPT-4 Vision API lub GPT-4o
-- Zalecany: Azure OpenAI dla zgodności z RODO i hostingu w EU
-- Szacunkowy koszt: $0.01-0.03 za jeden paragon
+- Provider: Google Gemini API (gemini-2.5-flash-lite)
+- Szacunkowy koszt: zależy od planu użytkowania Google AI
 - Maksymalny czas przetwarzania: 60 sekund
-- Obraz przesyłany jako base64 w request do API
+- Obraz przesyłany za pośrednictwem Gemini Files API
 - Prompt dla AI zawiera instrukcje dotyczące rozpoznawania polskich paragonów fiskalnych
 - AI kategoryzuje każdą pozycję do jednej z 9 predefiniowanych kategorii
 - Odpowiedź AI w formacie JSON z ustrukturyzowanymi danymi
@@ -621,7 +621,7 @@ Aby zaoszczędzić czas na ręcznym wpisywaniu danych
 Kryteria akceptacji:
 
 - Zdjęcie jest przesyłane do endpointu `/api/receipts/scan`
-- System analizuje paragon za pomocą OpenAI GPT-4 Vision/GPT-4o
+- System analizuje paragon za pomocą Google Gemini API
 - Podczas analizy wyświetlany jest loader z komunikatem "Analizuję paragon..."
 - Maksymalny czas oczekiwania: 60 sekund
 - Po analizie system rozpoznaje:

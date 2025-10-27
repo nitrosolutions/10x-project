@@ -6,7 +6,7 @@
 
 **🚀 Live App**: [https://10x-project.vercel.app](https://10x-project.vercel.app)
 
-PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by automatically analyzing Polish fiscal receipts using AI. Simply scan a receipt with your phone's camera, and let GPT-4 Vision extract and categorize all items instantly—eliminating the tedious manual data entry.
+PortfelIO is a Progressive Web App (PWA) that revolutionizes expense tracking by automatically analyzing Polish fiscal receipts using AI. Simply scan a receipt with your phone's camera, and let Google Gemini extract and categorize all items instantly—eliminating the tedious manual data entry.
 
 ## 📋 Table of Contents
 
@@ -334,7 +334,15 @@ For a complete list of future enhancements, see the [PRD](.ai/prd.md#4-granice-p
 
 ## 📄 License
 
-This project license is to be determined. See [LICENSE](./LICENSE) for more information (if available).
+This project is licensed under the **MIT License** - see [LICENSE](./LICENSE) for details.
+
+You are free to:
+- ✅ Use this software for personal or commercial projects
+- ✅ Modify and distribute the code
+- ✅ Sublicense the software
+- ⚠️ Must include the original copyright notice and license
+
+**No warranty provided** - use at your own risk.
 
 ---
 

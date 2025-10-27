@@ -13,9 +13,9 @@
 - Jest rozwiązaniem open source, które można hostować lokalnie lub na własnym serwerze
 - Posiada wbudowaną autentykację użytkowników
 
-# AI - Komunikacja z OpenAI:
+# AI - Google Gemini API:
 
-- Dostęp do multimodalnego modelu odczytującego obrazy
+- Dostęp do multimodalnego modelu Gemini odczytującego obrazy (gemini-2.5-flash-lite)
 
 # CI/CD i Hosting:
 

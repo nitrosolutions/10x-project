@@ -1,7 +1,13 @@
 {
-  "name": "10x-astro-starter",
+  "name": "portelio",
+  "description": "AI-powered household expense tracking through automatic receipt scanning",
   "type": "module",
   "version": "0.0.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nitrosolutions/10x-project"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
