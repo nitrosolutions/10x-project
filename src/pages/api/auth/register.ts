@@ -49,9 +49,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${new URL(request.url).origin}/`,
-      },
     });
 
     if (error) {
@@ -95,7 +92,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Rejestracja pomyślna. Sprawdź email, aby potwierdzić konto.",
+        message: "Rejestracja pomyślna. Zostałeś automatycznie zalogowany.",
         user: {
           id: data.user?.id,
           email: data.user?.email,
